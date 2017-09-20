@@ -3,10 +3,10 @@
  * functions_customers
  *
  * @package functions
- * @copyright Copyright 2003-2005 Zen Cart Development Team
+ * @copyright Copyright 2003-2012 Zen Cart Development Team
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
- * @version $Id: functions_customers.php 4793 2006-10-20 05:25:20Z ajeh $
+ * @version GIT: $Id: Author: DrByte  Tue Aug 14 12:41:22 2012 -0400 Modified in v1.5.1 $
  */
 
 ////
@@ -38,9 +38,6 @@
 
     $address_format = $db->Execute($address_format_query);
     $company = zen_output_string_protected($address['company']);
-// TVA_INTRACOM BEGIN
-	$tva_intracom = zen_output_string_protected($address['tva_intracom']);
-// TVA_INTRACOM END
     if (isset($address['firstname']) && zen_not_null($address['firstname'])) {
       $firstname = zen_output_string_protected($address['firstname']);
       $lastname = zen_output_string_protected($address['lastname']);
@@ -111,6 +108,31 @@
     if ( (ACCOUNT_COMPANY == 'true') && (zen_not_null($company)) ) {
       $address_out = $company . $cr . $address_out;
     }
+    
+//-bof-vat4eu-lat9  *** 1 of 2 ***
+    // -----
+    // "Package up" the various elements of an address and issue a notification that will be picked up
+    // by the VAT Mod's observer-class script.
+    //
+    $GLOBALS['zco_notifier']->notify(
+        'NOTIFY_END_ZEN_ADDRESS_FORMAT',
+        array(
+            'format' => $fmt,
+            'address' => $address,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'street' => $street,
+            'suburb' => $suburb,
+            'city' => $city,
+            'state' => $state,
+            'country' => $country,
+            'postcode' => $postcode,
+            'cr' => $cr,
+            'hr' => $hr,
+        ),
+        $address_out
+    );
+//-eof-vat4eu-lat9  *** 1 of 2 ***
 
     return $address_out;
   }
@@ -121,15 +143,19 @@
   function zen_address_label($customers_id, $address_id = 1, $html = false, $boln = '', $eoln = "\n") {
     global $db;
     $address_query = "select entry_firstname as firstname, entry_lastname as lastname,
-                             entry_company as company, entry_tva_intracom as tva_intracom, entry_street_address as street_address,
+                             entry_company as company, entry_street_address as street_address,
                              entry_suburb as suburb, entry_city as city, entry_postcode as postcode,
                              entry_state as state, entry_zone_id as zone_id,
                              entry_country_id as country_id
                       from " . TABLE_ADDRESS_BOOK . "
                       where customers_id = '" . (int)$customers_id . "'
-                      and address_book_id = '" . (int)$address_id . "'"; // TVA_INTRACOM
+                      and address_book_id = '" . (int)$address_id . "'";
 
     $address = $db->Execute($address_query);
+    
+//-bof-vat4eu-lat9  *** 2 of 2 ***
+    $GLOBALS['zco_notifier']->notify('NOTIFY_ZEN_ADDRESS_LABEL', array(), $customers_id, $address_id, $address->fields);
+//-bof-vat4eu-lat9  *** 2 of 2 ***
 
     $format_id = zen_get_address_format_id($address->fields['country_id']);
     return zen_address_format($format_id, $address->fields, $html, $boln, $eoln);
@@ -204,14 +230,15 @@
 // validate customer matches session
   function zen_get_customer_validate_session($customer_id) {
     global $db, $messageStack;
-    $zc_check_customer = $db->Execute("SELECT customers_id from " . TABLE_CUSTOMERS . " WHERE customers_id=" . (int)$customer_id);
-    if ($zc_check_customer->RecordCount() <= 0) {
+    $zc_check_customer = $db->Execute("SELECT customers_id, customers_authorization from " . TABLE_CUSTOMERS . " WHERE customers_id=" . (int)$customer_id);
+    $bannedStatus = $zc_check_customer->fields['customers_authorization'] == 4; // BANNED STATUS is 4
+    if ($zc_check_customer->RecordCount() <= 0 || $bannedStatus) {
       $db->Execute("DELETE from " . TABLE_CUSTOMERS_BASKET . " WHERE customers_id= " . $customer_id);
       $db->Execute("DELETE from " . TABLE_CUSTOMERS_BASKET_ATTRIBUTES . " WHERE customers_id= " . $customer_id);
+      $_SESSION['cart']->reset(TRUE);
       unset($_SESSION['customer_id']);
-      $messageStack->add_session('header', ERROR_CUSTOMERS_ID_INVALID, 'error');
+      if (!$bannedStatus) $messageStack->add_session('header', ERROR_CUSTOMERS_ID_INVALID, 'error');
       return false;
     }
     return true;
   }
-?>

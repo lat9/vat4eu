@@ -1,10 +1,17 @@
 <?php
-// TVA_INTRACOM BEGIN
-//define('ENTRY_COMPANY_ERROR', 'The Company Name must contain a minimum of ' . ENTRY_COMPANY_MIN_LENGTH . ' characters.');
+// -----
+// Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
+// Copyright (c) 2017 Vinos de Frutas Tropicales
+//
+define('VAT4EU_TEXT_MESSAGE_INSTALLED', 'v%s of the <em>VAT Mod</em> plugin has been successfully installed.');
+
+define('VAT4EU_TEXT_MESSAGE_UPDATED', 'The <em>VAT4EU/em> plugin has been successfully updated from v%1$s to v%$2s.');
+
 define('ENTRY_COMPANY_TEXT', 'Only if you want we bill the Company for your order');
 define('JS_COMPANY', '* The Company Name must have at least ' . ENTRY_COMPANY_MIN_LENGTH . ' characters.\n');
-define('JS_TVA_INTRACOM', '* The VAT number must have at least ' . ENTRY_TVA_INTRACOM_MIN_LENGTH . ' characters.\n');
-define('ENTRY_TVA_INTRACOM', 'VAT number:');
+define('JS_VAT_NUMBER_MIN_LENGTH', '* The VAT Number must have at least ' . VAT_MOD_MIN_LENGTH . ' characters.\n');
+
+define('ENTRY_VAT_NUMBER', 'VAT Number:');
 define('ENTRY_CONTROL_TVA_INTRACOM', '&nbsp;<span class="errorText">After checking, your VAT number is not correct or does not correspond to the entered country. Leave it blank if you don\'t know it.<br>
 <!-- Optional BEGIN-->For info, it must be structured like this:<br></span>
 <span class="smallText">
@@ -33,8 +40,7 @@ Poland:			\'PL\' + 10 numeric characters<br>
 Slovakia:		\'SK\' + 9 or 10 numeric characters<br>
 Czech Republic:	\'CZ\' + 8 or 9 or 10 numeric characters<br>
 Slovania:		\'SI\' + 8 numeric characters<!-- Optional END-->');
-define('ENTRY_TVA_INTRACOM_ERROR', '&nbsp;<span class="errorText">min. ' . ENTRY_TVA_INTRACOM_MIN_LENGTH . ' chars.</span>');
-define('ENTRY_NO_VERIF_TVA_INTRACOM', '&nbsp;<span class="errorText">Impossible to check your VAT number: leave blank</span>');
-define('ENTRY_SHOP_INTRACOM', 'VAT number of the shop :');
-// TVA_INTRACOM END
-?>
+
+define('ENTRY_VAT_NUMBER_MIN_LENGTH_ERROR', '&nbsp;<span class="errorText">min. ' . ENTRY_TVA_INTRACOM_MIN_LENGTH . ' chars.</span>');
+define('ENTRY_VAT_NUMBER_CANT_VERIFY', '&nbsp;<span class="errorText">Impossible to check your VAT number: leave blank</span>');
+define('ENTRY_VAT_NUMBER_STORE', 'Your store\'s VAT Number:');

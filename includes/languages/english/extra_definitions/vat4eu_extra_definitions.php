@@ -1,7 +1,18 @@
 <?php
-// TVA_INTRACOM BEGIN
-define('ENTRY_TVA_INTRACOM', 'VAT number:');
-define('ENTRY_TVA_INTRACOM_ERROR', 'VAT number of your Company must contain a minimum of ' . ENTRY_TVA_INTRACOM_MIN_LENGTH . ' characters.');
+// -----
+// Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
+// Copyright (c) 2017 Vinos de Frutas Tropicales
+//
+define('VAT4EU_ENTRY_VAT_NUMBER', 'VAT Number:');
+define('VAT4EU_ENTRY_VAT_MIN_ERROR', 'Your <em>VAT Number</em> must contain a minimum of ' . VAT4EU_MIN_LENGTH . ' characters.');
+define('VAT4EU_ENTRY_VAT_PREFIX_INVALID', 'Your <em>VAT Number</em> must begin with <b>%1$s</b>, since the address is in <em>%2$s</em>.');
+
+define('VAT4EU_MESSAGE_YOUR_VAT_REFUND', 'Your order qualifies for a <em>VAT Refund</em>, in the amount of %s.');     //- The $s is the formatted monetary amount of the refund
+
+define('VAT4EU_TEXT_VAT_REFUND', 'VAT Refund;');
+
+/*
+
 define('ENTRY_TVA_INTRACOM_TEXT', 'European companies only');
 define('ENTRY_CONTROL_TVA_INTRACOM', 'The VAT number does not match server request. Please, leave it blank.<br />
 <!-- Optional BEGIN-->
@@ -34,5 +45,5 @@ Slovania : \'SI\' + 8 numeric characters<!-- Optional END-->');
 define('ENTRY_NO_VERIF_TVA_INTRACOM', 'Server is unable to check your VAT number: please, leave blank');
 define('ENTRY_CONTROL_TVA_INTRACOM_COUNTRY', 'VAT number does not match the country. Please leave it blank if correct number is unknown');
 define('TEXT_NO_TAX', 'Tax');
-// TVA_INTRACOM END
-?>
+
+*/

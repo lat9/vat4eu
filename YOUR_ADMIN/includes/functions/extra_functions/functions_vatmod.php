@@ -61,6 +61,67 @@ return zen_round($price, $currencies->currencies[DEFAULT_CURRENCY]['decimal_plac
 //    United Kingdom 	GB + 9 numeric characters 
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
+/*
+VAT identification number structure
+Member State 	Structure 	Format*
+AT-Austria 	ATU99999999 	1 block of 9 characters
+BE-Belgium 	BE0999999999 	1 block of 10 digits
+BG-Bulgaria 	BG999999999 or
+BG9999999999 	1 block of 9 digits or1 block of 10 digits
+CY-Cyprus 	CY99999999L 	1 block of 9 characters
+CZ-Czech Republic 	CZ99999999 or
+CZ999999999 or
+CZ9999999999
+	1 block of either 8, 9 or 10 digits
+DE-Germany 	DE999999999 	1 block of 9 digits
+DK-Denmark 	DK99 99 99 99 	4 blocks of 2 digits
+EE-Estonia 	EE999999999 	1 block of 9 digits
+EL-Greece 	EL999999999 	1 block of 9 digits
+ES-Spain 	ESX9999999X4 	1 block of 9 characters
+FI-Finland 	FI99999999 	1 block of 8 digits
+FR-France 	FRXX 999999999 	1 block of 2 characters, 1 block of 9 digits
+GB-United Kingdom 	GB999 9999 99 or
+GB999 9999 99 9995 or
+GBGD9996 or
+GBHA9997 	1 block of 3 digits, 1 block of 4 digits and 1 block of 2 digits; or the above followed by a block of 3 digits; or 1 block of 5 characters
+HR-Croatia 	HR99999999999 	1 block of 11 digits
+HU-Hungary 	HU99999999 	1 block of 8 digits
+IE-Ireland 	IE9S99999L
+IE9999999WI 	1 block of 8 characters or 1 block of 9 characters
+IT-Italy 	IT99999999999 	1 block of 11 digits
+LT-Lithuania 	LT999999999 or
+LT999999999999 	1 block of 9 digits, or 1 block of 12 digits
+LU-Luxembourg 	LU99999999 	1 block of 8 digits
+LV-Latvia 	LV99999999999 	1 block of 11 digits
+MT-Malta 	MT99999999 	1 block of 8 digits
+NL-The Netherlands 	NL999999999B998 	1 block of 12 characters
+PL-Poland 	PL9999999999 	1 block of 10 digits
+PT-Portugal 	PT999999999 	1 block of 9 digits
+RO-Romania 	RO999999999 	1 block of minimum 2 digits and maximum 10 digits
+SE-Sweden 	SE999999999999 	1 block of 12 digits
+SI-Slovenia 	SI99999999 	1 block of 8 digits
+SK-Slovakia 	SK9999999999 	1 block of 10 digits
+
+Remarks:
+*: Format excludes 2 letter alpha prefix
+9: A digit
+X: A letter or a digit
+S: A letter; a digit; "+" or "*"
+L: A letter
+
+Notes:
+1: The 1st position following the prefix is always "U".
+2: The first digit following the prefix is always zero ('0').
+3: The (new) 10-digit format is the result of adding a leading zero to the (old) 9-digit format.
+4: The first and last characters may be alpha or numeric; but they may not both be numeric.
+5: Identifies branch traders.
+6: Identifies Government Departments.
+7: Identifies Health Authorities.
+8: The 10th position following the prefix is always "B".
+9: All letters are case sensitive. Please follow the exact syntax of the VAT number shown. 
+
+From: http://ec.europa.eu/taxation_customs/vies/faq.html
+*/
 function zen_verif_tva($num_tva){
 $num_tva=preg_replace('/ +/', "", $num_tva);
 $prefix = substr($num_tva, 0, 2);
