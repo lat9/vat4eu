@@ -1,10 +1,10 @@
 <?php
 /**
  * @package admin
- * @copyright Copyright 2003-2007 Zen Cart Development Team
+ * @copyright Copyright 2003-2016 Zen Cart Development Team
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
- * @version $Id: customers.php 7185 2007-10-05 15:35:38Z drbyte $
+ * @version $Id: Author: zcwilt  Fri Apr 15 Modified in v1.5.5 $
  */
 
   require('includes/application_top.php');
@@ -14,6 +14,7 @@
 
   $action = (isset($_GET['action']) ? $_GET['action'] : '');
   $customers_id = zen_db_prepare_input($_GET['cID']);
+  if (isset($_POST['cID'])) $customers_id = zen_db_prepare_input($_POST['cID']);
 
   $error = false;
   $processed = false;
@@ -68,26 +69,32 @@
         zen_redirect(zen_href_link(FILENAME_CUSTOMERS, 'cID=' . (int)$_GET['cID'] . '&page=' . $_GET['page'], 'NONSSL'));
         break;
       case 'status':
-        if ($_GET['current'] == CUSTOMERS_APPROVAL_AUTHORIZATION) {
-          $sql = "update " . TABLE_CUSTOMERS . " set customers_authorization=0 where customers_id='" . (int)$customers_id . "'";
-          $custinfo = $db->Execute("select customers_email_address, customers_firstname, customers_lastname
-                                    from " . TABLE_CUSTOMERS . "
-                                    where customers_id = '" . (int)$customers_id . "'");
-          if ((int)CUSTOMERS_APPROVAL_AUTHORIZATION > 0 && (int)$_GET['current'] > 0 && $custinfo->RecordCount() > 0) {
-            $message = EMAIL_CUSTOMER_STATUS_CHANGE_MESSAGE;
-            $html_msg['EMAIL_MESSAGE_HTML'] = EMAIL_CUSTOMER_STATUS_CHANGE_MESSAGE ;
-            zen_mail($custinfo->fields['customers_firstname'] . ' ' . $custinfo->fields['customers_lastname'], $custinfo->fields['customers_email_address'], EMAIL_CUSTOMER_STATUS_CHANGE_SUBJECT , $message, STORE_NAME, EMAIL_FROM, $html_msg, 'default');
+        if (isset($_POST['current']) && is_numeric($_POST['current']))
+        {
+          if ($_POST['current'] == CUSTOMERS_APPROVAL_AUTHORIZATION) {
+            $sql = "update " . TABLE_CUSTOMERS . " set customers_authorization=0 where customers_id='" . (int)$customers_id . "'";
+            $custinfo = $db->Execute("select customers_email_address, customers_firstname, customers_lastname
+                                      from " . TABLE_CUSTOMERS . "
+                                      where customers_id = '" . (int)$customers_id . "'");
+            if ((int)CUSTOMERS_APPROVAL_AUTHORIZATION > 0 && (int)$_POST['current'] > 0 && $custinfo->RecordCount() > 0) {
+              $message = EMAIL_CUSTOMER_STATUS_CHANGE_MESSAGE;
+              $html_msg['EMAIL_MESSAGE_HTML'] = EMAIL_CUSTOMER_STATUS_CHANGE_MESSAGE ;
+              zen_mail($custinfo->fields['customers_firstname'] . ' ' . $custinfo->fields['customers_lastname'], $custinfo->fields['customers_email_address'], EMAIL_CUSTOMER_STATUS_CHANGE_SUBJECT , $message, STORE_NAME, EMAIL_FROM, $html_msg, 'default');
+            }
+            zen_record_admin_activity('Customer-approval-authorization set customer auth status to 0 for customer ID ' . (int)$customers_id, 'info');
+          } else {
+            $sql = "update " . TABLE_CUSTOMERS . " set customers_authorization='" . CUSTOMERS_APPROVAL_AUTHORIZATION . "' where customers_id='" . (int)$customers_id . "'";
+            zen_record_admin_activity('Customer-approval-authorization set customer auth status to ' . CUSTOMERS_APPROVAL_AUTHORIZATION . ' for customer ID ' . (int)$customers_id, 'info');
           }
-        } else {
-          $sql = "update " . TABLE_CUSTOMERS . " set customers_authorization='" . CUSTOMERS_APPROVAL_AUTHORIZATION . "' where customers_id='" . (int)$customers_id . "'";
+          $db->Execute($sql);
+          $action = '';
+          zen_redirect(zen_href_link(FILENAME_CUSTOMERS, 'cID=' . (int)$customers_id . '&page=' . $_GET['page'], 'NONSSL'));
         }
-        $db->Execute($sql);
         $action = '';
-        zen_redirect(zen_href_link(FILENAME_CUSTOMERS, 'cID=' . (int)$customers_id . '&page=' . $_GET['page'], 'NONSSL'));
         break;
       case 'update':
-        $customers_firstname = zen_db_prepare_input($_POST['customers_firstname']);
-        $customers_lastname = zen_db_prepare_input($_POST['customers_lastname']);
+        $customers_firstname = zen_db_prepare_input(zen_sanitize_string($_POST['customers_firstname']));
+        $customers_lastname = zen_db_prepare_input(zen_sanitize_string($_POST['customers_lastname']));
         $customers_email_address = zen_db_prepare_input($_POST['customers_email_address']);
         $customers_telephone = zen_db_prepare_input($_POST['customers_telephone']);
         $customers_fax = zen_db_prepare_input($_POST['customers_fax']);
@@ -118,9 +125,6 @@
         $entry_country_id = zen_db_prepare_input($_POST['entry_country_id']);
 
         $entry_company = zen_db_prepare_input($_POST['entry_company']);
-// TVA_INTRACOM BEGIN
-$entry_tva_intracom = zen_db_prepare_input($_POST['entry_tva_intracom']);
-// TVA_INTRACOM END
         $entry_state = zen_db_prepare_input($_POST['entry_state']);
         if (isset($_POST['entry_zone_id'])) $entry_zone_id = zen_db_prepare_input($_POST['entry_zone_id']);
 
@@ -146,9 +150,9 @@ $entry_tva_intracom = zen_db_prepare_input($_POST['entry_tva_intracom']);
               $error = true;
               $entry_date_of_birth_error = true;
             }
-          } else {
-            $customers_dob = '0001-01-01 00:00:00';
           }
+        } else {
+            $customers_dob = '0001-01-01 00:00:00';
         }
 
         if (strlen($customers_email_address) < ENTRY_EMAIL_ADDRESS_MIN_LENGTH) {
@@ -164,49 +168,6 @@ $entry_tva_intracom = zen_db_prepare_input($_POST['entry_tva_intracom']);
         } else {
           $entry_email_address_check_error = false;
         }
-
-// TVA_INTRACOM BEGIN
-if (ACCOUNT_COMPANY == 'true') {
-if ( (strlen($entry_company) != 0) && (strlen($entry_company) < ENTRY_COMPANY_MIN_LENGTH) ) {
-$error = true;
-$entry_company_error = true;
-} else {
-$entry_company_error = false;
-}
-if ( ENTRY_TVA_INTRACOM_CHECK == 'true') {					
-if (strlen($entry_tva_intracom) != 0) {
-if ($entry_country_id != false) {
-$countries_array = $db->Execute("select countries_iso_code_2 from " . TABLE_COUNTRIES . " where countries_id = '" . (int)$entry_country_id . "'");
-if ( (array_search($countries_array->fields['countries_iso_code_2'], array_keys(zen_get_tva_intracom_array())) === false) || (array_search(substr(strtoupper(trim($entry_tva_intracom)),0,2), zen_get_tva_intracom_array()) === false) ) {
-$error = true;									
-$entry_tva_intracom_error = 'true';
-} else {
-$entry_tva_intracom_error = 'false';
-}
-}
-$result_tva = zen_verif_tva(strtoupper(rtrim($entry_tva_intracom)));
-if ($result_tva == 'false') {
-$error = true;
-$entry_tva_intracom_error = 'true';
-} elseif ($result_tva == 'no_verif') {
-$error = true;
-$entry_tva_intracom_error = 'no_verif';
-} else {
-if ($entry_tva_intracom_error != 'true') {
-$entry_tva_intracom_error = 'false';
-}
-}
-}
-} else {
-if ( (strlen($entry_tva_intracom) != 0) && (strlen($entry_tva_intracom) < ENTRY_TVA_INTRACOM_MIN_LENGTH) ) {
-$error = true;
-$entry_tva_intracom_error = 'true';
-} else {
-$entry_tva_intracom_error = 'false';
-}
-}
-}
-// TVA_INTRACOM END
 
         if (strlen($entry_street_address) < ENTRY_STREET_ADDRESS_MIN_LENGTH) {
           $error = true;
@@ -260,7 +221,7 @@ $entry_tva_intracom_error = 'false';
                 $entry_state_error = true;
               }
             } else {
-              if ($entry_state == false) {
+              if (strlen($entry_state) < (int)ENTRY_STATE_MIN_LENGTH) {
                 $error = true;
                 $entry_state_error = true;
               }
@@ -286,25 +247,29 @@ $entry_tva_intracom_error = 'false';
       } else {
         $entry_email_address_exists = false;
       }
+      
+//-bof-vat4eu-lat9  *** 1 of 6 ***
+      $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE', array(), $error);
+//-eof-vat4eu-lat9  *** 1 of 6 ***
 
       if ($error == false) {
 
-        $sql_data_array = array('customers_firstname' => $customers_firstname,
-                                'customers_lastname' => $customers_lastname,
-                                'customers_email_address' => $customers_email_address,
-                                'customers_telephone' => $customers_telephone,
-                                'customers_fax' => $customers_fax,
-                                'customers_group_pricing' => $customers_group_pricing,
-                                'customers_newsletter' => $customers_newsletter,
-                                'customers_email_format' => $customers_email_format,
-                                'customers_authorization' => $customers_authorization,
-                                'customers_referral' => $customers_referral
-                                );
+        $sql_data_array = array(array('fieldName'=>'customers_firstname', 'value'=>$customers_firstname, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'customers_lastname', 'value'=>$customers_lastname, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'customers_email_address', 'value'=>$customers_email_address, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'customers_telephone', 'value'=>$customers_telephone, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'customers_fax', 'value'=>$customers_fax, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'customers_group_pricing', 'value'=>$customers_group_pricing, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'customers_newsletter', 'value'=>$customers_newsletter, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'customers_email_format', 'value'=>$customers_email_format, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'customers_authorization', 'value'=>$customers_authorization, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'customers_referral', 'value'=>$customers_referral, 'type'=>'stringIgnoreNull'),
+        );
 
-        if (ACCOUNT_GENDER == 'true') $sql_data_array['customers_gender'] = $customers_gender;
-        if (ACCOUNT_DOB == 'true') $sql_data_array['customers_dob'] = ($customers_dob == '0001-01-01 00:00:00' ? '0001-01-01 00:00:00' : zen_date_raw($customers_dob));
+        if (ACCOUNT_GENDER == 'true') $sql_data_array[] = array('fieldName'=>'customers_gender', 'value'=>$customers_gender, 'type'=>'stringIgnoreNull');
+        if (ACCOUNT_DOB == 'true')  $sql_data_array[] = array('fieldName'=>'customers_dob', 'value'=>($customers_dob == '0001-01-01 00:00:00' ? '0001-01-01 00:00:00' : zen_date_raw($customers_dob)), 'type'=>'date');
 
-        zen_db_perform(TABLE_CUSTOMERS, $sql_data_array, 'update', "customers_id = '" . (int)$customers_id . "'");
+        $db->perform(TABLE_CUSTOMERS, $sql_data_array, 'update', "customers_id = '" . (int)$customers_id . "'");
 
         $db->Execute("update " . TABLE_CUSTOMERS_INFO . "
                       set customers_info_date_account_last_modified = now()
@@ -312,31 +277,33 @@ $entry_tva_intracom_error = 'false';
 
         if ($entry_zone_id > 0) $entry_state = '';
 
-        $sql_data_array = array('entry_firstname' => $customers_firstname,
-                                'entry_lastname' => $customers_lastname,
-                                'entry_street_address' => $entry_street_address,
-                                'entry_postcode' => $entry_postcode,
-                                'entry_city' => $entry_city,
-                                'entry_country_id' => $entry_country_id);
+        $sql_data_array = array(array('fieldName'=>'entry_firstname', 'value'=>$customers_firstname, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'entry_lastname', 'value'=>$customers_lastname, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'entry_street_address', 'value'=>$entry_street_address, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'entry_postcode', 'value'=>$entry_postcode, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'entry_city', 'value'=>$entry_city, 'type'=>'stringIgnoreNull'),
+                                array('fieldName'=>'entry_country_id', 'value'=>$entry_country_id, 'type'=>'integer'),
+        );
 
-        if (ACCOUNT_COMPANY == 'true') $sql_data_array['entry_company'] = $entry_company;
-// TVA_INTRACOM BEGIN
-if (ACCOUNT_COMPANY == 'true') $sql_data_array['entry_tva_intracom'] = $entry_tva_intracom;
-// TVA_INTRACOM END
-        if (ACCOUNT_SUBURB == 'true') $sql_data_array['entry_suburb'] = $entry_suburb;
+        if (ACCOUNT_COMPANY == 'true') $sql_data_array[] = array('fieldName'=>'entry_company', 'value'=>$entry_company, 'type'=>'stringIgnoreNull');
+        if (ACCOUNT_SUBURB == 'true') $sql_data_array[] = array('fieldName'=>'entry_suburb', 'value'=>$entry_suburb, 'type'=>'stringIgnoreNull');
 
         if (ACCOUNT_STATE == 'true') {
           if ($entry_zone_id > 0) {
-            $sql_data_array['entry_zone_id'] = $entry_zone_id;
-            $sql_data_array['entry_state'] = '';
+            $sql_data_array[] = array('fieldName'=>'entry_zone_id', 'value'=>$entry_zone_id, 'type'=>'integer');
+            $sql_data_array[] = array('fieldName'=>'entry_state', 'value'=>'', 'type'=>'stringIgnoreNull');
           } else {
-            $sql_data_array['entry_zone_id'] = '0';
-            $sql_data_array['entry_state'] = $entry_state;
+            $sql_data_array[] = array('fieldName'=>'entry_zone_id', 'value'=>0, 'type'=>'integer');
+            $sql_data_array[] = array('fieldName'=>'entry_state', 'value'=>$entry_state, 'type'=>'stringIgnoreNull');
           }
         }
+        
+//-bof-vat4eu-lat9  *** 2 of 6 ***
+        $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_B4_ADDRESS_UPDATE', array('customers_id' => $customers_id, 'address_book_id' => $default_address_id), $sql_data_array);
+//-eof-vat4eu-lat9  *** 2 of 6 ***
 
-        zen_db_perform(TABLE_ADDRESS_BOOK, $sql_data_array, 'update', "customers_id = '" . (int)$customers_id . "' and address_book_id = '" . (int)$default_address_id . "'");
-
+        $db->perform(TABLE_ADDRESS_BOOK, $sql_data_array, 'update', "customers_id = '" . (int)$customers_id . "' and address_book_id = '" . (int)$default_address_id . "'");
+        zen_record_admin_activity('Customer record updated for customer ID ' . (int)$customers_id, 'notice');
         zen_redirect(zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')) . 'cID=' . $customers_id, 'NONSSL'));
 
         } else if ($error == true) {
@@ -345,6 +312,58 @@ if (ACCOUNT_COMPANY == 'true') $sql_data_array['entry_tva_intracom'] = $entry_tv
         }
 
         break;
+      case 'pwdresetconfirm':
+        if ((int)$customers_id > 0 && isset($_POST['newpassword']) && $_POST['newpassword'] != '' && isset($_POST['newpasswordConfirm']) && $_POST['newpasswordConfirm'] != '') {
+          if (zen_admin_demo()) {
+            $_GET['action']= '';
+            $messageStack->add_session(ERROR_ADMIN_DEMO, 'caution');
+            zen_redirect(zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action'))));
+          }
+          $password_new = zen_db_prepare_input($_POST['newpassword']);
+          $password_confirmation = zen_db_prepare_input($_POST['newpasswordConfirm']);
+          $error = FALSE;
+          if (strlen($password_new) < ENTRY_PASSWORD_MIN_LENGTH) {
+            $error = true;
+            $messageStack->add_session(ERROR_PWD_TOO_SHORT . '(' . ENTRY_PASSWORD_MIN_LENGTH . ')', 'error');
+          } elseif ($password_new != $password_confirmation) {
+            $error = true;
+            $messageStack->add_session(ERROR_PASSWORDS_NOT_MATCHING, 'error');
+          }
+          if ($error == FALSE) {
+            $sql = "SELECT customers_email_address, customers_firstname, customers_lastname
+                     FROM " . TABLE_CUSTOMERS . "
+                     WHERE customers_id = :customersID";
+            $sql = $db->bindVars($sql, ':customersID', $customers_id, 'integer');
+            $custinfo = $db->Execute($sql);
+            if ($custinfo->RecordCount() == 0) die('ERROR: customer ID not specified. This error should never happen.');
+
+            $sql = "UPDATE " . TABLE_CUSTOMERS . "
+                    SET customers_password = :password
+                    WHERE customers_id = :customersID";
+            $sql = $db->bindVars($sql, ':customersID', $customers_id, 'integer');
+            $sql = $db->bindVars($sql, ':password',zen_encrypt_password($password_new), 'string');
+            $db->Execute($sql);
+            $sql = "UPDATE " . TABLE_CUSTOMERS_INFO . "
+                    SET    customers_info_date_account_last_modified = now()
+                    WHERE  customers_info_id = :customersID";
+            $sql = $db->bindVars($sql, ':customersID',$customers_id, 'integer');
+            $db->Execute($sql);
+
+            $message = EMAIL_CUSTOMER_PWD_CHANGE_MESSAGE . "\n\n" . $password_new . "\n\n\n";
+            $html_msg['EMAIL_MESSAGE_HTML'] = nl2br($message);
+            zen_mail($custinfo->fields['customers_firstname'] . ' ' . $custinfo->fields['customers_lastname'], $custinfo->fields['customers_email_address'], EMAIL_CUSTOMER_PWD_CHANGE_SUBJECT , $message, STORE_NAME, EMAIL_FROM, $html_msg, 'default');
+            $userList = zen_get_users($_SESSION['admin_id']);
+            $userDetails = $userList[0];
+            $adminUser = $userDetails['id'] . '-' . $userDetails['name'] . ' ' . zen_get_ip_address();
+            $message = sprintf(EMAIL_CUSTOMER_PWD_CHANGE_MESSAGE_FOR_ADMIN, $custinfo->fields['customers_firstname'] . ' ' . $custinfo->fields['customers_lastname'] . ' ' . $custinfo->fields['customers_email_address'], $adminUser) . "\n";
+            $html_msg['EMAIL_MESSAGE_HTML'] = nl2br($message);
+            zen_mail($userDetails['name'], $userDetails['email'], EMAIL_CUSTOMER_PWD_CHANGE_SUBJECT , $message, STORE_NAME, EMAIL_FROM, $html_msg, 'default');
+
+            $messageStack->add_session(SUCCESS_PASSWORD_UPDATED, 'success');
+          }
+          zen_redirect(zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')) . 'cID=' . $customers_id));
+        }
+        break;
       case 'deleteconfirm':
         // demo active test
         if (zen_admin_demo()) {
@@ -352,6 +371,7 @@ if (ACCOUNT_COMPANY == 'true') $sql_data_array['entry_tva_intracom'] = $entry_tv
           $messageStack->add_session(ERROR_ADMIN_DEMO, 'caution');
           zen_redirect(zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')), 'NONSSL'));
         }
+        $customers_id = zen_db_prepare_input($_POST['cID']);
 
         if (isset($_POST['delete_reviews']) && ($_POST['delete_reviews'] == 'on')) {
           $reviews = $db->Execute("select reviews_id
@@ -389,13 +409,15 @@ if (ACCOUNT_COMPANY == 'true') $sql_data_array['entry_tva_intracom'] = $entry_tv
         $db->Execute("delete from " . TABLE_WHOS_ONLINE . "
                       where customer_id = '" . (int)$customers_id . "'");
 
+    	$db->Execute("delete from " . TABLE_PRODUCTS_NOTIFICATIONS . " where customers_id = " . (int)$customers_id);
 
+        zen_record_admin_activity('Customer with customer ID ' . (int)$customers_id . ' deleted.', 'warning');
         zen_redirect(zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')), 'NONSSL'));
         break;
       default:
         $customers = $db->Execute("select c.customers_id, c.customers_gender, c.customers_firstname,
                                           c.customers_lastname, c.customers_dob, c.customers_email_address,
-                                          a.entry_company, a.entry_tva_intracom,  a.entry_street_address, a.entry_suburb,
+                                          a.entry_company, a.entry_street_address, a.entry_suburb,
                                           a.entry_postcode, a.entry_city, a.entry_state, a.entry_zone_id,
                                           a.entry_country_id, c.customers_telephone, c.customers_fax,
                                           c.customers_newsletter, c.customers_default_address_id,
@@ -404,7 +426,7 @@ if (ACCOUNT_COMPANY == 'true') $sql_data_array['entry_tva_intracom'] = $entry_tv
                                   from " . TABLE_CUSTOMERS . " c left join " . TABLE_ADDRESS_BOOK . " a
                                   on c.customers_default_address_id = a.address_book_id
                                   where a.customers_id = c.customers_id
-                                  and c.customers_id = '" . (int)$customers_id . "'"); // TVA_INTRACOM
+                                  and c.customers_id = '" . (int)$customers_id . "'");
 
         $cInfo = new objectInfo($customers->fields);
     }
@@ -431,9 +453,6 @@ function check_form() {
   var customers_firstname = document.customers.customers_firstname.value;
   var customers_lastname = document.customers.customers_lastname.value;
 <?php if (ACCOUNT_COMPANY == 'true') echo 'var entry_company = document.customers.entry_company.value;' . "\n"; ?>
-<!-- TVA_INTRACOM BEGIN -->
-<?php if (ACCOUNT_COMPANY == 'true') echo 'var entry_tva_intracom = document.customers.entry_tva_intracom.value;' . "\n"; ?>
-<!-- TVA_INTRACOM END -->
 <?php if (ACCOUNT_DOB == 'true') echo 'var customers_dob = document.customers.customers_dob.value;' . "\n"; ?>
   var customers_email_address = document.customers.customers_email_address.value;
   var entry_street_address = document.customers.entry_street_address.value;
@@ -471,19 +490,6 @@ function check_form() {
     error = 1;
   }
 
-<!-- TVA_INTRACOM BEGIN //-->
-<?php if (ACCOUNT_COMPANY == 'true') { ?>
-if (entry_company != "" && entry_company.length < <?php echo ENTRY_COMPANY_MIN_LENGTH; ?>) {
-error_message = error_message + "<?php echo JS_COMPANY; ?>";
-error = 1;
-}
-if (entry_tva_intracom != "" && entry_tva_intracom.length < <?php echo ENTRY_TVA_INTRACOM_MIN_LENGTH; ?>) {
-error_message = error_message + "<?php echo JS_TVA_INTRACOM; ?>";
-error = 1;
-}
-<?php } ?>
-<!-- TVA_INTRACOM END //-->
-
   if (entry_street_address == "" || entry_street_address.length < <?php echo ENTRY_STREET_ADDRESS_MIN_LENGTH; ?>) {
     error_message = error_message + "<?php echo JS_ADDRESS; ?>";
     error = 1;
@@ -519,7 +525,8 @@ error = 1;
     }
   }
 
-  if (customers_telephone == "" || customers_telephone.length < <?php echo ENTRY_TELEPHONE_MIN_LENGTH; ?>) {
+  minTelephoneLength = <?php echo (int)ENTRY_TELEPHONE_MIN_LENGTH; ?>;
+  if (minTelephoneLength > 0 && customers_telephone.length < minTelephoneLength) {
     error_message = error_message + "<?php echo JS_TELEPHONE; ?>";
     error = 1;
   }
@@ -620,12 +627,12 @@ error = 1;
 <?php
   if ($error == true) {
     if ($entry_firstname_error == true) {
-      echo zen_draw_input_field('customers_firstname', $cInfo->customers_firstname, zen_set_field_length(TABLE_CUSTOMERS, 'customers_firstname', 50)) . '&nbsp;' . ENTRY_FIRST_NAME_ERROR;
+      echo zen_draw_input_field('customers_firstname', htmlspecialchars($cInfo->customers_firstname, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_firstname', 50)) . '&nbsp;' . ENTRY_FIRST_NAME_ERROR;
     } else {
       echo $cInfo->customers_firstname . zen_draw_hidden_field('customers_firstname');
     }
   } else {
-    echo zen_draw_input_field('customers_firstname', $cInfo->customers_firstname, zen_set_field_length(TABLE_CUSTOMERS, 'customers_firstname', 50), true);
+    echo zen_draw_input_field('customers_firstname', htmlspecialchars($cInfo->customers_firstname, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_firstname', 50), true);
   }
 ?></td>
           </tr>
@@ -635,12 +642,12 @@ error = 1;
 <?php
   if ($error == true) {
     if ($entry_lastname_error == true) {
-      echo zen_draw_input_field('customers_lastname', $cInfo->customers_lastname, zen_set_field_length(TABLE_CUSTOMERS, 'customers_lastname', 50)) . '&nbsp;' . ENTRY_LAST_NAME_ERROR;
+      echo zen_draw_input_field('customers_lastname', htmlspecialchars($cInfo->customers_lastname, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_lastname', 50)) . '&nbsp;' . ENTRY_LAST_NAME_ERROR;
     } else {
       echo $cInfo->customers_lastname . zen_draw_hidden_field('customers_lastname');
     }
   } else {
-    echo zen_draw_input_field('customers_lastname', $cInfo->customers_lastname, zen_set_field_length(TABLE_CUSTOMERS, 'customers_lastname', 50), true);
+    echo zen_draw_input_field('customers_lastname', htmlspecialchars($cInfo->customers_lastname, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_lastname', 50), true);
   }
 ?></td>
           </tr>
@@ -672,16 +679,16 @@ error = 1;
 <?php
   if ($error == true) {
     if ($entry_email_address_error == true) {
-      echo zen_draw_input_field('customers_email_address', $cInfo->customers_email_address, zen_set_field_length(TABLE_CUSTOMERS, 'customers_email_address', 50)) . '&nbsp;' . ENTRY_EMAIL_ADDRESS_ERROR;
+      echo zen_draw_input_field('customers_email_address', htmlspecialchars($cInfo->customers_email_address, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_email_address', 50)) . '&nbsp;' . ENTRY_EMAIL_ADDRESS_ERROR;
     } elseif ($entry_email_address_check_error == true) {
-      echo zen_draw_input_field('customers_email_address', $cInfo->customers_email_address, zen_set_field_length(TABLE_CUSTOMERS, 'customers_email_address', 50)) . '&nbsp;' . ENTRY_EMAIL_ADDRESS_CHECK_ERROR;
+      echo zen_draw_input_field('customers_email_address', htmlspecialchars($cInfo->customers_email_address, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_email_address', 50)) . '&nbsp;' . ENTRY_EMAIL_ADDRESS_CHECK_ERROR;
     } elseif ($entry_email_address_exists == true) {
-      echo zen_draw_input_field('customers_email_address', $cInfo->customers_email_address, zen_set_field_length(TABLE_CUSTOMERS, 'customers_email_address', 50)) . '&nbsp;' . ENTRY_EMAIL_ADDRESS_ERROR_EXISTS;
+      echo zen_draw_input_field('customers_email_address', htmlspecialchars($cInfo->customers_email_address, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_email_address', 50)) . '&nbsp;' . ENTRY_EMAIL_ADDRESS_ERROR_EXISTS;
     } else {
       echo $customers_email_address . zen_draw_hidden_field('customers_email_address');
     }
   } else {
-    echo zen_draw_input_field('customers_email_address', $cInfo->customers_email_address, zen_set_field_length(TABLE_CUSTOMERS, 'customers_email_address', 50), true);
+    echo zen_draw_input_field('customers_email_address', htmlspecialchars($cInfo->customers_email_address, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_email_address', 50), true);
   }
 ?></td>
           </tr>
@@ -704,48 +711,24 @@ error = 1;
 <?php
     if ($error == true) {
       if ($entry_company_error == true) {
-        echo zen_draw_input_field('entry_company', $cInfo->entry_company, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_company', 50)) . '&nbsp;' . ENTRY_COMPANY_ERROR;
+        echo zen_draw_input_field('entry_company', htmlspecialchars($cInfo->entry_company, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_company', 50)) . '&nbsp;' . ENTRY_COMPANY_ERROR;
       } else {
         echo $cInfo->entry_company . zen_draw_hidden_field('entry_company');
       }
     } else {
-      echo zen_draw_input_field('entry_company', $cInfo->entry_company, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_company', 50));
+      echo zen_draw_input_field('entry_company', htmlspecialchars($cInfo->entry_company, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_company', 50));
     }
 ?></td>
           </tr>
-<!-- TVA_INTRACOM BEGIN //-->
-<tr>
-<td class="main" valign="top"><?php echo ENTRY_TVA_INTRACOM; ?></td>
-<td class="main">
+          
 <?php
-if ( ENTRY_TVA_INTRACOM_CHECK == 'true') {
-if ($error == true) {
-if ($entry_tva_intracom_error == 'true') {
-echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_tva_intracom', 32)) . '&nbsp;' . ENTRY_CONTROL_TVA_INTRACOM ;
-} 
-if ($entry_tva_intracom_error == 'no_verif') {
-echo zen_draw_input_field('entry_tva_intracom', '', zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_tva_intracom', 32)) . '&nbsp;' . ENTRY_NO_VERIF_TVA_INTRACOM;
-} 
-if ($entry_tva_intracom_error == 'false') {
-echo $cInfo->entry_tva_intracom . zen_draw_hidden_field('entry_tva_intracom');
-}
-} else {
-echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_tva_intracom', 32));
-}
-} else {
-if ($error == true) {
-if ($entry_tva_intracom_error == 'true') {
-echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_tva_intracom', 32)) . '&nbsp;' . ENTRY_TVA_INTRACOM_ERROR;
-} else {
-echo $cInfo->entry_tva_intracom . zen_draw_hidden_field('entry_tva_intracom');
-}
-} else {
-echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_tva_intracom', 32));
-}
-} 
-?> </td>
-</tr>
-<!-- TVA_INTRACOM END //-->
+//-bof-vat4eu-lat9  *** 3 of 6 ***
+    $additional_fields = '';
+    $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT', $cInfo, $additional_fields);
+    echo $additional_fields;
+//-eof-vat4eu-lat9  *** 3 of 6 ***
+?>
+
         </table></td>
       </tr>
 <?php
@@ -765,12 +748,12 @@ echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_
 <?php
   if ($error == true) {
     if ($entry_street_address_error == true) {
-      echo zen_draw_input_field('entry_street_address', $cInfo->entry_street_address, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_street_address', 50)) . '&nbsp;' . ENTRY_STREET_ADDRESS_ERROR;
+      echo zen_draw_input_field('entry_street_address', htmlspecialchars($cInfo->entry_street_address, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_street_address', 50)) . '&nbsp;' . ENTRY_STREET_ADDRESS_ERROR;
     } else {
       echo $cInfo->entry_street_address . zen_draw_hidden_field('entry_street_address');
     }
   } else {
-    echo zen_draw_input_field('entry_street_address', $cInfo->entry_street_address, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_street_address', 50), true);
+    echo zen_draw_input_field('entry_street_address', htmlspecialchars($cInfo->entry_street_address, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_street_address', 50), true);
   }
 ?></td>
           </tr>
@@ -783,12 +766,12 @@ echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_
 <?php
     if ($error == true) {
       if ($entry_suburb_error == true) {
-        echo zen_draw_input_field('suburb', $cInfo->entry_suburb, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_suburb', 50)) . '&nbsp;' . ENTRY_SUBURB_ERROR;
+        echo zen_draw_input_field('suburb', htmlspecialchars($cInfo->entry_suburb, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_suburb', 50)) . '&nbsp;' . ENTRY_SUBURB_ERROR;
       } else {
         echo $cInfo->entry_suburb . zen_draw_hidden_field('entry_suburb');
       }
     } else {
-      echo zen_draw_input_field('entry_suburb', $cInfo->entry_suburb, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_suburb', 50));
+      echo zen_draw_input_field('entry_suburb', htmlspecialchars($cInfo->entry_suburb, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_suburb', 50));
     }
 ?></td>
           </tr>
@@ -801,12 +784,12 @@ echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_
 <?php
   if ($error == true) {
     if ($entry_post_code_error == true) {
-      echo zen_draw_input_field('entry_postcode', $cInfo->entry_postcode, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_postcode', 10)) . '&nbsp;' . ENTRY_POST_CODE_ERROR;
+      echo zen_draw_input_field('entry_postcode', htmlspecialchars($cInfo->entry_postcode, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_postcode', 10)) . '&nbsp;' . ENTRY_POST_CODE_ERROR;
     } else {
       echo $cInfo->entry_postcode . zen_draw_hidden_field('entry_postcode');
     }
   } else {
-    echo zen_draw_input_field('entry_postcode', $cInfo->entry_postcode, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_postcode', 10), true);
+    echo zen_draw_input_field('entry_postcode', htmlspecialchars($cInfo->entry_postcode, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_postcode', 10), true);
   }
 ?></td>
           </tr>
@@ -816,12 +799,12 @@ echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_
 <?php
   if ($error == true) {
     if ($entry_city_error == true) {
-      echo zen_draw_input_field('entry_city', $cInfo->entry_city, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_city', 50)) . '&nbsp;' . ENTRY_CITY_ERROR;
+      echo zen_draw_input_field('entry_city', htmlspecialchars($cInfo->entry_city, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_city', 50)) . '&nbsp;' . ENTRY_CITY_ERROR;
     } else {
       echo $cInfo->entry_city . zen_draw_hidden_field('entry_city');
     }
   } else {
-    echo zen_draw_input_field('entry_city', $cInfo->entry_city, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_city', 50), true);
+    echo zen_draw_input_field('entry_city', htmlspecialchars($cInfo->entry_city, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_city', 50), true);
   }
 ?></td>
           </tr>
@@ -848,13 +831,13 @@ echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_
           }
           echo zen_draw_pull_down_menu('entry_state', $zones_array) . '&nbsp;' . ENTRY_STATE_ERROR;
         } else {
-          echo zen_draw_input_field('entry_state', zen_get_zone_name($cInfo->entry_country_id, $cInfo->entry_zone_id, $cInfo->entry_state)) . '&nbsp;' . ENTRY_STATE_ERROR;
+          echo zen_draw_input_field('entry_state', htmlspecialchars(zen_get_zone_name($cInfo->entry_country_id, $cInfo->entry_zone_id, $cInfo->entry_state), ENT_COMPAT, CHARSET, TRUE)) . '&nbsp;' . ENTRY_STATE_ERROR;
         }
       } else {
         echo $entry_state . zen_draw_hidden_field('entry_zone_id') . zen_draw_hidden_field('entry_state');
       }
     } else {
-      echo zen_draw_input_field('entry_state', zen_get_zone_name($cInfo->entry_country_id, $cInfo->entry_zone_id, $cInfo->entry_state));
+      echo zen_draw_input_field('entry_state', htmlspecialchars(zen_get_zone_name($cInfo->entry_country_id, $cInfo->entry_zone_id, $cInfo->entry_state), ENT_COMPAT, CHARSET, TRUE));
     }
 
 ?></td>
@@ -893,12 +876,12 @@ echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_
 <?php
   if ($error == true) {
     if ($entry_telephone_error == true) {
-      echo zen_draw_input_field('customers_telephone', $cInfo->customers_telephone, zen_set_field_length(TABLE_CUSTOMERS, 'customers_telephone', 15)) . '&nbsp;' . ENTRY_TELEPHONE_NUMBER_ERROR;
+      echo zen_draw_input_field('customers_telephone', htmlspecialchars($cInfo->customers_telephone, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_telephone', 15)) . '&nbsp;' . ENTRY_TELEPHONE_NUMBER_ERROR;
     } else {
       echo $cInfo->customers_telephone . zen_draw_hidden_field('customers_telephone');
     }
   } else {
-    echo zen_draw_input_field('customers_telephone', $cInfo->customers_telephone, zen_set_field_length(TABLE_CUSTOMERS, 'customers_telephone', 15), true);
+    echo zen_draw_input_field('customers_telephone', htmlspecialchars($cInfo->customers_telephone, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_telephone', 15), true);
   }
 ?></td>
           </tr>
@@ -912,7 +895,7 @@ echo zen_draw_input_field('entry_tva_intracom', $cInfo->entry_tva_intracom, zen_
   if ($processed == true) {
     echo $cInfo->customers_fax . zen_draw_hidden_field('customers_fax');
   } else {
-    echo zen_draw_input_field('customers_fax', $cInfo->customers_fax, zen_set_field_length(TABLE_CUSTOMERS, 'customers_fax', 15));
+    echo zen_draw_input_field('customers_fax', htmlspecialchars($cInfo->customers_fax, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_fax', 15));
   }
 ?></td>
           </tr>
@@ -965,7 +948,7 @@ if ($processed == true) {
 <?php
   if ($processed == true) {
     if ($cInfo->customers_group_pricing) {
-      $group_query = $db->Execute("select group_name, group_percentage from " . TABLE_GROUP_PRICING . " where group_id = '" . $cInfo->customers_group_pricing . "'");
+      $group_query = $db->Execute("select group_name, group_percentage from " . TABLE_GROUP_PRICING . " where group_id = '" . (int)$cInfo->customers_group_pricing . "'");
       echo $group_query->fields['group_name'].'&nbsp;'.$group_query->fields['group_percentage'].'%';
     } else {
       echo ENTRY_NONE;
@@ -986,7 +969,7 @@ if ($processed == true) {
           <tr>
             <td class="main"><?php echo CUSTOMERS_REFERRAL; ?></td>
             <td class="main">
-              <?php echo zen_draw_input_field('customers_referral', $cInfo->customers_referral, zen_set_field_length(TABLE_CUSTOMERS, 'customers_referral', 15)); ?>
+              <?php echo zen_draw_input_field('customers_referral', htmlspecialchars($cInfo->customers_referral, ENT_COMPAT, CHARSET, TRUE), zen_set_field_length(TABLE_CUSTOMERS, 'customers_referral', 15)); ?>
             </td>
           </tr>
         </table></td>
@@ -1084,49 +1067,58 @@ if ($processed == true) {
                 </td>
                 <td class="dataTableHeadingContent" align="left" valign="top">
                   <?php echo (($_GET['list_order']=='lastname' or $_GET['list_order']=='lastname-desc') ? '<span class="SortOrderHeader">' . TABLE_HEADING_LASTNAME . '</span>' : TABLE_HEADING_LASTNAME); ?><br>
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=lastname', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='lastname' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</b>'); ?></a>&nbsp;
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=lastname-desc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='lastname-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</b>'); ?></a>
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=lastname', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='lastname' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</span>'); ?></a>&nbsp;
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=lastname-desc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='lastname-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
                 </td>
                 <td class="dataTableHeadingContent" align="left" valign="top">
                   <?php echo (($_GET['list_order']=='firstname' or $_GET['list_order']=='firstname-desc') ? '<span class="SortOrderHeader">' . TABLE_HEADING_FIRSTNAME . '</span>' : TABLE_HEADING_FIRSTNAME); ?><br>
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=firstname', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='firstname' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</b>'); ?></a>&nbsp;
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=firstname-desc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='firstname-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=firstname', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='firstname' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</span>'); ?></a>&nbsp;
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=firstname-desc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='firstname-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
                 </td>
                 <td class="dataTableHeadingContent" align="left" valign="top">
                   <?php echo (($_GET['list_order']=='company' or $_GET['list_order']=='company-desc') ? '<span class="SortOrderHeader">' . TABLE_HEADING_COMPANY . '</span>' : TABLE_HEADING_COMPANY); ?><br>
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=company', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='company' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</b>'); ?></a>&nbsp;
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=company-desc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='company-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</b>'); ?></a>
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=company', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='company' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</span>'); ?></a>&nbsp;
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=company-desc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='company-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
                 </td>
+                
+<?php
+//-bof-vat4eu-lat9  *** 4 of 6 ***
+           $additional_heading = '';
+           $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER', array(), $additional_heading);
+           echo $additional_heading;
+//-eof-vat4eu-lat9  *** 4 of 6 ***
+?>
+
                 <td class="dataTableHeadingContent" align="left" valign="top">
                   <?php echo (($_GET['list_order']=='id-asc' or $_GET['list_order']=='id-desc') ? '<span class="SortOrderHeader">' . TABLE_HEADING_ACCOUNT_CREATED . '</span>' : TABLE_HEADING_ACCOUNT_CREATED); ?><br>
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=id-asc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='id-asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</b>'); ?></a>&nbsp;
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=id-desc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='id-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</b>'); ?></a>
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=id-asc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='id-asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</span>'); ?></a>&nbsp;
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=id-desc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='id-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
                 </td>
 
                 <td class="dataTableHeadingContent" align="left" valign="top">
                   <?php echo (($_GET['list_order']=='login-asc' or $_GET['list_order']=='login-desc') ? '<span class="SortOrderHeader">' . TABLE_HEADING_LOGIN . '</span>' : TABLE_HEADING_LOGIN); ?><br>
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=login-asc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='login-asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</b>'); ?></a>&nbsp;
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=login-desc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='login-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</b>'); ?></a>
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=login-asc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='login-asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</span>'); ?></a>&nbsp;
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=login-desc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='login-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
                 </td>
 
                 <td class="dataTableHeadingContent" align="left" valign="top">
                   <?php echo (($_GET['list_order']=='group-asc' or $_GET['list_order']=='group-desc') ? '<span class="SortOrderHeader">' . TABLE_HEADING_PRICING_GROUP . '</span>' : TABLE_HEADING_PRICING_GROUP); ?><br>
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=group-asc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='group-asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</b>'); ?></a>&nbsp;
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=group-desc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='group-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</b>'); ?></a>
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=group-asc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='group-asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</span>'); ?></a>&nbsp;
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=group-desc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='group-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
                 </td>
 
 <?php if (MODULE_ORDER_TOTAL_GV_STATUS == 'true') { ?>
                 <td class="dataTableHeadingContent" align="left" valign="top" width="75">
                   <?php echo (($_GET['list_order']=='gv_balance-asc' or $_GET['list_order']=='gv_balance-desc') ? '<span class="SortOrderHeader">' . TABLE_HEADING_GV_AMOUNT . '</span>' : TABLE_HEADING_GV_AMOUNT); ?><br>
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=gv_balance-asc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='gv_balance-asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</b>'); ?></a>&nbsp;
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=gv_balance-desc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='gv_balance-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</b>'); ?></a>
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=gv_balance-asc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='gv_balance-asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</span>'); ?></a>&nbsp;
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=gv_balance-desc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='gv_balance-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
                 </td>
 <?php } ?>
 
                 <td class="dataTableHeadingContent" align="center" valign="top">
                   <?php echo (($_GET['list_order']=='approval-asc' or $_GET['list_order']=='approval-desc') ? '<span class="SortOrderHeader">' . TABLE_HEADING_AUTHORIZATION_APPROVAL . '</span>' : TABLE_HEADING_AUTHORIZATION_APPROVAL); ?><br>
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=approval-asc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='approval-asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</b>'); ?></a>&nbsp;
-                  <a href="<?php echo zen_href_link(basename($PHP_SELF) . '?list_order=approval-desc', '', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='approval-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</b>'); ?></a>
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=approval-asc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='approval-asc' ? '<span class="SortOrderHeader">Asc</span>' : '<span class="SortOrderHeaderLink">Asc</span>'); ?></a>&nbsp;
+                  <a href="<?php echo zen_href_link(basename($PHP_SELF), zen_get_all_get_params(array('list_order','page')) . 'list_order=approval-desc', 'NONSSL'); ?>"><?php echo ($_GET['list_order']=='approval-desc' ? '<span class="SortOrderHeader">Desc</span>' : '<span class="SortOrderHeaderLink">Desc</span>'); ?></a>
                 </td>
 
                 <td class="dataTableHeadingContent" align="right" valign="top"><?php echo TABLE_HEADING_ACTION; ?>&nbsp;</td>
@@ -1139,6 +1131,11 @@ if ($processed == true) {
       $search = $db->bindVars($search, ':keywords:', $keywords, 'regexp');
     }
     $new_fields=', c.customers_telephone, a.entry_company, a.entry_street_address, a.entry_city, a.entry_postcode, c.customers_authorization, c.customers_referral';
+    
+//-bof-vat4eu-lat9  *** 5 of 6 ***
+    $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_NEW_FIELDS', array(), $new_fields, $disp_order);
+//-eof-vat4eu-lat9  *** 5 of 6 ***
+
     $customers_query_raw = "select c.customers_id, c.customers_lastname, c.customers_firstname, c.customers_email_address, c.customers_group_pricing, a.entry_country_id, a.entry_company, ci.customers_info_date_of_last_logon, ci.customers_info_date_account_created " . $new_fields . ",
     cgc.amount
     from " . TABLE_CUSTOMERS . " c
@@ -1179,9 +1176,9 @@ if (($_GET['page'] == '' or $_GET['page'] == '1') and $_GET['cID'] != '') {
       $info = $db->Execute($sql);
 
       // if no record found, create one to keep database in sync
-      if (!isset($info->fields) || !is_array($info->fields)) {
-        $insert_sql = "insert into " . TABLE_CUSTOMERS_INFO . " (customers_info_id, customers_info_number_of_logons, customers_info_date_account_created)
-                       values ('" . (int)$customers->fields['customers_id'] . "', '0', now())";
+        if ($info->RecordCount() == 0) {
+          $insert_sql = "insert into " . TABLE_CUSTOMERS_INFO . " (customers_info_id)
+                         values ('" . (int)$customers->fields['customers_id'] . "')";
         $db->Execute($insert_sql);
         $info = $db->Execute($sql);
       }
@@ -1212,7 +1209,7 @@ if (($_GET['page'] == '' or $_GET['page'] == '1') and $_GET['cID'] != '') {
       if (isset($cInfo) && is_object($cInfo) && ($customers->fields['customers_id'] == $cInfo->customers_id)) {
         echo '          <tr id="defaultSelected" class="dataTableRowSelected" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="document.location.href=\'' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')) . 'cID=' . $cInfo->customers_id . '&action=edit', 'NONSSL') . '\'">' . "\n";
       } else {
-        echo '          <tr class="dataTableRow" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="document.location.href=\'' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID')) . 'cID=' . $customers->fields['customers_id'], 'NONSSL') . '\'">' . "\n";
+        echo '          <tr class="dataTableRow" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="document.location.href=\'' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')) . 'cID=' . $customers->fields['customers_id'], 'NONSSL') . '\'">' . "\n";
       }
 
       $zc_address_book_count_list = zen_get_customers_address_book($customers->fields['customers_id']);
@@ -1222,13 +1219,33 @@ if (($_GET['page'] == '' or $_GET['page'] == '1') and $_GET['cID'] != '') {
                 <td class="dataTableContent"><?php echo $customers->fields['customers_lastname']; ?></td>
                 <td class="dataTableContent"><?php echo $customers->fields['customers_firstname']; ?></td>
                 <td class="dataTableContent"><?php echo $customers->fields['entry_company']; ?></td>
+<?php
+//-bof-vat4eu-lat9  *** 6 of 6 ***
+           $additional_column = '';
+           $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT', $customers->fields, $additional_column);
+           echo $additional_column;
+//-eof-vat4eu-lat9  *** 6 of 6 ***
+?>
                 <td class="dataTableContent"><?php echo zen_date_short($info->fields['date_account_created']); ?></td>
                 <td class="dataTableContent"><?php echo zen_date_short($customers->fields['customers_info_date_of_last_logon']); ?></td>
                 <td class="dataTableContent"><?php echo $group_name_entry; ?></td>
 <?php if (MODULE_ORDER_TOTAL_GV_STATUS == 'true') { ?>
                 <td class="dataTableContent" align="right"><?php echo $currencies->format($customers->fields['amount']); ?></td>
 <?php } ?>
-                <td class="dataTableContent" align="center"><?php echo ($customers->fields['customers_authorization'] == 4 ? zen_image(DIR_WS_IMAGES . 'icon_red_off.gif', IMAGE_ICON_STATUS_OFF) : ($customers->fields['customers_authorization'] == 0 ? '<a href="' . zen_href_link(FILENAME_CUSTOMERS, 'action=status&current=' . $customers->fields['customers_authorization'] . '&cID=' . $customers->fields['customers_id'] . ($_GET['page'] > 0 ? '&page=' . $_GET['page'] : ''), 'NONSSL') . '">' . zen_image(DIR_WS_IMAGES . 'icon_green_on.gif', IMAGE_ICON_STATUS_ON) . '</a>' : '<a href="' . zen_href_link(FILENAME_CUSTOMERS, 'action=status&current=' . $customers->fields['customers_authorization'] . '&cID=' . $customers->fields['customers_id'] . ($_GET['page'] > 0 ? '&page=' . $_GET['page'] : ''), 'NONSSL') . '">' . zen_image(DIR_WS_IMAGES . 'icon_red_on.gif', IMAGE_ICON_STATUS_OFF) . '</a>')); ?></td>
+                <td class="dataTableContent" align="center">
+                <?php if ($customers->fields['customers_authorization'] == 4) { ?>
+                <?php echo zen_image(DIR_WS_IMAGES . 'icon_red_off.gif', IMAGE_ICON_STATUS_OFF); ?>
+                <?php } else {
+                    echo zen_draw_form('setstatus', FILENAME_CUSTOMERS, 'action=status&cID=' . $customers->fields['customers_id'] . (isset($_GET['page']) ? '&page=' . $_GET['page'] : '') . (isset($_GET['search']) ? '&search=' . $_GET['search'] : ''));?>
+                  <?php if ($customers->fields['customers_authorization'] == 0) { ?>
+                    <input type="image" src="<?php echo DIR_WS_IMAGES ?>icon_green_on.gif" title="<?php echo IMAGE_ICON_STATUS_ON; ?>" />
+                  <?php } else { ?>
+                    <input type="image" src="<?php echo DIR_WS_IMAGES ?>icon_red_on.gif" title="<?php echo IMAGE_ICON_STATUS_OFF; ?>" />
+                  <?php } ?>
+                    <input type="hidden" name="current" value="<?php echo $customers->fields['customers_authorization']; ?>" />
+                    </form>
+                  <?php } ?>
+                </td>
                 <td class="dataTableContent" align="right"><?php if (isset($cInfo) && is_object($cInfo) && ($customers->fields['customers_id'] == $cInfo->customers_id)) { echo zen_image(DIR_WS_IMAGES . 'icon_arrow_right.gif', ''); } else { echo '<a href="' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID')) . 'cID=' . $customers->fields['customers_id'] . ($_GET['page'] > 0 ? '&page=' . $_GET['page'] : ''), 'NONSSL') . '">' . zen_image(DIR_WS_IMAGES . 'icon_info.gif', IMAGE_ICON_INFO) . '</a>'; } ?>&nbsp;</td>
               </tr>
 <?php
@@ -1261,12 +1278,21 @@ if (($_GET['page'] == '' or $_GET['page'] == '1') and $_GET['cID'] != '') {
     case 'confirm':
       $heading[] = array('text' => '<b>' . TEXT_INFO_HEADING_DELETE_CUSTOMER . '</b>');
 
-      $contents = array('form' => zen_draw_form('customers', FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')) . 'cID=' . $cInfo->customers_id . '&action=deleteconfirm', 'post', '', true));
+      $contents = array('form' => zen_draw_form('customers', FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action', 'search')) . 'action=deleteconfirm', 'post', '', true) . zen_draw_hidden_field('cID', $cInfo->customers_id));
       $contents[] = array('text' => TEXT_DELETE_INTRO . '<br><br><b>' . $cInfo->customers_firstname . ' ' . $cInfo->customers_lastname . '</b>');
       if (isset($cInfo->number_of_reviews) && ($cInfo->number_of_reviews) > 0) $contents[] = array('text' => '<br />' . zen_draw_checkbox_field('delete_reviews', 'on', true) . ' ' . sprintf(TEXT_DELETE_REVIEWS, $cInfo->number_of_reviews));
       $contents[] = array('align' => 'center', 'text' => '<br />' . zen_image_submit('button_delete.gif', IMAGE_DELETE) . ' <a href="' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')) . 'cID=' . $cInfo->customers_id, 'NONSSL') . '">' . zen_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
       break;
+    case 'pwreset':
+      $heading[] = array('text' => '<b>' . TEXT_INFO_HEADING_RESET_CUSTOMER_PASSWORD . '</b>');
+      $contents = array('form' => zen_draw_form('customers', FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action', 'search')) . 'action=pwdresetconfirm', 'post', 'id="pReset"', true) . zen_draw_hidden_field('cID', $cInfo->customers_id));
+      $contents[] = array('text' => TEXT_PWDRESET_INTRO . '<br><br><strong>' . $cInfo->customers_firstname . ' ' . $cInfo->customers_lastname . '</strong>');
+      $contents[] = array('text' => '<br>' . TEXT_CUST_NEW_PASSWORD . '<br>' . zen_draw_input_field('newpassword', '', 'maxlength="40" autofocus="autofocus" autocomplete="off" id="newpassword"', false, 'text', false));
+      $contents[] = array('text' => '<br>' . TEXT_CUST_CONFIRM_PASSWORD . '<br>' . zen_draw_input_field('newpasswordConfirm', '', 'maxlength="40" autocomplete="off" id="newpasswordConfirm"', false, 'text', false));
+      $contents[] = array('align' => 'center', 'text' => '<br />' . zen_image_submit('button_reset_pwd.gif', IMAGE_RESET_PWD) . ' <a href="' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')) . 'cID=' . $cInfo->customers_id) . '">' . zen_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
+      break;
     default:
+      if (isset($_GET['search'])) $_GET['search'] = zen_output_string_protected($_GET['search']);
       if (isset($cInfo) && is_object($cInfo)) {
         $customers_orders = $db->Execute("select o.orders_id, o.date_purchased, o.order_total, o.currency, o.currency_value,
                                           cgc.amount
@@ -1274,15 +1300,19 @@ if (($_GET['page'] == '' or $_GET['page'] == '1') and $_GET['cID'] != '') {
                                           left join " . TABLE_COUPON_GV_CUSTOMER . " cgc on o.customers_id = cgc.customer_id
                                           where customers_id='" . $cInfo->customers_id . "' order by date_purchased desc");
 
-        $heading[] = array('text' => '<b>' . TABLE_HEADING_ID . $cInfo->customers_id . ' ' . $cInfo->customers_firstname . ' ' . $cInfo->customers_lastname . '</b>');
+        $heading[] = array('text' => '<b>' . TABLE_HEADING_ID . $cInfo->customers_id . ' ' . $cInfo->customers_firstname . ' ' . $cInfo->customers_lastname . '</b>' . '<br>' . $cInfo->customers_email_address);
 
-        $contents[] = array('align' => 'center', 'text' => '<a href="' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')) . 'cID=' . $cInfo->customers_id . '&action=edit', 'NONSSL') . '">' . zen_image_button('button_edit.gif', IMAGE_EDIT) . '</a> <a href="' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action')) . 'cID=' . $cInfo->customers_id . '&action=confirm', 'NONSSL') . '">' . zen_image_button('button_delete.gif', IMAGE_DELETE) . '</a><br />' . ($customers_orders->RecordCount() != 0 ? '<a href="' . zen_href_link(FILENAME_ORDERS, 'cID=' . $cInfo->customers_id, 'NONSSL') . '">' . zen_image_button('button_orders.gif', IMAGE_ORDERS) . '</a>' : '') . ' <a href="' . zen_href_link(FILENAME_MAIL, 'origin=customers.php&mode=NONSSL&selected_box=tools&customer=' . $cInfo->customers_email_address.'&cID=' . $cInfo->customers_id, 'NONSSL') . '">' . zen_image_button('button_email.gif', IMAGE_EMAIL) . '</a>');
+        $contents[] = array('align' => 'center', 'text' => '<a href="' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action', 'search')) . 'cID=' . $cInfo->customers_id . '&action=edit', 'NONSSL') . '">' . zen_image_button('button_edit.gif', IMAGE_EDIT) . '</a> <a href="' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action', 'search')) . 'cID=' . $cInfo->customers_id . '&action=confirm', 'NONSSL') . '">' . zen_image_button('button_delete.gif', IMAGE_DELETE) . '</a><br />' . ($customers_orders->RecordCount() != 0 ? '<a href="' . zen_href_link(FILENAME_ORDERS, 'cID=' . $cInfo->customers_id, 'NONSSL') . '">' . zen_image_button('button_orders.gif', IMAGE_ORDERS) . '</a>' : '') . ' <a href="' . zen_href_link(FILENAME_MAIL, 'origin=customers.php&mode=NONSSL&customer=' . $cInfo->customers_email_address.'&cID=' . $cInfo->customers_id, 'NONSSL') . '">' . zen_image_button('button_email.gif', IMAGE_EMAIL) . '</a>');
+        $contents[] = array('align' => 'center', 'text' => '<a href="' . zen_href_link(FILENAME_CUSTOMERS, zen_get_all_get_params(array('cID', 'action', 'search')) . 'cID=' . $cInfo->customers_id . '&action=pwreset') . '">' . zen_image_button('button_reset_pwd.gif', IMAGE_RESET_PWD) . '</a>');
+        $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_MENU_BUTTONS', $cInfo, $contents);
+
         $contents[] = array('text' => '<br />' . TEXT_DATE_ACCOUNT_CREATED . ' ' . zen_date_short($cInfo->date_account_created));
         $contents[] = array('text' => '<br />' . TEXT_DATE_ACCOUNT_LAST_MODIFIED . ' ' . zen_date_short($cInfo->date_account_last_modified));
         $contents[] = array('text' => '<br />' . TEXT_INFO_DATE_LAST_LOGON . ' '  . zen_date_short($cInfo->date_last_logon));
         $contents[] = array('text' => '<br />' . TEXT_INFO_NUMBER_OF_LOGONS . ' ' . $cInfo->number_of_logons);
 
-        $contents[] = array('text' => '<br />' . TEXT_INFO_GV_AMOUNT . ' ' . $currencies->format($customers_orders->fields['amount']));
+        $customer_gv_balance = zen_user_has_gv_balance($cInfo->customers_id);
+        $contents[] = array('text' => '<br />' . TEXT_INFO_GV_AMOUNT . ' ' . $currencies->format($customer_gv_balance));
 
         $contents[] = array('text' => '<br />' . TEXT_INFO_NUMBER_OF_ORDERS . ' ' . $customers_orders->RecordCount());
         if ($customers_orders->RecordCount() != 0) {
@@ -1294,6 +1324,7 @@ if (($_GET['page'] == '' or $_GET['page'] == '1') and $_GET['cID'] != '') {
       }
       break;
   }
+  $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_MENU_BUTTONS_END', (isset($cInfo) ? $cInfo : new stdClass), $contents);
 
   if ( (zen_not_null($heading)) && (zen_not_null($contents)) ) {
     echo '            <td width="25%" valign="top">' . "\n";

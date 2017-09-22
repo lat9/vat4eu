@@ -9,7 +9,7 @@ class zcObserverVatForEuCountries extends base
     private $vatValidated = false;
     private $vatIsRefundable = false;
     private $vatNumber = '';
-    private $vatNumberStatus = 0;
+    private $vatNumberStatus;
     private $vatGathered = false;
     private $addressFormatCount = 0;
     private $vatCountries = array();
@@ -24,6 +24,15 @@ class zcObserverVatForEuCountries extends base
     //
     public function __construct() 
     {
+        // -----
+        // Pull in the VatValidation class, enabling its constants to be used even if the plugin
+        // isn't enabled.
+        //
+        if (!class_exists('VatValidation')) {
+            require DIR_WS_CLASSES . 'VatValidation.php';
+        }
+        $this->vatNumberStatus = VatValidation::VAT_NOT_VALIDATED;
+        
         // -----
         // If the plugin is enabled ...
         //
@@ -245,7 +254,7 @@ class zcObserverVatForEuCountries extends base
         $vat_ok = true;
         $GLOBALS['vat_number'] = $vat_number = zen_db_prepare_input($_POST['vat_number']);
         $vat_number_length = strlen($vat_number);
-        $this->vatNumberStatus = 0;     //- Unvalidated
+        $this->vatNumberStatus = VatValidated::VAT_NOT_VALIDATED;
         if ($vat_number != '') {
             $vat_ok = false;
             if (VAT4EU_MIN_LENGTH != '0' && $vat_number_length < VAT4EU_MIN_LENGTH) {
@@ -257,17 +266,12 @@ class zcObserverVatForEuCountries extends base
                     $GLOBALS['messageStack']->add($message_location, sprintf(VAT4EU_ENTRY_VAT_PREFIX_INVALID, $country_iso_code_2, zen_get_country_name($countries_id)), 'error');
                 } else {
                     $vat_ok = true;
-                    if (VAT4EU_VALIDATION == 'Admin') {
-                        $this->vatNumberStatus = 2;     //- Pending (admin validation)
-                    } else {
-                        if (!class_exists('VatValidation')) {
-                            require DIR_WS_CLASSES . 'VatValidation.php';
-                        }
+                    if (VAT4EU_VALIDATION != 'Admin') {
                         $validation = new VatValidation();
-                        if (!$validation->checkVatNumber($country_iso_code_2, $vat_number)) {
-                            $this->vatNumberStatus = 0; //- Not validated
+                        if ($validation->checkVatNumber($country_iso_code_2, $vat_number)) {
+                            $this->vatNumberStatus = VatValidation::VAT_VIES_OK;
                         } else {
-                            $this->vatNumberStatus = 1; //- Validated
+                            $this->vatNumberStatus = VatValidation::VAT_VIES_NOT_OK;
                         }
                     }
                 }
@@ -300,8 +304,10 @@ class zcObserverVatForEuCountries extends base
                     if ($this->isVatCountry($check->fields['entry_country_id'])) {
                         $this->vatNumber = $check->fields['entry_vat_number'];
                         $this->vatValidated = $check->fields['entry_vat_validated'];
-                        if ($this->vatValidated == 1 && (VAT4EU_IN_COUNTRY_REFUND == 'true' || STORE_COUNTRY != $check->fields['entry_country_id'])) {
-                            $this->vatIsRefundable = true;
+                        if ($this->vatValidated == VatValidation::VAT_VIES_OK || $this->vatValidated == VatValidation::VAT_ADMIN_OVERRIDE) {
+                            if (VAT4EU_IN_COUNTRY_REFUND == 'true' || STORE_COUNTRY != $check->fields['entry_country_id']) {
+                                $this->vatIsRefundable = true;
+                            }
                         }
                     }
                 }

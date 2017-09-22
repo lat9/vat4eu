@@ -40,9 +40,6 @@
 
     $address_format = $db->Execute($address_format_query);
     $company = zen_output_string_protected($address['company']);
-// TVA_INTRACOM BEGIN
-	$tva_intracom = zen_output_string_protected($address['tva_intracom']);
-// TVA_INTRACOM END
     if (isset($address['firstname']) && zen_not_null($address['firstname'])) {
       $firstname = zen_output_string_protected($address['firstname']);
       $lastname = zen_output_string_protected($address['lastname']);
@@ -113,6 +110,31 @@
     if ( (ACCOUNT_COMPANY == 'true') && (zen_not_null($company)) ) {
       $address_out = $company . $cr . $address_out;
     }
+    
+//-bof-vat4eu-lat9  *** 1 of 2 ***
+    // -----
+    // "Package up" the various elements of an address and issue a notification that will be picked up
+    // by the VAT Mod's observer-class script.
+    //
+    $GLOBALS['zco_notifier']->notify(
+        'NOTIFY_END_ZEN_ADDRESS_FORMAT',
+        array(
+            'format' => $fmt,
+            'address' => $address,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'street' => $street,
+            'suburb' => $suburb,
+            'city' => $city,
+            'state' => $state,
+            'country' => $country,
+            'postcode' => $postcode,
+            'cr' => $cr,
+            'hr' => $hr,
+        ),
+        $address_out
+    );
+//-eof-vat4eu-lat9  *** 1 of 2 ***
 
     return $address_out;
   }
@@ -132,6 +154,10 @@
                       and address_book_id = '" . (int)$address_id . "'";
 
     $address = $db->Execute($address_query);
+    
+//-bof-vat4eu-lat9  *** 2 of 2 ***
+    $GLOBALS['zco_notifier']->notify('NOTIFY_ZEN_ADDRESS_LABEL', array(), $customers_id, $address_id, $address->fields);
+//-bof-vat4eu-lat9  *** 2 of 2 ***
 
     $format_id = zen_get_address_format_id($address->fields['country_id']);
     return zen_address_format($format_id, $address->fields, $html, $boln, $eoln);

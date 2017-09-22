@@ -1,6 +1,6 @@
 <?php
 // -----
-// Part of the "VAT Mod - v2.0" plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
+// Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
 // Copyright (c) 2017 Vinos de Frutas Tropicales
 //
 // This class derived from a similarly-named class provided here: https://github.com/herdani/vat-validation
@@ -9,6 +9,15 @@ class VatValidation
 {
     const WSDL = "http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl";
     
+    // -----
+    // These class constants define the possible values for the entry_vat_validated field, present
+    // in the Zen Cart address_book table.
+    //
+    const VAT_ADMIN_OVERRIDE = 2;       //- An admin "overrode" the VIES validation    
+    const VAT_VIES_OK        = 1;       //- The VAT Number was validated via VIES
+    const VAT_NOT_VALIDATED  = 0;       //- The VAT Number has not been validated; initial setting when admin-validation is configured
+    const VAT_VIES_NOT_OK    = -1;      //- The VAT Number was indicated to be invalid via VIES.
+
     private $_client = null;
     private $_valid = false;
     private $_data = array();
