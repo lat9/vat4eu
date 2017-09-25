@@ -9,6 +9,8 @@ define('VAT4EU_TEXT_MESSAGE_UPDATED', 'The <em>VAT4EU</em> plugin has been succe
 define('BOX_CONFIG_VAT4EU', 'VAT for EU Countries');
 
 define('VAT4EU_ENTRY_VAT_NUMBER', 'VAT Number:');
+define('VAT4EU_ENTRY_OVERRIDE_VALIDATION', 'VAT Validation Override:');
+
 define('VAT4EU_CUSTOMERS_HEADING', 'VAT Number');
 
 define('VAT4EU_ENTRY_VAT_MIN_ERROR', '<span class="errorText">At least ' . VAT4EU_MIN_LENGTH . ' characters.</span>');

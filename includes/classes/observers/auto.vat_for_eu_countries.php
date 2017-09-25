@@ -13,7 +13,8 @@ class zcObserverVatForEuCountries extends base
     private $vatGathered = false;
     private $addressFormatCount = 0;
     private $vatCountries = array();
-    public  $debug = array();
+    private $debug = false;
+    private $logfile;
     
     // -----
     // On construction, this auto-loaded observer checks to see that the plugin is enabled and, if so:
@@ -38,6 +39,12 @@ class zcObserverVatForEuCountries extends base
         //
         if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED == 'true') {
             $this->isEnabled = true;
+            $this->debug = (defined('VAT4EU_DEBUG') && VAT4EU_DEBUG == 'true');
+            if (isset($_SESSION['customer_id'])) {
+                $this->logfile = DIR_FS_LOGS . '/vat4eu_' . $_SESSION['customer_id'] . '.log';
+            } else {
+                $this->logfile = DIR_FS_LOGS . '/vat4eu.log';
+            }
             $this->attach(
                 $this, 
                 array(
@@ -171,15 +178,20 @@ class zcObserverVatForEuCountries extends base
             // determine whether a currently-logged-in customer qualifies for a VAT refund.
             //
             case 'NOTIFY_HEADER_END_SHOPPING_CART':
-                if ($this->vatIsRefundable && isset($GLOBALS['products']) && is_array($GLOBALS['products'])) {
+                if ($this->checkVatIsRefundable() && isset($GLOBALS['products']) && is_array($GLOBALS['products'])) {
+                    $debug_message = $eventID . " starts ...";
                     $products_tax = 0;
                     $currency_decimal_places = $GLOBALS['currencies']->get_decimal_places($_SESSION['currency']);
                     foreach ($GLOBALS['products'] as $current_product) {
                         $current_tax = zen_calculate_tax($current_product['final_price'], zen_get_tax_rate($current_product['tax_class_id']));
                         $products_tax += $current_product['quantity'] * zen_round($current_tax, $currency_decimal_places);
+                        $debug_message .= ("\t" . $current_product['name'] . '(' . $current_product['id'] . ") adds $current_tax to the overall tax ($products_tax)." . PHP_EOL);
                     }
                     $this->vatRefund = $products_tax;
-                    $GLOBALS['cartShowTotal'] .= '<br /><span class="vat-refund-label">' . VAT4EU_TEXT_VAT_REFUND . '</span><span class="vat-refund_amt">' . $GLOBALS['currencies']->format($products_tax) . '</span>';
+                    if ($products_tax != 0) {
+                        $GLOBALS['cartShowTotal'] .= '<br /><span class="vat-refund-label">' . VAT4EU_TEXT_VAT_REFUND . '</span><span class="vat-refund_amt">' . $GLOBALS['currencies']->format($products_tax) . '</span>';
+                    }
+                    $this->debug($debug_message);
                 }
                 break;
                 
@@ -254,7 +266,7 @@ class zcObserverVatForEuCountries extends base
         $vat_ok = true;
         $GLOBALS['vat_number'] = $vat_number = zen_db_prepare_input($_POST['vat_number']);
         $vat_number_length = strlen($vat_number);
-        $this->vatNumberStatus = VatValidated::VAT_NOT_VALIDATED;
+        $this->vatNumberStatus = VatValidation::VAT_NOT_VALIDATED;
         if ($vat_number != '') {
             $vat_ok = false;
             if (VAT4EU_MIN_LENGTH != '0' && $vat_number_length < VAT4EU_MIN_LENGTH) {
@@ -266,12 +278,18 @@ class zcObserverVatForEuCountries extends base
                     $GLOBALS['messageStack']->add($message_location, sprintf(VAT4EU_ENTRY_VAT_PREFIX_INVALID, $country_iso_code_2, zen_get_country_name($countries_id)), 'error');
                 } else {
                     $vat_ok = true;
-                    if (VAT4EU_VALIDATION != 'Admin') {
+                    if ($message_location == 'create_account') {
+                        $message_location = 'header';
+                    }
+                    if (VAT4EU_VALIDATION == 'Admin') {
+                        $GLOBALS['messageStack']->add_session($message_location, VAT4EU_APPROVAL_PENDING, 'warning');
+                    } else {
                         $validation = new VatValidation();
                         if ($validation->checkVatNumber($country_iso_code_2, $vat_number)) {
                             $this->vatNumberStatus = VatValidation::VAT_VIES_OK;
                         } else {
                             $this->vatNumberStatus = VatValidation::VAT_VIES_NOT_OK;
+                            $GLOBALS['messageStack']->add_session($message_location, VAT4EU_VAT_NOT_VALIDATED, 'warning');
                         }
                     }
                 }
@@ -286,6 +304,7 @@ class zcObserverVatForEuCountries extends base
             $this->vatValidated = false;
             $this->vatIsRefundable = false;
             $this->vatNumber = '';
+            $debug_message = 'checkVatIsRefundable($customers_id, $address_id)' . PHP_EOL;
             if (isset($_SESSION['customer_id'])) {
                 if ($customers_id === false) {
                     $customers_id = $_SESSION['customer_id'];
@@ -293,6 +312,7 @@ class zcObserverVatForEuCountries extends base
                 if ($address_id === false) {
                     $address_id = (isset($_SESSION['billto'])) ? $_SESSION['billto'] : $_SESSION['customer_default_address_id'];
                 }
+                $debug_message .= "\tCustomer is logged in ($customers_id, $address_id)" . PHP_EOL;
                 $check = $GLOBALS['db']->Execute(
                     "SELECT entry_country_id, entry_vat_number, entry_vat_validated
                        FROM " . TABLE_ADDRESS_BOOK . "
@@ -301,17 +321,33 @@ class zcObserverVatForEuCountries extends base
                       LIMIT 1"
                 );
                 if (!$check->EOF) {
+                    $debug_message .= "\tAddress located, country #" . $check->fields['entry_country_id'] . PHP_EOL;
                     if ($this->isVatCountry($check->fields['entry_country_id'])) {
                         $this->vatNumber = $check->fields['entry_vat_number'];
                         $this->vatValidated = $check->fields['entry_vat_validated'];
-                        if ($this->vatValidated == VatValidation::VAT_VIES_OK || $this->vatValidated == VatValidation::VAT_ADMIN_OVERRIDE) {
-                            if (VAT4EU_IN_COUNTRY_REFUND == 'true' || STORE_COUNTRY != $check->fields['entry_country_id']) {
-                                $this->vatIsRefundable = true;
+                        $debug_message .= "\tBilling country is part of the EU, VAT Number (" . $this->vatNumber . "), validation status: " . $this->vatValidated . PHP_EOL;
+                        if (isset($_SESSION['sendto']) && $_SESSION['sendto'] !== false) {
+                            $debug_message .= "\tSend-to address set ..." . PHP_EOL;
+                            $ship_check = $GLOBALS['db']->Execute(
+                                "SELECT entry_country_id
+                                   FROM " . TABLE_ADDRESS_BOOK . "
+                                  WHERE address_book_id = " . (int)$_SESSION['sendto'] . "
+                                    AND customers_id = " . (int)$customers_id . "
+                                  LIMIT 1"
+                            );
+                            if (!$ship_check->EOF && $this->isVatCountry($ship_check->fields['entry_country_id'])) {
+                                $debug_message .= "\tShip-to country is in the EU (" . $ship_check->fields['entry_country_id'] . ")" . PHP_EOL;
+                                if ($this->vatValidated == VatValidation::VAT_VIES_OK || $this->vatValidated == VatValidation::VAT_ADMIN_OVERRIDE) {
+                                    if (VAT4EU_IN_COUNTRY_REFUND == 'true' || STORE_COUNTRY != $ship_check->fields['entry_country_id']) {
+                                        $this->vatIsRefundable = true;
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
+            $this->debug($debug_message . "\tReturning (" . $this->vatIsRefundable . ")" . PHP_EOL);
         }
         return $this->vatIsRefundable;
     }
@@ -418,7 +454,7 @@ class zcObserverVatForEuCountries extends base
             //
             if ($show_vat_number) {
                 $address_out = $current_address . $address_elements['cr'] . VAT4EU_ENTRY_VAT_NUMBER . ' ' . $this->vatNumber;
-                if ($this->vatValidated != 1) {
+                if ($this->vatValidated != VatValidation::VAT_VIES_OK && $this->vatValidated != VatValidation::VAT_ADMIN_OVERRIDE) {
                     $address_out .= VAT4EU_UNVERIFIED;
                 }
             }
@@ -437,7 +473,9 @@ class zcObserverVatForEuCountries extends base
     
     private function debug($message)
     {
-        $this->debug[] = $message;
+        if ($this->debug) {
+            error_log(date('Y-m-d H:i:s') . ": $message" . PHP_EOL, 3, $this->logfile);
+        }
     }
 
 }

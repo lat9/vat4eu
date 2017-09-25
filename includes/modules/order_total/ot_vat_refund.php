@@ -3,6 +3,10 @@
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
 // Copyright (c) 2017 Vinos de Frutas Tropicales
 ///
+if (!defined('IS_ADMIN_FLAG')) {
+    die('Invalid access.');
+}
+
 class ot_vat_refund extends base
 {
     public    $title;
@@ -24,9 +28,19 @@ class ot_vat_refund extends base
 
     public function process() 
     {
-        if ($this->isEnabled && is_object($GLOBALS['zcObserverVatForEuCountries']) && $GLOBALS['zcObserverVatForEuCountries']->isVatRefundable()) {
+        if ($this->isEnabled) {
+            if (IS_ADMIN_FLAG === false && is_object($GLOBALS['zcObserverVatForEuCountries'])) {
+                $is_refundable = $GLOBALS['zcObserverVatForEuCountries']->isVatRefundable();
+            } elseif (IS_ADMIN_FLAG == true && is_object($GLOBALS['vat4EuAdmin'])) {
+                $is_refundable = $GLOBALS['vat4EuAdmin']->isVatRefundable();
+            } else {
+                $is_refundable = false;
+            }
+        }
+        if ($is_refundable) {
             $order = $GLOBALS['order'];
             $vat_refund = $order->info['tax'];
+            $GLOBALS['order']->info['total'] -= $vat_refund;
             if ($vat_refund != 0) {
                 $this->output[] = array(
                     'title' => $this->title . ':',
