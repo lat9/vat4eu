@@ -27,7 +27,7 @@ class VatValidation
     
     public function __construct() 
     {
-        if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED != 'true') {
+        if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED == 'true') {
             $this->debug = (defined('VAT4EU_DEBUG') && VAT4EU_DEBUG == 'true');
             
             if (!class_exists('SoapClient')) {
