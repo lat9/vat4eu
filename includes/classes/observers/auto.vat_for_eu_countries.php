@@ -189,7 +189,7 @@ class zcObserverVatForEuCountries extends base
                     }
                     $this->vatRefund = $products_tax;
                     if ($products_tax != 0) {
-                        $GLOBALS['cartShowTotal'] .= '<br /><span class="vat-refund-label">' . VAT4EU_TEXT_VAT_REFUND . '</span><span class="vat-refund_amt">' . $GLOBALS['currencies']->format($products_tax) . '</span>';
+                        $GLOBALS['cartShowTotal'] .= '<br /><span class="vat-refund-label">' . VAT4EU_TEXT_VAT_REFUND . '</span> <span class="vat-refund_amt">' . $GLOBALS['currencies']->format($products_tax) . '</span>';
                     }
                     $this->debug($debug_message);
                 }
@@ -304,7 +304,7 @@ class zcObserverVatForEuCountries extends base
             $this->vatValidated = false;
             $this->vatIsRefundable = false;
             $this->vatNumber = '';
-            $debug_message = 'checkVatIsRefundable($customers_id, $address_id)' . PHP_EOL;
+            $debug_message = "checkVatIsRefundable($customers_id, $address_id)" . PHP_EOL;
             if (isset($_SESSION['customer_id'])) {
                 if ($customers_id === false) {
                     $customers_id = $_SESSION['customer_id'];
@@ -326,12 +326,13 @@ class zcObserverVatForEuCountries extends base
                         $this->vatNumber = $check->fields['entry_vat_number'];
                         $this->vatValidated = $check->fields['entry_vat_validated'];
                         $debug_message .= "\tBilling country is part of the EU, VAT Number (" . $this->vatNumber . "), validation status: " . $this->vatValidated . PHP_EOL;
-                        if (isset($_SESSION['sendto']) && $_SESSION['sendto'] !== false) {
+                        $sendto_address_id = (isset($_SESSION['sendto'])) ? $_SESSION['sendto'] : $_SESSION['customer_default_address_id'];
+                        if ($sendto_address_id !== false) {
                             $debug_message .= "\tSend-to address set ..." . PHP_EOL;
                             $ship_check = $GLOBALS['db']->Execute(
                                 "SELECT entry_country_id
                                    FROM " . TABLE_ADDRESS_BOOK . "
-                                  WHERE address_book_id = " . (int)$_SESSION['sendto'] . "
+                                  WHERE address_book_id = " . (int)$sendto_address_id . "
                                     AND customers_id = " . (int)$customers_id . "
                                   LIMIT 1"
                             );

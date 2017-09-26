@@ -7,7 +7,7 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Invalid access.');
 }
 
-class ot_vat_refund extends base
+class ot_vat_reverse_charges extends base
 {
     public    $title;
     public    $output;
@@ -16,10 +16,11 @@ class ot_vat_refund extends base
 
     public function __construct() 
     {
-        $this->code = 'ot_vat_refund';
-        $this->title = MODULE_ORDER_TOTAL_VAT_REFUND_TITLE;
-        $this->description = MODULE_ORDER_TOTAL_VAT_REFUND_DESCRIPTION;
-        $this->sort_order = MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER;
+        $this->code = 'ot_vat_reverse_charges';
+        $this->title = (IS_ADMIN_FLAG === true) ? MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_TITLE_ADMIN : MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_TITLE;
+        
+        $this->description = MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_DESCRIPTION;
+        $this->sort_order = MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_SORT_ORDER;
         
         $this->isEnabled = (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED == 'true');
 
@@ -37,14 +38,11 @@ class ot_vat_refund extends base
             }
         }
         if ($is_refundable) {
-            $order = $GLOBALS['order'];
-            $vat_refund = $order->info['tax'];
-            $GLOBALS['order']->info['total'] -= $vat_refund;
-            if ($vat_refund != 0) {
+            if ($GLOBALS['order']->info['tax'] != 0) {
                 $this->output[] = array(
-                    'title' => $this->title . ':',
-                    'text' => '-' . $GLOBALS['currencies']->format($vat_refund, true, $order->info['currency'], $order->info['currency_value']),
-                    'value' => -$vat_refund
+                    'title' => '<span id="vat-reverse-charge">' . $this->title . '</span>',
+                    'text' => '&nbsp;',
+                    'value' => 0
                 );
             }
         }
@@ -56,7 +54,7 @@ class ot_vat_refund extends base
             $check = $GLOBALS['db']->Execute(
                 "SELECT configuration_value
                    FROM " . TABLE_CONFIGURATION . "
-                  WHERE configuration_key = 'MODULE_ORDER_TOTAL_VAT_REFUND_STATUS'
+                  WHERE configuration_key = 'MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_STATUS'
                   LIMIT 1"
             );
             $this->_check = $check->RecordCount();
@@ -67,8 +65,8 @@ class ot_vat_refund extends base
     public function keys() 
     {
         return array(
-            'MODULE_ORDER_TOTAL_VAT_REFUND_STATUS', 
-            'MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER', 
+            'MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_STATUS', 
+            'MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_SORT_ORDER', 
         );
     }
 
@@ -78,13 +76,13 @@ class ot_vat_refund extends base
             "INSERT INTO " . TABLE_CONFIGURATION . " 
                 (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added) 
              VALUES 
-                ('This module is installed', 'MODULE_ORDER_TOTAL_VAT_REFUND_STATUS', 'true', '', '6', '1','zen_cfg_select_option(array(\'true\'), ', now())"
+                ('This module is installed', 'MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_STATUS', 'true', '', '6', '1','zen_cfg_select_option(array(\'true\'), ', now())"
         );
         $GLOBALS['db']->Execute(
             "INSERT INTO " . TABLE_CONFIGURATION . " 
                 (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added) 
              VALUES 
-                ('Sort Order', 'MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER', '900', 'Sort order of display.<br /><br /><b>Note:</b> Make sure that the value is larger than the sort-order for the <em>Tax</em> total\'s display!', '6', '2', now())"
+                ('Sort Order', 'MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_SORT_ORDER', '2000', 'Sort order of display.<br /><br /><b>Note:</b> Make sure that the value is larger than the sort-order for the <em>Total</em> total\'s display!', '6', '2', now())"
         );
     }
 
