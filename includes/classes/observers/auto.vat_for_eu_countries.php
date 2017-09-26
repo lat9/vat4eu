@@ -64,6 +64,7 @@ class zcObserverVatForEuCountries extends base
                     'NOTIFY_ADDRESS_BOOK_PROCESS_VALIDATION',                   //- Allows us to check/validate any supplied VAT Number
                     'NOTIFY_MODULE_ADDRESS_BOOK_UPDATED_ADDRESS_BOOK_RECORD',   //- Indicates that an address-record was just updated
                     'NOTIFY_MODULE_ADDRESS_BOOK_ADDED_ADDRESS_BOOK_RECORD',     //- Indicates that an address-record was just created
+                    'NOTIFY_HEADER_END_ADDRESS_BOOK_PROCESS',                   //- Allows us to gather any existing VAT number for display
                     
                     //- From /includes/modules/pages/shopping_cart/header_php.php
                     'NOTIFY_HEADER_END_SHOPPING_CART',          //- End of the "standard" page's processing
@@ -171,6 +172,26 @@ class zcObserverVatForEuCountries extends base
                         AND customers_id = " . (int)$_SESSION['customer_id'] . "
                       LIMIT 1"
                 );
+                break;
+                
+            // -----
+            // Issued by the "address_book_process" page's header, preparing to display (or re-display
+            // on error) the address-book entry form.  Gives us the opportunity to gather any pre-existing
+            // VAT number for the display.
+            //
+            case 'NOTIFY_HEADER_END_ADDRESS_BOOK_PROCESS':
+                if (!isset($_POST['vat_number']) && isset($_GET['edit'])) {
+                    $check = $GLOBALS['db']->Execute(
+                        "SELECT entry_vat_number, entry_vat_validated
+                           FROM " . TABLE_ADDRESS_BOOK . "
+                          WHERE customers_id = " . (int)$_SESSION['customer_id'] . "
+                            AND address_book_id = " . (int)$_GET['edit'] . "
+                          LIMIT 1"
+                    );
+                    if (!$check->EOF) {
+                        $GLOBALS['vat_number'] = $check->fields['entry_vat_number'];
+                    }
+                }
                 break;
                 
             // -----
@@ -285,6 +306,7 @@ class zcObserverVatForEuCountries extends base
                         $GLOBALS['messageStack']->add_session($message_location, VAT4EU_APPROVAL_PENDING, 'warning');
                     } else {
                         $validation = new VatValidation();
+                        $vat_number = ($vat_number_length >= 2) ? substr($vat_number, 2) : $vat_number;
                         if ($validation->checkVatNumber($country_iso_code_2, $vat_number)) {
                             $this->vatNumberStatus = VatValidation::VAT_VIES_OK;
                         } else {

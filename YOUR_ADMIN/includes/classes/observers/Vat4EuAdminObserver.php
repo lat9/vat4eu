@@ -361,6 +361,7 @@ class Vat4EuAdminObserver extends base
                     $vat_ok = true;
                 } else {
                     $validation = new VatValidation();
+                    $vat_number = ($vat_number_length >= 2) ? substr($vat_number, 2) : $vat_number;
                     if (!$validation->checkVatNumber($country_iso_code_2, $vat_number)) {
                         $this->vatNumberMessage = VAT4EU_ENTRY_VAT_INVALID;
                         $this->vatNumberStatus = VatValidation::VAT_VIES_NOT_OK;
