@@ -17,7 +17,7 @@ class ot_vat_reverse_charges extends base
     public function __construct() 
     {
         $this->code = 'ot_vat_reverse_charges';
-        $this->title = (IS_ADMIN_FLAG === true) ? MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_TITLE_ADMIN : MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_TITLE;
+        $this->title = (IS_ADMIN_FLAG === true && $GLOBALS['current_page'] != 'edit_orders.php') ? MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_TITLE_ADMIN : MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_TITLE;
         
         $this->description = MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_DESCRIPTION;
         $this->sort_order = MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_SORT_ORDER;
