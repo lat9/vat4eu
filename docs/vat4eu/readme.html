@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VAT for EU Countries (VAT4EU)</title>
+<link rel="icon" href="../vinos_favicon.ico" type="image/x-icon" />
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+<style type="text/css">
+<!--
+a, a:active, a:visited { color: #006666; text-decoration: none; }
+a:hover { color:#00CC99; text-decoration: underline; }
+body, p, h1, h2, h3, h4, h5, h6, li, td, dd, img, dt, dl, table { font-family: Roboto, verdana, avantgarde, tahoma, arial, sans-serif; font-size: 12pt; color: black; padding: 0px; margin: 10px 20px; line-height: 1.75em; }
+h1, h2, h3, h4 { font-weight: bold; padding: 5px; }
+h1 { font-size: 20px; text-align: center; border-bottom: 1px solid #666; }
+h2 { font-size: 16px; }
+h2, h3 { border: 1px solid #666; background-color: #eee; }
+h1+h3 { border: none; background-color: inherit; }
+h5 { border-bottom: 1px dashed #666; padding-bottom: 5px; }
+code.no-pad, pre.no-pad { padding: 0; margin: 0; }
+.tableHead { background-color: #eee; }
+ol li, ol li p { margin-left: 0; }
+img { margin: 0 20px 10px; float: left; border: 1px solid #666; }
+img.wide { width: 95%; float: none; margin: 0 2.5%; }
+table, td, th { border: 1px solid black; border-collapse: collapse; }
+td, th { padding: 5px; }
+th { text-align: left; }
+span.title { font-style: italic; font-weight: bold; color: #006666; }
+.corefile, .red { color: red; }
+.bold-red { color: red; font-weight: bold; }
+.template { color: green; }
+.added { color: blue; }
+.removed { text-decoration: line-through; }
+.osh { color: blue; }
+.minspacing li { margin: 0; }
+.smallimg { float: left; width: auto; margin: 0.5% 0.25% 0.25% auto; }
+.forward { float: right; }
+ol li, ul li { margin-top: 5px; margin-bottom: 5px; }
+ul li ul { padding-left: 0; }
+dt { font-weight: bold; margin-bottom: 0; }
+dd { margin-top: 0; padding-left: 40px; }
+.table { display: table; padding-left: 0.5%; font-size: smaller; }
+.head_outer, .item_outer { display: table-row; }
+.thead, .item { display: table-cell; padding: 0.25% 0.25%;}
+.thead { font-weight: bold; }
+.table ul { list-style-type: none; padding-left: 0; margin: 0; }
+.table ul li { margin: 0; }
+.c1 { text-align: center; font-weight: bold; width: 15%; color: #333333; vertical-align: top; }
+.c3 { vertical-align: top; }
+.clearBoth { clear: both; }
+.smaller { font-size: smaller; }
+.e { background-color: #eee; }
+ul.simple, ul.simple li { list-style-type: none; padding: 0 0 0 0.5em; margin: 0; }
+#table-config-osm tr td:first-child, #table-config-osm tr th:first-child { width: 30em; }
+#overview-images { margin-right: 0.5em; }
+.back { float: left; }
+#fdcv ol { margin: 0; }
+.nowrap { white-space: nowrap; }
+.h-name { font-style: italic; font-weight: bold; }
+#t-handlers td, #t-handlers th { vertical-align: top; }
+div.totals-desc h4 { border-top: 1px solid #666; }
+
+.etabs { margin: 0; padding: 0; }
+.tab { display: inline-block; zoom:1; *display:inline; background: #eee; border: solid 1px #999; border-bottom: none; border-radius: 4px 4px 0 0; margin: 0; }
+.tab a { font-size: 14px; line-height: 2em; display: block; padding: 0 10px; outline: none; }
+.tab a:hover { text-decoration: underline; }
+.tab.active { background: #fff; padding-top: 6px; position: relative; top: 1px; border-color: #666; }
+.tab a.active { font-weight: bold; }
+.tab-container .panel-container { background: #fff; border: solid #666 1px; padding: 10px; border-radius: 0 4px 4px 4px; }
+.panel-container { margin-bottom: 10px; }
+-->
+</style>
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script> 
+<script src="../jquery.easytabs.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready( function() {
+        $('#tab-container').easytabs();
+    });
+</script>
+</head>
+
+<body>
+  <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.5a and later</h1>
+  <p>Version 1.0.0 by lat9.  Copyright &copy; 2017, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
+  <p>Current Support Thread on the Zen Cart forums: TBD</p>
+  
+  <p><strong>Usage Notes:</strong></p>
+  <ol>
+    <li>A working copy of Zen Cart (v1.5.5a or later) must be previously installed.</li>
+    <li>Integration with <em>Edit Orders</em> requires EO version 4.3.0 or later.  See the <em>Interaction with Other Plugins</em> tab for more information.</li>
+    <li>If you require the automatic VAT validation service (via <a href="http://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools-&gt;Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
+  </ol>
+  
+  <div class="tab-container" id="outer-container">
+    <ul class="etabs">
+      <li class="tab"><a href="#overview">Overview</a></li>
+      <li class="tab"><a href="#installation">Installation</a></li>
+      <li class="tab"><a href="#customization">Configuration</a></li>
+      <li class="tab"><a href="#visual-changes">Visual Changes</a></li>
+      <li class="tab"><a href="#interactions">Interaction with Other Plugins</a></li>
+      <li class="tab"><a href="#history">Change History</a></li>
+    </ul>
+    
+    <div class="panel-container">
+  
+      <!-- start overview section -->
+      <div id="overview">
+        <noscript><h2>Overview</h2></noscript>
+        <p><em>VAT for EU Countries (VAT4EU)</em> updates your store to gather, display and validate an EU &quot;VAT Number&quot;. Once the plugin is installed, configured and enabled on your store:</p>
+        <ol>
+          <li>The address-gathering forms on the <em>storefront</em> and the admin's <em>Customers-&gt;Customers</em> tool include an input field for a <em>VAT Number</em>.</li>
+          <li><em>Billing-address</em> blocks within the various checkout- and account-related pages have the associated &quot;VAT Number&quot; appended.</li>
+          <li>Your admin's invoices' and packingslips' billing-address displays with any &quot;VAT Number&quot; associated with the associated order.</li>
+          <li>If an order <em>qualifies</em> for a <b>VAT Refund</b>, order-total modules display the refunded VAT value and include a &quot;VAT reverse-charge&quot; statement for the order.<ul>
+            <li>A <em>qualified</em> order:<ol>
+              <li>Includes a validated (either via VIES, see below, or via admin-override) <em>VAT Number</em> for the billing address.</li>
+              <li>Is to be shipped to an EU country <em>other than</em> the country in which the store resides <span class="smaller">(unless otherwise configured)</span>.</li>
+            </ol></li>
+            <li>Unlike the previous (see below) version of this processing, no alteration is made to product prices; your store will continue to display prices inclusive of VAT (if so configured).  The <em>VAT Refund</em> processing simply inserts an order-total element that backs-out any tax charged for <em>qualified</em> orders.</li>
+          </ul></li>
+          <li>The plugin's processing makes use of the <a href="http://ec.europa.eu/taxation_customs/vies/faq.html" target="_blank">VIES (VAT Information Exchange System)</a> on-line validation service to automatically validate any <em>VAT Number</em> entered &mdash; either by the customer or an admin.  Admin processing includes a validation-override.</li>
+        </ol>
+        
+        <p><strong>Note:</strong> This plugin is derived from the similarly-named plugin <a href="https://www.zen-cart.com/showthread.php?35744-VAT-mod-for-European-companies&p=201772#post201772" target="_blank">VAT-mod for European companies</a>, but its processing is quite different!</p>
+      </div>
+      <!-- end overview section -->
+    
+      <!-- start installation section -->
+      <div id="installation">
+        <noscript><h2>Installing and Uninstalling</h2></noscript>
+        <div class="tab-container" id="inner-container1">
+          
+          <p>This section identifies the processes you'll use to install <em>VAT for EU Countries</em> or uninstall <em>VAT4EU</em> entirely.</p>
+
+          <ul class="etabs">
+            <li class="tab"><a href="#initial">Installation</a></li>
+            <li class="tab"><a href="#uninstall">Uninstalling</a></li>
+          </ul>
+
+          <div class="panel-container">
+
+            <div id="initial">
+              <noscript><h3>Installation</h3></noscript>
+              <p>There are <span class="corefile">core-file overwrites</span> and <span class="template">template-overrides</span> required by this plugin; you should <strong>always</strong> backup your cart's database and files prior to making any changes.  All <span class="corefile">core-</span> and <span class="template">template-</span>overrides use the like-named files in the Zen Cart 1.5.5e distribution as their change-basis.  Template-file changes are based on those present in the <code>template_default</code> directories.</p>
+              <p><strong>Note:</strong> These changes are, for the most part, the addition of a &quot;notifier&quot; to allow <em>VAT4EU</em> to provide its changes.</p>
+              <p>Unzip the plugin's package file and then:</p>
+              <ol type="A">
+                <li>Rename the YOUR_ADMIN folder to match your custom admin folder's name.</li>
+                <li>Merge any pre-existing <span class="corefile">core-file</span> changes with the changes required by <em>VAT4EU</em>:<ol>
+                  <li><span class="corefile">/includes/functions/functions_customers.php</span> <span class="smaller">(2 marked change-sections)</span></li>
+                  <li><span class="corefile">/includes/modules/pages/address_book_process/header_php.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                  <li><span class="corefile">/YOUR_ADMIN/customers.php</span> <span class="smaller">(6 marked change-sections)</span></li>
+                  <li><span class="corefile">/YOUR_ADMIN/includes/functions/functions_customers.php</span> <span class="smaller">(2 marked change-sections)</span></li>
+                </ol></li>
+                <li>Rename the two YOUR_TEMPLATE folders to match your current template's name:<ol>
+                  <li>/includes/modules/YOUR_TEMPLATE</li>
+                  <li>/includes/templates/YOUR_TEMPLATE</li>
+                </ol></li>
+                <li>Merge any pre-existing <span class="template">template-file</span> changes with the changes required by <em>VAT4EU</em>:<ol>
+                  <li><span class="template">/includes/modules/YOUR_TEMPLATE/checkout_new_address.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_address_book_details.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_checkout_new_address.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_create_account.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                </ol></li>
+                <li>Sign into your Zen Cart's admin panel.</li>
+                <li>Copy the plugin's files (including those possibly modified above) to your store's folder structure:<ol>
+                  <li>/includes/classes/VatValidation.php</li>
+                  <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                  <li><span class="corefile">/includes/functions/functions_customers.php</span></li>
+                  <li>/includes/languages/english/extra_definitions/vat4eu_extra_definitions.php</li>
+                  <li>/includes/languages/english/modules/order_total/ot_vat_refund.php</li>
+                  <li>/includes/languages/english/modules/order_total/ot_vat_reverse_charges.php</li>
+                  <li>/includes/modules/order_total/ot_vat_refund.php</li>
+                  <li>/includes/modules/order_total/ot_vat_reverse_charges.php</li>
+                  <li><span class="corefile">/includes/modules/pages/address_book_process/header_php.php</span></li>
+                  <li><span class="template">/includes/modules/YOUR_TEMPLATE/checkout_new_address.php</span></li>
+                  <li>/includes/templates/template_default/templates/tpl_modules_vat4eu_display.php</li>
+                   <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_address_book_details.php</span></li>
+                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_checkout_new_address.php</span></li>
+                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_create_account.php</span></li>
+                  <li><span class="corefile">/YOUR_ADMIN/customers.php</span></li>
+                  <li>/YOUR_ADMIN/includes/auto_loaders/config.vat4eu_admin.php</li>
+                  <li>/YOUR_ADMIN/includes/classes/Vat4EuAdminObserver.php</li>
+                  <li><span class="corefile">/YOUR_ADMIN/includes/functions/functions_customers.php</span></li>
+                  <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                  <li>/YOUR_ADMIN/includes/languages/english/extra_definitions/vat4eu_admin_definitions.php</li>
+                </ol></li>
+                <li>Click the &quot;Admin Home&quot; link in your Zen Cart's top admin menu.  This action will cause the plugin's installation script to run.</li>
+                <li>Next step &hellip; Configuration!</li>
+              </ol>
+            </div>
+            
+            <div id="uninstall">
+              <noscript><h3>Uninstalling</h3></noscript>
+              <p>First, delete the files that were copied to your Zen Cart's file-system during the installation process, then copy the contents of the plugin's <code>/docs/vat4eu/uninstall/uninstall_vat4eu.sql</code> to your clipboard and paste into your admin's <em>Tools-&gt;Install SQL Patches</em> to complete the uninstall process.</p>
+            </div>
+            
+          </div>
+        </div>
+       </div>
+       <!-- end installation section -->
+       
+      <!-- start customization section -->
+      <div id="customization">
+        <noscript><h2>Configuration</em></h2></noscript>
+        <div class="tab-container" id="inner-container2">
+          <ul class="etabs">
+            <li class="tab"><a href="#config">VAT4EU Settings</a></li>
+            <li class="tab"><a href="#modules">Order-Total Modules</a></li>
+            <li class="tab"><a href="#other">Other Settings</a></li>
+            <li class="tab"><a href="#taxes">Tax-Related Settings</a></li>
+          </ul>
+          
+          <div class="panel-container">
+            <div id="config">
+              <noscript><h3>VAT4EU Settings</h3></noscript>
+              <p>Once you've performed the initial <em>Installation</em> steps, a new configuration group is available in your admin's menu: <em>Configuration-&gt;VAT for EU Countries</em>.  The following settings are provided:</p>
+              <table>
+                <tr>
+                  <th>Setting Name</th>
+                  <th>Description</th>
+                  <th>Default</th>
+                </tr>
+                <tr>
+                  <td>Plugin Version and Release Date</td>
+                  <td>Displays the plugin's currently installed version and release date.</td>
+                  <td>Varies</td>
+                </tr>
+                <tr>
+                  <td>European Union Countries List</td>
+                  <td>Contains a comma-separated list of the ISO-code-2 values, e.g. DE for Germany, of the countries currently in the European Union &mdash; with intervening blanks allowed.  The list is updateable since countries can move in and out of the EU!</td>
+                  <td>AT,BE,BG,CY,CZ,DE, DK,EE,EL,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK</td>
+                </tr>
+                <tr>
+                  <td>Enable storefront processing?</td>
+                  <td>The <em>VAT4EU</em> processing is enabled when this setting is &quot;true&quot; and you have also set <em>Configuration-&gt;Customer Details-&gt;Company</em> to <b>true</b>.</td>
+                  <td>false</td>
+                </tr>
+                <tr>
+                  <td>Minimum VAT Number Length</td>
+                  <td>Identify the minimum length (including the 2-character country-code prefix) of a <em>VAT Number</em>.  The value is used as a sanity check for customer- and admin-entered values.</td>
+                  <td>10</td>
+                </tr>
+                <tr>
+                  <td>Enable <em>VAT Refund</em> for in-country purchases?</td>
+                  <td>Identify whether or not billing addresses within your store's country with a validated <em>VAT Number</em> qualify for a VAT refund.</td>
+                  <td>false</td>
+                </tr>
+                <tr>
+                  <td><em>VAT Number</em> Validation</td>
+                  <td>Identify the method to use when validating a <em>VAT Number</em>, either:<ol>
+                    <li><b>Admin</b>.  All <em>VAT Number</em> validation is performed under admin-control.  When a customer adds or updates the <em>VAT Number</em> associated with one of their addresses, that address does not qualify for any <em>VAT Refund</em> until the admin takes action.</li>
+                    <li><b>Customer</b>.  When a customer enters or updates a <em>VAT Number</em>, the plugin uses the <em>VIES</em> validation service to immediately see if that value is valid.  If valid and the customer uses that address as an order's billing-address, they receive a <em>VAT Refund</em> on qualifying orders.  Otherwise, admin-validation is required prior to any refund.</li>
+                  </ol></td>
+                  <td>Admin</td>
+                </tr>
+                <tr>
+                  <td>VAT Number: Unvalidated Indicator</td>
+                  <td>Identify the character(s) to be appended to any <em>VAT Number</em> display when that number has not been validated and, thus, cannot be used to receive any <em>VAT Refund</em>.</td>
+                  <td>*</td>
+                </tr>
+                <tr>
+                  <td>Enable debug?</td>
+                  <td>Choose whether the plugin's debug is enabled.  When enabled, each:<ul>
+                    <li>VAT-validation request/response is logged in <code>/logs/VatValidate.log</code>.</li>
+                    <li>Admin action is logged in <code>/logs/vat4eu_adm_xxx.log</code>, where <code>xxx</code> is the admin's ID value.</li>
+                    <li>Customer action is logged in <code>/logs/vat4eu_xxx.log</code>, where <code>xxx</code> is the customer's ID value.</li>
+                  </ul></td>
+                </tr>
+              </table>
+              <div class="clearBoth"></div>
+            </div>
+            
+            <div id="modules">
+              <noscript><h3>Order-Total Modules</h3></noscript>
+              <img class="forward" src="order_total_block.png" alt="Sample order-total display" title="Sample order-total display" />
+              <p><em>VAT4EU</em> provides two (2) order-total modules that activate when an order qualifies for a <em>VAT Refund</em>; use your admin's <em>Modules-&gt;Order Total</em> tool to &quot;Install&quot; each of these modules:</p>
+              <ol>
+                <li><b>ot_vat_refund</b>.  This order-total negates any tax associated with the order.  Its <em>Sort Order</em> must be after that associated with your store's <code>ot_tax</code> for proper operation.</li>
+                <li><b>ot_vat_reverse_charges</b>.  This order-total adds a disclaimer to the order, indicating that &quot;VAT reverse charges&quot; are in effect.  Its <em>Sort Order</em> must be after that associated with your store's <code>ot_total</code> for proper operation.</li>
+              </ol>
+              <p>The image illustrates a sample order-total block for an order that <em>qualifies</em> the purchaser for a <em>VAT Refund</em>, essentially backing-out any tax-related charges for the order and adding the &quot;reverse charge&quot; disclaimer.</p>
+              <div class="clearBoth"></div>
+            </div>
+            
+            <div id="other">
+              <noscript><h3>Other Settings</h3></noscript>
+              <p>The following configuration settings are also required for full <em>VAT4EU</em> customization:</p>
+              <ol>
+                <li><em>Configuration-&gt;My Store-&gt;Store Address and Phone</em>. Update this value to include your store's <em>VAT Number</em> for display on invoices and packing-slips.</li>
+                <li><em>Configuration-&gt;Customer Details-&gt;Company</em>. Ensure that this value is set to <b>true</b>.  <em>VAT4EU</em> inserts its &quot;VAT Number&quot; fields within the <em>Company</em> block of any entered address.  If not set to <b>true</b>, a <em>VAT Number</em> will never be entered!</li>
+              </ol>
+              <div class="clearBoth"></div>
+            </div>
+            
+            <div id="taxes">
+              <noscript><h3>Tax-Related Settings</h3></noscript>
+              <p>If you haven't already set up the taxes for your store, now is the time!.</p>
+
+              <div class="totals-desc">
+                <h4>Configure Your Store</h4>
+                <p>First, you'll need to configure your store's base settings using your admin's <em>Configuration-&gt;My Store</em>:</p>
+                <ol>
+                  <li><strong>Country</strong>. Choose your EU-based country from the drop-down list.</li>
+                  <li><strong>Basis of Product Tax</strong>.  Set this value to <em>Shipping</em>.</li>
+                  <li><strong>Basis of Shipping Tax</strong>.  Set this value to <em>Shipping</em>.</li>
+                  <li><strong>Display Prices with Tax</strong>.  Set this value to <em>true</em>.</li>
+                  <li><strong>Display Prices with Tax in Admin</strong>.  Set this value to <em>true</em>.</li>
+                </ol>
+              </div>
+
+              <div class="totals-desc">
+                <h4>Define Tax Zones</h4>
+                <p>Next, you'll define the taxable &quot;zones&quot; to be used for your store, using your admin's <em>Locations / Taxes-&gt;Zone Definitions</em> tool. This section identifies the <em>minimum</em> requirements for this setup, assuming that you will be charging the <em>same VAT rate</em> for all taxable products shipped within the European Union, including your store's country.</p>
+                <ol>
+                  <li>Click the &quot;Insert&quot; button and &hellip;<ol type="a">
+                    <li>Set the <b>Zone Name</b> to <em>European Union</em>.</li>
+                    <li>Set the <b>Description</b> to <em>EU Countries</em>.</li>
+                    <li>Click the &quot;Insert&quot; button to save that definition.</li>
+                  </ol></li>
+                  <li>Click the &quot;Details&quot; button associated with the <em>European Union</em> zone and for each country currently in the EU&hellip;<ol type="a">
+                    <li>Click the &quot;Insert&quot; button.</li>
+                    <li>Choose the country name from the <b>Country</b> drop-down.</li>
+                    <li>Leave the <b>Zone</b> selection as <em>All Zones</em>.</li>
+                    <li>Click the &quot;Insert&quot; button to save that zone definition.</li>
+                  </ol>When you have added all the EU countries to the list, click the &quot;Back&quot; button.</li>
+                  <li>Click a &quot;Tax Rates&quot; button, then the &quot;New Tax Rate&quot; button and &hellip;<ol type="a">
+                    <li>Choose the <b>Tax Class Title</b>, e.g. Taxable Goods, from the drop-down.</li>
+                    <li>Choose <em>European Union</em> from the <b>Zone</b> drop-down.</li>
+                    <li>Identify the associated <b>Tax Rate (%)</b> value; for a 25% tax, you'll enter <em>25</em>.</li>
+                    <li>Enter the <b>Description</b> of the tax.  Remember that this value is displayed to the customer, so enter something like <em>EU VAT (25%), inc</em> (assuming that you're using a 25% rate).</li>
+                    <li>Click the &quot;Insert&quot; button to save that tax-rate definition.</li>
+                  </ol></li>
+                </ol>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <!-- end customization section -->
+      
+      <!-- start visual changes section -->
+      <div id="visual-changes">
+        <noscript><h2>Visual Changes</h2></noscript>
+        <p>This section identifies the visual changes made to your store (both admin and storefront) once the <em>VAT4EU</em> plugin is installed and configured.</p>
+        </ol>
+        <div class="tab-container" id="inner-container3">
+          <ul class="etabs">
+            <li class="tab"><a href="#admin-customers">Customers-&gt;Customers</a></li>
+            <li class="tab"><a href="#admin-orders">Customers-&gt;Orders</a></li>
+            <li class="tab"><a href="#ot-display">Order-Totals' Block</a></li>
+            <li class="tab"><a href="#store-address-entry">Storefront Address Entry</a></li>
+            <li class="tab"><a href="#store-address-display">Storefront Address Display</a></li>
+          </ul>
+          
+          <div class="panel-container">
+           
+            <div id="admin-customers">
+              <noscript><h3>Customers-&gt;Customers</h3></noscript>
+              <img class="forward" src="customers_listing.png" alt="Admin Customers Listing" title="Admin Customers Listing" />
+              <p><em>VAT4EU</em> integrates with your admin's <em>Customers-&gt;Customers</em> listing display, identifying which customers have supplied a <em>VAT Number</em> and the validation-status of each.  Clicking on the <b>Asc</b> or <b>Desc</b> links for the &quot;VAT Number&quot; column sorts the display based on the <em>status</em> of the associated <em>VAT Number</em>.</p>
+              <p>When sorted in <b>Asc</b> order, the customer records are displayed in the following status-order:</p>
+              <ol>
+                <li><em>Validated via Admin Override</em>, shows <i class="fa fa-thumbs-up" aria-hidden="true" style="color: orange;"></i></li>
+                <li><em>Validated via VIES</em>, shows <i class="fa fa-thumbs-up" aria-hidden="true" style="color: green;"></i></li>               
+                <li><em>Not Validated</em>, shows <i class="fa fa-thumbs-down" aria-hidden="true" style="color: orange;"></i></li>               
+                <li><em>Deemed Invalid by VIES</em>, shows <i class="fa fa-thumbs-down" aria-hidden="true" style="color: red;"></i></li>                
+              </ol>
+              <img src="customers_details.png" alt="Admin Customers Details" title="Admin Customers Details" />
+              <p>When you click on the &quot;Edit&quot; button associated with a customer, the information-gathering page now includes fields where you can enter (or correct) a customer's <em>VAT Number</em> entry.  If that <em>VAT Number</em> can't be automatically verified by the <em>VIES</em> service, there's a <em>VAT Validation Override</em> checkbox; ticking that box will allow the customer to create an order that <em>qualifies</em> for a VAT refund.</p>
+              <div class="clearBoth"></div>
+            </div>
+                        
+            <div id="admin-orders">
+              <noscript><h3>Customers-&gt;Orders</h3></noscript>
+              <img src="orders.png" alt="Customer Order Display" title="Customer Order Display" />
+              <p><em>VAT4EU</em> also updates your admin's <em>Customers-&gt;Orders</em> display (as well as the display for any <em>Invoice</em> or <em>Packing-slip</em>) to include the VAT Number associated with the <em>billing address</em> for the order.</p>
+              <div class="clearBoth"></div>
+            </div>
+                        
+            <div id="ot-display">
+              <noscript><h3>Order-Totals' Block</h3></noscript>
+              <img src="order_total_block.png" alt="Order-Total Block Display" title="Order-Total Block Display" />
+              <p>When a customer places an order with a <em>validated</em> VAT Number, <em>VAT4EU</em>'s order-total modules update the order's &quot;order-total&quot; block to identify that the VAT has been removed from the order and includes a &quot;reverse charge&quot; disclaimer.  This change is visible both in the storefront and the admin post-order displays.</p>
+              <div class="clearBoth"></div>
+            </div>
+            
+            <div id="store-address-entry">
+              <noscript><h3>Storefront Address Entry</h3></noscript>
+              <img class="forward" src="vat_number_entry.png" alt="Sample VAT Number Entry" title="Sample VAT Number Entry" />
+              <p>When <em>VAT4EU</em> is installed, the address-entry form on the following pages is modified, inserting the <em>VAT Number</em> field following the <em>Company Name</em> field as shown in the sample image.</p>
+              <ol>
+                <li>address_book_process</li>
+                <li>checkout_payment_address</li>
+                <li>create_account</li>
+                <li>login</li>
+              </ol>
+              <p><strong>Note:</strong> The <em>VAT Number</em> input will be added <b>only if</b> you have set <em>Configuration-&gt;Customer Details-&gt;Company</em> to <b>true</b>!</p>
+              <div class="clearBoth"></div>
+            </div>
+            
+            <div id="store-address-display">
+              <noscript><h3>Storefront Address Display</h3></noscript>
+              <img class="forward" src="address_block.png" alt="Sample address blocks" title="Sample Address Blocks" />
+              <p>Each customer address-block in the storefront display is also modified, adding any <em>VAT Number</em> associated with a customer's <b>billing</b> address.  The sample image shows this rendering for the <code>checkout_confirmation</code> page.  The following Zen Cart pages are included in this processing:</p>
+              <ol>
+                <li>address_book</li>
+                <li>account_history_info</li>
+                <li>checkout_confirmation</li>
+                <li>checkout_one <span class="smaller">(Part of the <em>One-Page Checkout</em> plugin)</span></li>
+                <li>checkout_payment</li>
+                <li>checkout_payment_address</li>
+                <li>create_account_success</li>
+              </ol>
+              <div class="clearBoth"></div>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+      <!-- end visual changes section -->
+      
+      <!-- start interactions section -->
+      <div id="interactions">
+        <noscript><h2>Integration With Other Modules</h2></noscript>
+        <div class="tab-container" id="inner-container4">
+          <ul class="etabs">
+            <li class="tab"><a href="#edit-orders">Edit Orders</a></li>
+            <li class="tab"><a href="#other-plugins">Other Plugins</a></li>
+          </ul>
+          
+          <div class="panel-container">
+           
+            <div id="edit-orders">
+              <noscript><h3>Edit Orders</h3></noscript>
+              <p><em>VAT4EU</em> integrates with <a href="https://www.zen-cart.com/downloads.php?do=file&id=1513" target="_blank">Edit Orders</a>, version 4.3.0 or later.  That version of <em>EO</em> provides additional notifiers that allow <em>VAT4EU</em>'s operations.  You'll need to install <em>EO</em> separately.</p>
+            </div>
+                        
+            <div id="other-plugins">
+              <noscript><h3>Other Plugins</h3></noscript>
+              <p>If you have additional plugins installed that also &quot;want to&quot; include the <em>VAT Number</em> display in an address block, <em>VAT4EU</em> has you covered!  Both the storefront and admin processing issue a notification when a <code>zen_address_format</code> function call is made on a page that isn't in the <em>VAT4EU</em> built-in processing.  An observer-class module can &quot;attach&quot; to that notifier and indicate (by setting the 3rd parameter to <em>(boolean)true</em> to indicate that the VAT Number should be included in that address block.</p>
+              <pre>
+    $this->notify('NOTIFY_VAT4EU_ADDRESS_DEFAULT', $address_elements, $current_address, $show_vat_number);
+              </pre>
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <!-- end interactions section -->
+      
+      <!-- start history section -->
+      <div id="history">
+        <noscript><h3>Version History</h3></noscript>
+        <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
+        <ul>
+          <li>v1.0.0, 2017-xx-yy: Initial release.</li>
+        </ul>
+      </div>
+      <!-- end history section -->
+      
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    $( '#outer-container, #inner-container1, #inner-container2, #inner-container3, #inner-container4' ).easytabs();
+    
+    $( '.side-link' ).click( function() {
+        window.location.hash = $(this).attr( 'href' );
+        location.reload();
+    });
+  </script>
+</body>
+</html>
