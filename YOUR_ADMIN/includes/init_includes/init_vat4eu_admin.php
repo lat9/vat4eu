@@ -7,8 +7,8 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('VAT4EU_CURRENT_RELEASE', '1.0.0-beta1');
-define('VAT4EU_CURRENT_UPDATE_DATE', '2017-09-20');
+define('VAT4EU_CURRENT_RELEASE', '1.0.0-beta2');
+define('VAT4EU_CURRENT_UPDATE_DATE', '2017-09-26');
 
 define('VAT4EU_CURRENT_VERSION', VAT4EU_CURRENT_RELEASE . ': ' . VAT4EU_CURRENT_UPDATE_DATE);
 
@@ -71,14 +71,7 @@ if (isset($_SESSION['admin_id'])) {
             "INSERT INTO " . TABLE_CONFIGURATION . " 
                 (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function) 
              VALUES 
-                ('Enable storefront processing?', 'VAT4EU_ENABLED', 'false', 'The <em>VAT4EU</em> processing is enabled when this setting is &quot;true&quot;.', $cgi, 20, now(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),')"
-        );
-        
-        $db->Execute(
-            "INSERT INTO " . TABLE_CONFIGURATION . " 
-                ( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
-            VALUES 
-                ( 'VAT Number for Your Store', 'VAT4EU_VAT_NUMBER', '', 'Enter the VAT Number for <em>your</em> store.', $cgi, 25, now(), NULL, NULL)"
+                ('Enable storefront processing?', 'VAT4EU_ENABLED', 'false', 'The <em>VAT4EU</em> processing is enabled when this setting is &quot;true&quot; and you have also set <em>Configuration-&gt;Customer Details-&gt;Company</em> to <b>true</b>.', $cgi, 20, now(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),')"
         );
 
         $db->Execute(
@@ -91,7 +84,7 @@ if (isset($_SESSION['admin_id'])) {
             "INSERT INTO " . TABLE_CONFIGURATION . " 
                 (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function) 
              VALUES 
-                ('Enable <em>VAT Refund</em> for in-country purchases?', 'VAT4EU_IN_COUNTRY_REFUND', 'true', 'Should purchases by addresses in the store\'s country be granted a <em>VAT Refund</em>?', $cgi, 35, now(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),')"
+                ('Enable <em>VAT Refund</em> for in-country purchases?', 'VAT4EU_IN_COUNTRY_REFUND', 'false', 'Should purchases by addresses in the store\'s country be granted a <em>VAT Refund</em>?', $cgi, 35, now(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),')"
         );
 
         $db->Execute(

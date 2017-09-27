@@ -198,8 +198,8 @@ class Vat4EuAdminObserver extends base
                 $heading = 
                     '<td class="dataTableHeadingContent" align="center" valign="top">' . PHP_EOL .
                         $heading_text . '<br />' . PHP_EOL .
-                        '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-asc') . '"><span class="' . $asc_class . '">Asc</span></a>&nbsp;' . PHP_EOL . 
-                        '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-desc') . '"><span class="' . $desc_class . '">Desc</span></a>' . PHP_EOL .
+                        '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-asc') . '"><span class="' . $asc_class . '" title="' . VAT4EU_SORT_ASC . '">Asc</span></a>&nbsp;' . PHP_EOL . 
+                        '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-desc') . '"><span class="' . $desc_class . '" title="'. VAT4EU_SORT_DESC . '">Desc</span></a>' . PHP_EOL .
                     '</td>' . PHP_EOL;
                 $p2 .= $heading;
                 break;
@@ -215,9 +215,9 @@ class Vat4EuAdminObserver extends base
             //
             case 'NOTIFY_ADMIN_CUSTOMERS_LISTING_NEW_FIELDS':
                 $p2 .= ', a.entry_vat_number, a.entry_vat_validated';
-                if (isset($_GET['disp_order']) && strpos($_GET['disp_order'], 'vatnum') === 0) {
+                if (isset($_GET['list_order']) && strpos($_GET['list_order'], 'vatnum') === 0) {
                     $p3 = 'a.entry_vat_validated ';
-                    $p3 .= ($_GET['disp_order'] == 'vatnum-asc') ? 'ASC' : 'DESC';
+                    $p3 .= ($_GET['list_order'] == 'vatnum-asc') ? 'ASC' : 'DESC';
                     $p3 .= ', a.entry_vat_number DESC, c.customers_lastname, c.customers_firstname';
                 }
                 break;
@@ -233,9 +233,12 @@ class Vat4EuAdminObserver extends base
             //
             case 'NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT':
                 $vat_number = $p1['entry_vat_number'];
-                $vat_validated = $p1['entry_vat_validated'];
+                $vat_validated = '';
+                if ($vat_number != '') {
+                    $vat_validated = $this->showVatNumberStatus($p1['entry_vat_validated']);
+                }
                 $vat_column =
-                    '<td class="dataTableContent" align="center">' . $vat_number . '</td>';
+                    '<td class="dataTableContent" align="center">' . $vat_validated . $vat_number . '</td>';
                 $p2 .= $vat_column;
                 break;
                 
@@ -328,9 +331,35 @@ class Vat4EuAdminObserver extends base
         return ($check->EOF) ? 'Unknown' : $check->fields['countries_iso_code_2'];
     }
     
+    protected function showVatNumberStatus($vat_validation)
+    {
+        switch ($vat_validation) {
+            case VatValidation::VAT_ADMIN_OVERRIDE:
+                $glyph = 'fa fa-thumbs-up';
+                $color = 'orange';
+                $title = VAT4EU_ADMIN_OVERRIDE;
+                break;
+            case VatValidation::VAT_VIES_OK:
+                $glyph = 'fa fa-thumbs-up';
+                $color = 'green';
+                $title = VAT4EU_VIES_OK;
+                break;
+            case VatValidation::VAT_VIES_NOT_OK:
+                $glyph = 'fa fa-thumbs-down';
+                $color = 'red';
+                $title = VAT4EU_VIES_NOT_OK;
+                break;
+            default:
+                $glyph = 'fa fa-thumbs-down';
+                $color = 'orange';
+                $title = VAT4EU_NOT_VALIDATED;
+                break;
+        }
+        return '<i class="' . $glyph . '" aria-hidden="true" title="' . $title . '" style="color: ' . $color . '"></i> ';
+    }
+    
     // -----
     // This function, called during processing where a VAT Number can be entered,
-    
     //
     protected function validateVatNumber()
     {
