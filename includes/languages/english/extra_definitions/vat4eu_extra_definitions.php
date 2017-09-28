@@ -3,7 +3,17 @@
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
 // Copyright (c) 2017 Vinos de Frutas Tropicales
 //
+
+// -----
+// These two definitions are used in different spots.
+//
+// 1) VAT4EU_ENTRY_VAT_NUMBER is used during VAT Number "gathering" and should not be an empty string.
+// 2) VAT4EU_DISPLAY_VAT_NUMBER is used when formatting an address-block with a previously-entered VAT Number.
+//    If you don't want to precede the actual VAT Number with that text, just set the value to ''; otherwise,
+//    remember to keep the final space so that there's separation from the text and the actual VAT Number!
+//
 define('VAT4EU_ENTRY_VAT_NUMBER', 'VAT Number:');
+define('VAT4EU_DISPLAY_VAT_NUMBER', 'VAT Number: ');
 
 define('VAT4EU_ENTRY_VAT_MIN_ERROR', 'Your <em>VAT Number</em> must contain a minimum of ' . VAT4EU_MIN_LENGTH . ' characters.');
 define('VAT4EU_ENTRY_VAT_PREFIX_INVALID', 'Your <em>VAT Number</em> must begin with <b>%1$s</b>, since the address is in <em>%2$s</em>.');

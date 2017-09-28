@@ -110,14 +110,14 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         <p><em>VAT for EU Countries (VAT4EU)</em> updates your store to gather, display and validate an EU &quot;VAT Number&quot;. Once the plugin is installed, configured and enabled on your store:</p>
         <ol>
           <li>The address-gathering forms on the <em>storefront</em> and the admin's <em>Customers-&gt;Customers</em> tool include an input field for a <em>VAT Number</em>.</li>
-          <li><em>Billing-address</em> blocks within the various checkout- and account-related pages have the associated &quot;VAT Number&quot; appended.</li>
+          <li><em>Billing-address</em> blocks within the various checkout- and account-related pages and order-confirmation emails have the associated &quot;VAT Number&quot; appended.</li>
           <li>Your admin's invoices' and packingslips' billing-address displays with any &quot;VAT Number&quot; associated with the associated order.</li>
-          <li>If an order <em>qualifies</em> for a <b>VAT Refund</b>, order-total modules display the refunded VAT value and include a &quot;VAT reverse-charge&quot; statement for the order.<ul>
+          <li>If an order <em>qualifies</em> for a <b>VAT Refund</b>, order-total modules display the refunded VAT value, deducting that value from the order's total, and include a &quot;VAT reverse-charge&quot; statement for the order.<ul>
             <li>A <em>qualified</em> order:<ol>
               <li>Includes a validated (either via VIES, see below, or via admin-override) <em>VAT Number</em> for the billing address.</li>
               <li>Is to be shipped to an EU country <em>other than</em> the country in which the store resides <span class="smaller">(unless otherwise configured)</span>.</li>
             </ol></li>
-            <li>Unlike the previous (see below) version of this processing, no alteration is made to product prices; your store will continue to display prices inclusive of VAT (if so configured).  The <em>VAT Refund</em> processing simply inserts an order-total element that backs-out any tax charged for <em>qualified</em> orders.</li>
+            <li>Unlike the previous (see below) version of this processing, <em>no alteration is made to product prices</em>; your store will continue to display prices inclusive of VAT (if so configured).  The <em>VAT Refund</em> processing simply inserts an order-total element that backs-out any tax charged for <em>qualified</em> orders.</li>
           </ul></li>
           <li>The plugin's processing makes use of the <a href="http://ec.europa.eu/taxation_customs/vies/faq.html" target="_blank">VIES (VAT Information Exchange System)</a> on-line validation service to automatically validate any <em>VAT Number</em> entered &mdash; either by the customer or an admin.  Admin processing includes a validation-override.</li>
         </ol>

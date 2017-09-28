@@ -17,18 +17,50 @@ class VatValidation
     const VAT_VIES_OK        = 1;       //- The VAT Number was validated via VIES
     const VAT_NOT_VALIDATED  = 0;       //- The VAT Number has not been validated; initial setting when admin-validation is configured
     const VAT_VIES_NOT_OK    = -1;      //- The VAT Number was indicated to be invalid via VIES.
+    
+    // -----
+    // These class constants are returned by the vatNumberPreCheck function, identifying the pre-check's
+    // completion status.
+    //
+    const VAT_NOT_SUPPLIED   = 1;       //- No VAT Number was supplied (and it's not required).
+    const VAT_OK             = 0;       //- The pre-checks all passed
+    const VAT_MIN_LENGTH     = -1;      //- A minimum length has been set and the value's length is too short
+    const VAT_BAD_PREFIX     = -2;      //- The first 2 characters of the number don't match the associated country-code
+    const VAT_INVALID_CHARS  = -3;      //- There is at least one "invalid" character in the supplied VAT number
+    
+    // -----
+    // This constant defines the characters (used in preg_match) that are "valid" for a VAT Number.  Note
+    // that characters that are valid for one country might not be valid for another!
+    //
+    // Valid characters are alphanumerics, space (' '), plus-sign ('+') and asterisk ('*').
+    //
+    const VAT_VALIDATION     = '/[A-Z0-9 \+*]+/';
+    
 
     private $_client = null;
     private $_valid = false;
-    private $_data = array();
+    
+    private $vatNumber;
+    private $countryCode;
     
     private $debug = false;
     private $soapInstalled = false;
     
-    public function __construct() 
+    // -----
+    // The class constructor gathers the to-be-verified country-code (2-character ISO) and
+    // the associated VAT Number.  The "VAT Number" value must include any country code
+    // prefix.
+    //
+    // Since we'll need the SOAP service to automatically validate the VAT Number, check now
+    // to see that the PHP installation includes that service, logging a warning if not.
+    //
+    public function __construct($countryCode, $vatNumber) 
     {
         if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED == 'true') {
             $this->debug = (defined('VAT4EU_DEBUG') && VAT4EU_DEBUG == 'true');
+            
+            $this->countryCode = $countryCode;
+            $this->vatNumber = strtoupper($vatNumber);
             
             if (!class_exists('SoapClient')) {
                 trigger_error('VAT Number validation not possible, "SoapClient" class is not available.', E_USER_WARNING);;
@@ -43,63 +75,81 @@ class VatValidation
             }
         }
     }
+    
+    // -----
+    // This function performs a quick pre-check of the VAT Number, weeding out some simple errors
+    // prior to requesting VIES validation.
+    //
+    // The return-code value returned (one of this class' constants) identifies the type of issue
+    // or a successful pre-check.
+    //
+    public function vatNumberPreCheck()
+    {
+        // -----
+        // If the VAT Number isn't supplied, then check to see if it's required and let the caller
+        // know.
+        //
+        if ($this->vatNumber == '') {
+            if (VAT4EU_MIN_LENGTH == '0') {
+                $rc = self::VAT_NOT_SUPPLIED;
+            } else {
+                $rc = self::VAT_MIN_LENGTH;
+            }
+        // -----
+        // Otherwise, a VAT Number has been supplied and is checked for:
+        //
+        // 1) A minimum length, if so configured.
+        // 2) A VAT Number  must begin with the 2-character ISO code associated with the
+        //    country in its associated address.
+        // 3) A valid VAT number consists of alphanumeric characters, with a couple of "special"
+        //    characters allowed for some countries.
+        } else {
+            $vat_number_length = strlen($this->vatNumber);
+            if (VAT4EU_MIN_LENGTH != '0' && $vat_number_length < VAT4EU_MIN_LENGTH) {
+                $rc = self::VAT_MIN_LENGTH;
+            } elseif (strpos($this->vatNumber, $this->countryCode) !== 0) {
+                $rc = self::VAT_BAD_PREFIX;  
+            } elseif (!preg_match(self::VAT_VALIDATION, $this->vatNumber)) {
+                $rc = self::VAT_INVALID_CHARS;
+            } else {
+                $rc = self::VAT_OK;
+            }
+        }
+        return $rc;
+    }        
 
-    public function checkVatNumber($countryCode, $vatNumber) 
+    // -----
+    // This function calls, via SOAP, the VIES VAT validation service to see if the current
+    // VAT Number is registered (aka valid), returning a boolean value indicating whether (true)
+    // or not (false) the VIES service has validated the number.
+    //
+    public function validateVatNumber() 
     {
         $this->_valid = false;
-        $this->_data = array();
         if ($this->soapInstalled) {
             $rs = $this->_client->checkVat(
                 array(
-                    'countryCode' => $countryCode, 
-                    'vatNumber' => $vatNumber
+                    'countryCode' => $this->countryCode, 
+                    'vatNumber' => substr($this->vatNumber, 2)
                 ) 
             );
 
-            $this->trace("Web Service result ($countryCode, $vatNumber): " . $this->_client->__getLastResponse());    
+            $this->trace("Web Service result (" . $this->countryCode . ', ' . $this->vatNumber . "): " . $this->_client->__getLastResponse());    
 
             if ($rs->valid) {
                 $this->_valid = true;
-                list($denomination, $name) = explode(' ', $rs->name, 2);
-                $this->_data = array(
-                    'denomination' => $denomination, 
-                    'name' => $name, 
-                    'address' => $rs->address,
-                );
             }
         }
         return $this->_valid;
     }
 
-    public function isValid() 
-    {
-        return $this->_valid;
-    }
-    
-    public function getDenomination() 
-    {
-        return (isset($this->_data['denomination'])) ? $this->_data['denomination'] : false;
-    }
-    
-    public function getName() 
-    {
-        return (isset($this->_data['name'])) ? $this->_data['name'] : false;
-    }
-    
-    public function getAddress() 
-    {
-        return (isset($this->_data['address'])) ? $this->_data['address'] : false;
-    }
-    
-    public function isDebug() 
-    {
-        return ($this->debug === true);
-    }
-    
+    // -----
+    // Locally used to log any information, under the control of the VAT4EU's debug configuration.
+    //
     private function trace($message) 
     {
         if ($this->debug) {
-            error_log(date('Y-m-d H:m:i: ') . $message . PHP_EOL, 3, DIR_FS_LOGS . '/VatValidate.log');
+            error_log(date('Y-m-d H:m:i: ') . $message . PHP_EOL . PHP_EOL, 3, DIR_FS_LOGS . '/VatValidate.log');
         }
     }
 }

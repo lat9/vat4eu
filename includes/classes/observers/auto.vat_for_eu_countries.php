@@ -284,38 +284,53 @@ class zcObserverVatForEuCountries extends base
     //
     protected function validateVatNumber($message_location)
     {
-        $vat_ok = true;
-        $GLOBALS['vat_number'] = $vat_number = zen_db_prepare_input($_POST['vat_number']);
-        $vat_number_length = strlen($vat_number);
+        $vat_ok = false;
+        $GLOBALS['vat_number'] = $vat_number = strtoupper(zen_db_prepare_input($_POST['vat_number']));
+        
+        $countries_id = $_POST['zone_country_id'];
+        $country_iso_code_2 = $this->getCountryIsoCode2($countries_id);
+        
         $this->vatNumberStatus = VatValidation::VAT_NOT_VALIDATED;
-        if ($vat_number != '') {
-            $vat_ok = false;
-            if (VAT4EU_MIN_LENGTH != '0' && $vat_number_length < VAT4EU_MIN_LENGTH) {
+        
+        $validation = new VatValidation($country_iso_code_2, $vat_number);
+        $precheck_status = $validation->vatNumberPreCheck();
+        switch ($precheck_status) {
+            case VatValidation::VAT_NOT_SUPPLIED:
+                $vat_ok = true;
+                break;
+                
+            case VatValidation::VAT_MIN_LENGTH:
                 $GLOBALS['messageStack']->add($message_location, VAT4EU_ENTRY_VAT_MIN_ERROR, 'error');
-            } else {
-                $countries_id = $_POST['zone_country_id'];
-                $country_iso_code_2 = $this->getCountryIsoCode2($countries_id);
-                if (strpos(strtoupper($vat_number), $country_iso_code_2) !== 0) {
-                    $GLOBALS['messageStack']->add($message_location, sprintf(VAT4EU_ENTRY_VAT_PREFIX_INVALID, $country_iso_code_2, zen_get_country_name($countries_id)), 'error');
-                } else {
-                    $vat_ok = true;
-                    if ($message_location == 'create_account') {
-                        $message_location = 'header';
-                    }
-                    if (VAT4EU_VALIDATION == 'Admin') {
-                        $GLOBALS['messageStack']->add_session($message_location, VAT4EU_APPROVAL_PENDING, 'warning');
-                    } else {
-                        $validation = new VatValidation();
-                        $vat_number = ($vat_number_length >= 2) ? substr($vat_number, 2) : $vat_number;
-                        if ($validation->checkVatNumber($country_iso_code_2, $vat_number)) {
-                            $this->vatNumberStatus = VatValidation::VAT_VIES_OK;
-                        } else {
-                            $this->vatNumberStatus = VatValidation::VAT_VIES_NOT_OK;
-                            $GLOBALS['messageStack']->add_session($message_location, VAT4EU_VAT_NOT_VALIDATED, 'warning');
-                        }
-                    }
+                break;
+                
+            case VatValidation::VAT_BAD_PREFIX:
+                $GLOBALS['messageStack']->add($message_location, sprintf(VAT4EU_ENTRY_VAT_PREFIX_INVALID, $country_iso_code_2, zen_get_country_name($countries_id)), 'error');
+                break;
+                
+            case VatValidation::VAT_INVALID_CHARS:
+                $GLOBALS['messageStack']->add_session($message_location, VAT4EU_VAT_NOT_VALIDATED, 'warning');
+                break;
+                
+            case VatValidation::VAT_OK:
+                $vat_ok = true;
+                if ($message_location == 'create_account') {
+                    $message_location = 'header';
                 }
-            }
+                if (VAT4EU_VALIDATION == 'Admin') {
+                    $GLOBALS['messageStack']->add_session($message_location, VAT4EU_APPROVAL_PENDING, 'warning');
+                } else {
+                    if ($validation->validateVatNumber()) {
+                        $this->vatNumberStatus = VatValidation::VAT_VIES_OK;
+                    } else {
+                        $this->vatNumberStatus = VatValidation::VAT_VIES_NOT_OK;
+                        $GLOBALS['messageStack']->add_session($message_location, VAT4EU_VAT_NOT_VALIDATED, 'warning');
+                    }
+                }                
+                break;
+                
+            default:
+                trigger_error("Unexpected return value from vatNumberPreCheck: $precheck_status, VAT number not authorized.", E_USER_WARNING);
+                break;
         }
         return $vat_ok;    
     }
@@ -375,6 +390,10 @@ class zcObserverVatForEuCountries extends base
         return $this->vatIsRefundable;
     }
     
+    // ------
+    // This function determines, based on the currently-active page, whether a zen_address_format
+    // function call should have the VAT Number appended and, if so, appends it!
+    //
     protected function formatAddress($address_elements, $current_address)
     {
         // -----
@@ -454,9 +473,9 @@ class zcObserverVatForEuCountries extends base
                         }
                     // -----
                     // If the "One-Page Checkout" plugin is installed, the billing address-block is the first
-                    // one created.
+                    // one requested on both the main, data-gathering, and confirmation pages.
                     //
-                    } elseif (defined('FILENAME_CHECKOUT_ONE') && $current_page_base == FILENAME_CHECKOUT_ONE) {
+                    } elseif (defined('FILENAME_CHECKOUT_ONE') && $current_page_base == FILENAME_CHECKOUT_ONE || $current_page_base == FILENAME_CHECKOUT_ONE_CONFIRMATION) {
                         $this->addressFormatCount++;
                         if ($this->addressFormatCount == 1) {
                             $show_vat_number = true;
@@ -467,6 +486,7 @@ class zcObserverVatForEuCountries extends base
                     //
                     } else {
                         $show_vat_number = false;
+                        $address_elements['address_format_count'] = $this->addressFormatCount;
                         $this->notify('NOTIFY_VAT4EU_ADDRESS_DEFAULT', $address_elements, $current_address, $show_vat_number);
                     }
                     break;
@@ -476,7 +496,7 @@ class zcObserverVatForEuCountries extends base
             // end of the address, including the "unverified" tag if the number has not been validated.
             //
             if ($show_vat_number) {
-                $address_out = $current_address . $address_elements['cr'] . VAT4EU_ENTRY_VAT_NUMBER . ' ' . $this->vatNumber;
+                $address_out = $current_address . $address_elements['cr'] . VAT4EU_DISPLAY_VAT_NUMBER . $this->vatNumber;
                 if ($this->vatValidated != VatValidation::VAT_VIES_OK && $this->vatValidated != VatValidation::VAT_ADMIN_OVERRIDE) {
                     $address_out .= VAT4EU_UNVERIFIED;
                 }

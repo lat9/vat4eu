@@ -315,11 +315,18 @@ class Vat4EuAdminObserver extends base
         }
     }
     
+    // -----
+    // Returns a boolean status indicating whether (true) or not (false) the currently-active
+    // order-class object (if present) qualifies for a VAT refund.
+    //
     public function isVatRefundable()
     {
         return $this->checkVatIsRefundable();
     }
     
+    // -----
+    // This helper function retrieves the 2-character ISO code for the specified country.
+    //
     public function getCountryIsoCode2($countries_id)
     {
         $check = $GLOBALS['db']->Execute(
@@ -331,6 +338,10 @@ class Vat4EuAdminObserver extends base
         return ($check->EOF) ? 'Unknown' : $check->fields['countries_iso_code_2'];
     }
     
+    // -----
+    // This function returns a Font-Awesome glyph that represents the specified
+    // VAT-validation status.
+    //
     protected function showVatNumberStatus($vat_validation)
     {
         switch ($vat_validation) {
@@ -359,51 +370,72 @@ class Vat4EuAdminObserver extends base
     }
     
     // -----
-    // This function, called during processing where a VAT Number can be entered,
+    // This function, called during form validation where a VAT Number can be entered, e.g. Customers->Customers, returning
+    // a boolean value that indicates whether (true) or not (false) the VAT Number is 'valid'.
     //
     protected function validateVatNumber()
-    {
-        $vat_ok = true;
-        $GLOBALS['vat_number'] = $vat_number = zen_db_prepare_input($_POST['vat_number']);
+    {       
+        $GLOBALS['vat_number'] = $vat_number = strtoupper(zen_db_prepare_input($_POST['vat_number']));
         $GLOBALS['vat_number_override'] = $vat_number_override = (isset($_POST['vat_number_override']));
-        $vat_number_length = strlen($vat_number);
-        $this->vatNumberStatus = VatValidation::VAT_NOT_VALIDATED;
-        $this->vatNumberError = false;
+        $vat_number_length = strlen($vat_number);       
+
+        $vat_ok = false;
+        $this->vatNumberError = true;
         $this->vatNumberMessage = '';
-        if ($vat_number != '') {
-            $vat_ok = false;
-            if (VAT4EU_MIN_LENGTH != '0' && $vat_number_length < VAT4EU_MIN_LENGTH) {
+        $this->vatNumberStatus = VatValidation::VAT_NOT_VALIDATED;
+        
+        if ($GLOBALS['current_page'] == 'edit_orders.php') {
+            $countries_id = $_POST['update_billing_country'];
+        } else {
+            $countries_id = $_POST['entry_country_id'];
+        }
+        $country_iso_code_2 = $this->getCountryIsoCode2($countries_id);
+        
+        $validation = new VatValidation($country_iso_code_2, $vat_number);
+        $precheck_status = $validation->vatNumberPreCheck();
+        switch ($precheck_status) {
+            case VatValidation::VAT_NOT_SUPPLIED:
+                $vat_ok = true;
+                break;
+                
+            case VatValidation::VAT_MIN_LENGTH:
                 $this->vatNumberMessage = VAT4EU_ENTRY_VAT_MIN_ERROR;
-                $this->vatNumberError = true;
-            } else {
-                if ($GLOBALS['current_page'] == 'edit_orders.php') {
-                    $countries_id = $_POST['update_billing_country'];
-                } else {
-                    $countries_id = $_POST['entry_country_id'];
-                }
-                $country_iso_code_2 = $this->getCountryIsoCode2($countries_id);
-                if (strpos(strtoupper($vat_number), $country_iso_code_2) !== 0) {
-                    $this->vatNumberMessage = sprintf(VAT4EU_ENTRY_VAT_PREFIX_INVALID, $country_iso_code_2, zen_get_country_name($countries_id));
-                    $this->vatNumberError = true;
-                } elseif ($vat_number_override) {
+                break;
+                
+            case VatValidation::VAT_BAD_PREFIX:
+                $this->vatNumberMessage = sprintf(VAT4EU_ENTRY_VAT_PREFIX_INVALID, $country_iso_code_2, zen_get_country_name($countries_id));
+                break;
+                
+            case VatValidation::VAT_INVALID_CHARS:
+                $this->vatNumberMessage = VAT4EU_ENTRY_VAT_INVALID_CHARS;
+                break;
+                
+            case VatValidation::VAT_OK:
+                $vat_ok = true;
+                $this->vatNumberError = false;
+                if ($vat_number_override) {
                     $this->vatNumberStatus = VatValidation::VAT_ADMIN_OVERRIDE;
-                    $vat_ok = true;
                 } else {
-                    $validation = new VatValidation();
-                    $vat_number = ($vat_number_length >= 2) ? substr($vat_number, 2) : $vat_number;
-                    if (!$validation->checkVatNumber($country_iso_code_2, $vat_number)) {
-                        $this->vatNumberMessage = VAT4EU_ENTRY_VAT_INVALID;
-                        $this->vatNumberStatus = VatValidation::VAT_VIES_NOT_OK;
-                    } else {
-                        $vat_ok = true;
+                    if ($validation->validateVatNumber()) {
                         $this->vatNumberStatus = VatValidation::VAT_VIES_OK;
+                    } else {
+                        $this->vatNumberStatus = VatValidation::VAT_VIES_NOT_OK;
+                        $this->vatNumberMessage = VAT4EU_ENTRY_VAT_VIES_INVALID;
                     }
-                }
-            }
+                }                
+                break;
+                
+            default:
+                $this->vatNumberMessage = "Unexpected return value from vatNumberPreCheck: $precheck_status, VAT number not authorized.";
+                trigger_error($this->vatNumberMessage, E_USER_WARNING);
+                break;
         }
         return $vat_ok;    
     }
     
+    // -----
+    // This function creates (and returns) the HTML associated with a "VAT Number".
+    //
     protected function formatVatNumberDisplay($cInfo)
     {
         if (isset($_POST['vat_number'])) {
@@ -493,6 +525,10 @@ class Vat4EuAdminObserver extends base
         return (is_array($country_info) && isset($country_info['id'])) ? $country_info['id'] : false;
     }
     
+    // ------
+    // This function determines, based on the admin page currently active, whether a zen_address_format
+    // function call should have the VAT Number appended and, if so, appends it!
+    //
     protected function formatAddress($address_elements, $current_address)
     {
         // -----
@@ -535,6 +571,7 @@ class Vat4EuAdminObserver extends base
             //
             default:
                 $show_vat_number = false;
+                $address_elements['address_format_count'] = $this->addressFormatCount;
                 $this->notify('NOTIFY_VAT4EU_ADDRESS_DEFAULT', $address_elements, $current_address, $show_vat_number);
                 break;
         }
@@ -543,7 +580,7 @@ class Vat4EuAdminObserver extends base
         // end of the address, including the "unverified" tag if the number has not been validated.
         //
         if ($show_vat_number) {
-            $address_out = $current_address . $address_elements['cr'] . VAT4EU_ENTRY_VAT_NUMBER . ' ' . $this->vatNumber;
+            $address_out = $current_address . $address_elements['cr'] . VAT4EU_DISPLAY_VAT_NUMBER . $this->vatNumber;
             if ($this->vatValidated != VatValidation::VAT_VIES_OK && $this->vatValidated != VatValidation::VAT_ADMIN_OVERRIDE) {
                 $address_out .= VAT4EU_UNVERIFIED;
             }

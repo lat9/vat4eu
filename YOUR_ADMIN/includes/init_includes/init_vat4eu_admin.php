@@ -78,7 +78,7 @@ if (isset($_SESSION['admin_id'])) {
             "INSERT INTO " . TABLE_CONFIGURATION . " 
                 ( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
              VALUES 
-                ( 'Minimum VAT Number Length', 'VAT4EU_MIN_LENGTH', '10', 'Identify the minimum length of a VAT Number, used to check the customer\'s input.  Enter a value of <em>0</em> to disable this check.', $cgi, 30, now(), NULL, NULL)"
+                ( 'Minimum VAT Number Length', 'VAT4EU_MIN_LENGTH', '0', 'Identify the minimum length of a VAT Number, used as a pre-check for any input value. When the value is <b>not 0</b>, the field is <b>required</b>; set the value to <b>0</b> to allow the field to be <em>optional</em> &mdash; additional validation is still performed for any entered value!', $cgi, 30, now(), NULL, NULL)"
         );       
         $db->Execute(
             "INSERT INTO " . TABLE_CONFIGURATION . " 
