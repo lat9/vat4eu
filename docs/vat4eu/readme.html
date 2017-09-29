@@ -167,15 +167,22 @@ div.totals-desc h4 { border-top: 1px solid #666; }
                 <li>Copy the plugin's files (including those possibly modified above) to your store's folder structure:<ol>
                   <li>/includes/classes/VatValidation.php</li>
                   <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                  <li>/includes/extra_datafiles/vat4eu_filenames.php</li>
                   <li><span class="corefile">/includes/functions/functions_customers.php</span></li>
                   <li>/includes/languages/english/extra_definitions/vat4eu_extra_definitions.php</li>
+                  <li>/includes/languages/english/html_includes/define_popup_vat4eu_formats.php</li>
                   <li>/includes/languages/english/modules/order_total/ot_vat_refund.php</li>
                   <li>/includes/languages/english/modules/order_total/ot_vat_reverse_charges.php</li>
                   <li>/includes/modules/order_total/ot_vat_refund.php</li>
                   <li>/includes/modules/order_total/ot_vat_reverse_charges.php</li>
                   <li><span class="corefile">/includes/modules/pages/address_book_process/header_php.php</span></li>
+                  <li>/includes/modules/pages/popup_vat4eu_formats/header_php.php</li>
+                  <li>/includes/modules/pages/popup_vat4eu_formats/jscript_main.php</li>
                   <li><span class="template">/includes/modules/YOUR_TEMPLATE/checkout_new_address.php</span></li>
+                  <li>/includes/templates/template_default/css/popup_vat4eu_formats.css</li>
+                  <li>/includes/templates/template_default/popup_vat4eu_formats/tpl_main_page.php</li>
                   <li>/includes/templates/template_default/templates/tpl_modules_vat4eu_display.php</li>
+                  <li>/includes/templates/YOUR_TEMPLATE/css/popup_vat4eu_formats.css</li>
                    <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_address_book_details.php</span></li>
                   <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_checkout_new_address.php</span></li>
                   <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_create_account.php</span></li>
@@ -239,11 +246,11 @@ div.totals-desc h4 { border-top: 1px solid #666; }
                 </tr>
                 <tr>
                   <td>Minimum VAT Number Length</td>
-                  <td>Identify the minimum length (including the 2-character country-code prefix) of a <em>VAT Number</em>.  The value is used as a sanity check for customer- and admin-entered values.</td>
-                  <td>10</td>
+                  <td>Identify the minimum length (including the 2-character country-code prefix) of a <em>VAT Number</em>.  The value is used as a sanity check for customer- and admin-entered values. Set the value to <b>0</b> if the <em>VAT Number</em> is an optional entry; otherwise, set the value to the minimum allowed. The &quot;VIES&quot; validation service will be the final arbitrator of the number's validity!</td>
+                  <td>0</td>
                 </tr>
                 <tr>
-                  <td>Enable <em>VAT Refund</em> for in-country purchases?</td>
+                  <td>Enable <em>VAT Refund</em> for in-country purchasers?</td>
                   <td>Identify whether or not billing addresses within your store's country with a validated <em>VAT Number</em> qualify for a VAT refund.</td>
                   <td>false</td>
                 </tr>
@@ -397,6 +404,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
                 <li>create_account</li>
                 <li>login</li>
               </ol>
+              <p>The <em>What's this?</em> link, when clicked, displays a popup window that illustrates the varied VAT formats for the EU countries.  That information is a re-formatted version of the information on the <a href="http://ec.europa.eu/taxation_customs/vies/faq.html#item_11" target="_blank">VIES</a> website, and is current as of 2017-09-29.  The content is provided by <code>/includes/languages/english/html_includes/define_popup_vat4eu_formats.php</code>.</p>
               <p><strong>Note:</strong> The <em>VAT Number</em> input will be added <b>only if</b> you have set <em>Configuration-&gt;Customer Details-&gt;Company</em> to <b>true</b>!</p>
               <div class="clearBoth"></div>
             </div>
