@@ -27,6 +27,7 @@ class VatValidation
     const VAT_MIN_LENGTH     = -1;      //- A minimum length has been set and the value's length is too short
     const VAT_BAD_PREFIX     = -2;      //- The first 2 characters of the number don't match the associated country-code
     const VAT_INVALID_CHARS  = -3;      //- There is at least one "invalid" character in the supplied VAT number
+    const VAT_REQUIRED       = -4;      //- No VAT Number was supplied and it's required
     
     // -----
     // This constant defines the characters (used in preg_match) that are "valid" for a VAT Number.  Note
@@ -90,10 +91,10 @@ class VatValidation
         // know.
         //
         if ($this->vatNumber == '') {
-            if (VAT4EU_MIN_LENGTH == '0') {
-                $rc = self::VAT_NOT_SUPPLIED;
+            if (VAT4EU_REQUIRED == 'true') {
+                $rc = self::VAT_REQUIRED;
             } else {
-                $rc = self::VAT_MIN_LENGTH;
+                $rc = self::VAT_NOT_SUPPLIED;
             }
         // -----
         // Otherwise, a VAT Number has been supplied and is checked for:

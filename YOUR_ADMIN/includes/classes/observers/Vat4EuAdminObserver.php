@@ -398,6 +398,10 @@ class Vat4EuAdminObserver extends base
                 $vat_ok = true;
                 break;
                 
+            case VatValidation::VAT_REQUIRED:
+                $this->vatNumberMessage = VAT4EU_ENTRY_VAT_REQUIRED;
+                break;
+                
             case VatValidation::VAT_MIN_LENGTH:
                 $this->vatNumberMessage = VAT4EU_ENTRY_VAT_MIN_ERROR;
                 break;

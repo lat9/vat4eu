@@ -27,6 +27,7 @@ define('VAT4EU_ENTRY_VAT_MIN_ERROR', '<span class="errorText">At least ' . VAT4E
 define('VAT4EU_ENTRY_VAT_PREFIX_INVALID', '<span class="errorText">Must begin with <b>%1$s</b>, since the address is in <em>%2$s</em>.</span>');
 define('VAT4EU_ENTRY_VAT_INVALID_CHARS', '<span class="errorText">Invalid characters detected.</span>');
 define('VAT4EU_ENTRY_VAT_VIES_INVALID', '<span class="errorText">Failed VIES validation.</span>');
+define('VAT4EU_ENTRY_VAT_REQUIRED', '<span class="errorText">This field is required</span>');
 
 // -----
 // Used as in the title attribute when displaying VAT Numbers' status in Customrs->Customers.

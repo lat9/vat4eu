@@ -299,6 +299,10 @@ class zcObserverVatForEuCountries extends base
                 $vat_ok = true;
                 break;
                 
+            case VatValidation::VAT_REQUIRED:
+                $GLOBALS['messageStack']->add($message_location, VAT4EU_ENTRY_REQUIRED_ERROR, 'error');
+                break;
+                
             case VatValidation::VAT_MIN_LENGTH:
                 $GLOBALS['messageStack']->add($message_location, VAT4EU_ENTRY_VAT_MIN_ERROR, 'error');
                 break;

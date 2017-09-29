@@ -7,8 +7,8 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('VAT4EU_CURRENT_RELEASE', '1.0.0-beta2');
-define('VAT4EU_CURRENT_UPDATE_DATE', '2017-09-26');
+define('VAT4EU_CURRENT_RELEASE', '1.0.0-beta3');
+define('VAT4EU_CURRENT_UPDATE_DATE', '2017-09-29');
 
 define('VAT4EU_CURRENT_VERSION', VAT4EU_CURRENT_RELEASE . ': ' . VAT4EU_CURRENT_UPDATE_DATE);
 
@@ -78,8 +78,16 @@ if (isset($_SESSION['admin_id'])) {
             "INSERT INTO " . TABLE_CONFIGURATION . " 
                 ( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
              VALUES 
-                ( 'Minimum VAT Number Length', 'VAT4EU_MIN_LENGTH', '0', 'Identify the minimum length of a VAT Number, used as a pre-check for any input value. When the value is <b>not 0</b>, the field is <b>required</b>; set the value to <b>0</b> to allow the field to be <em>optional</em> &mdash; additional validation is still performed for any entered value!', $cgi, 30, now(), NULL, NULL)"
-        );       
+                ( 'VAT Number Required?', 'VAT4EU_REQUIRED', 'false', 'Should the <em>VAT Number</em> be a <b>required</b> field?', $cgi, 30, now(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),')"
+        );
+
+        $db->Execute(
+            "INSERT INTO " . TABLE_CONFIGURATION . " 
+                ( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
+             VALUES 
+                ( 'Minimum VAT Number Length', 'VAT4EU_MIN_LENGTH', '10', 'Identify the minimum length of an entered VAT Number, used as a pre-check for any input value. Set the value to <em>0</em> to disable this check.', $cgi, 31, now(), NULL, NULL)"
+        );
+        
         $db->Execute(
             "INSERT INTO " . TABLE_CONFIGURATION . " 
                 (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function) 
