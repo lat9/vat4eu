@@ -25,7 +25,7 @@ define('VAT4EU_ENTRY_VAT_PREFIX_INVALID', 'Your <em>VAT Number</em> must begin w
 define('VAT4EU_ENTRY_REQUIRED_ERROR', 'Your <em>VAT Number</em> is a required field.');
 
 define('VAT4EU_VAT_NOT_VALIDATED', 'We were unable to validate the <em>VAT Number</em> that you entered.  Please re-enter the value or <a href="' . zen_href_link(FILENAME_CONTACT_US, '', 'SSL') . '">contact us</a> for assistance.');
-define('VAT4EU_APPROVAL_PENDING', 'Once we validate the <em>VAT Number</em> that you entered, your qualifying orders will automatically receive a <em>VAT Exemption</em>.  Please <a href="' . zen_href_link(FILENAME_CONTACT_US, '', 'SSL') . '">contact us</a> if you have any questions.');
+define('VAT4EU_APPROVAL_PENDING', 'Once your <em>VAT Number</em> (%s) has been validated, your qualifying orders will automatically receive a <em>VAT Exemption</em>.  Please <a href="' . zen_href_link(FILENAME_CONTACT_US, '', 'SSL') . '">contact us</a> if you have any questions.');
 
 define('VAT4EU_MESSAGE_YOUR_VAT_REFUND', 'Your order qualifies for a <em>VAT Refund</em>, in the amount of %s.');     //- The $s is the formatted monetary amount of the refund
 
