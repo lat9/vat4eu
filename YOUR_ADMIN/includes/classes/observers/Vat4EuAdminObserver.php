@@ -423,6 +423,7 @@ class Vat4EuAdminObserver extends base
                     if ($validation->validateVatNumber()) {
                         $this->vatNumberStatus = VatValidation::VAT_VIES_OK;
                     } else {
+                        $vat_ok = false;
                         $this->vatNumberStatus = VatValidation::VAT_VIES_NOT_OK;
                         $this->vatNumberMessage = VAT4EU_ENTRY_VAT_VIES_INVALID;
                     }
