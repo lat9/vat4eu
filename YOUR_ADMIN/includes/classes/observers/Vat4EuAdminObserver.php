@@ -255,6 +255,10 @@ class Vat4EuAdminObserver extends base
                 $this->validateVatNumber();
                 $p2['billing_vat_number'] = $GLOBALS['vat_number'];
                 $p2['billing_vat_validated'] = $this->vatNumberStatus;
+                
+                if (strtoupper(zen_db_prepare_input($_POST['current_vat_number'])) != $GLOBALS['vat_number'] || $_POST['current_vat_validated'] != $this->vatNumberStatus) {
+                    $GLOBALS['messageStack']->add_session(VAT4EU_EO_CUSTOMER_UPDATE_REQUIRED, 'warning');
+                }
                 break;
                 
             // -----
@@ -273,12 +277,13 @@ class Vat4EuAdminObserver extends base
                 if ($vat_number != '' && $vat_validated != VatValidation::VAT_VIES_OK && $vat_validated != VatValidation::VAT_ADMIN_OVERRIDE) {
                     $valid_indicator = '&nbsp;&nbsp;' . VAT4EU_UNVERIFIED;
                 }
+                $hidden_fields = zen_draw_hidden_field('current_vat_number', $vat_number) . zen_draw_hidden_field('current_vat_validated', $vat_validated);
                 $vat_info =
                     '<tr>' . PHP_EOL .
                     '    <td>&nbsp;</td>' . PHP_EOL .
                     '    <td>&nbsp;</td>' . PHP_EOL .
                     '    <td><strong>' . VAT4EU_ENTRY_VAT_NUMBER . '</strong></td>' . PHP_EOL .
-                    '    <td>' . zen_draw_input_field('vat_number', zen_html_quotes($vat_number), 'size="45"') . $valid_indicator . '</td>' . PHP_EOL .
+                    '    <td>' . zen_draw_input_field('vat_number', zen_html_quotes($vat_number), 'size="45"') . $valid_indicator . $hidden_fields . '</td>' . PHP_EOL .
                     '    <td>&nbsp;</td>' . PHP_EOL .
                     '    <td>&nbsp;</td>' . PHP_EOL .
                     '</tr>' . PHP_EOL .

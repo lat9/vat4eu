@@ -30,7 +30,7 @@ define('VAT4EU_ENTRY_VAT_VIES_INVALID', '<span class="errorText">Failed VIES val
 define('VAT4EU_ENTRY_VAT_REQUIRED', '<span class="errorText">This field is required</span>');
 
 // -----
-// Used as in the title attribute when displaying VAT Numbers' status in Customrs->Customers.
+// Used as in the title attribute when displaying VAT Numbers' status in Customers->Customers.
 //
 define('VAT4EU_ADMIN_OVERRIDE', 'Overridden by Admin');
 define('VAT4EU_VIES_OK', 'Validated by VIES');
@@ -42,3 +42,9 @@ define('VAT4EU_VIES_NOT_OK', 'Found Invalid by VIES');
 //
 define('VAT4EU_SORT_ASC', 'Sort by Status, Asc');
 define('VAT4EU_SORT_DESC', 'Sort by Status, Desc');
+
+// -----
+// Issued during Edit Orders processing if the admin has changed either the VAT Number or its
+// validation status.
+//
+define('VAT4EU_EO_CUSTOMER_UPDATE_REQUIRED', 'The <em>VAT Number</em> or its status has changed <em>for this order only</em>! Edit the customer\'s information to make this change available for future purchases.');
