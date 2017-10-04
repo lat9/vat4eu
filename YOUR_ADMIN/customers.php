@@ -31,6 +31,11 @@
                     ORDER BY firstname, lastname";
 
         $addresses_query = $db->bindVars($addresses_query, ':customersID', $_GET['cID'], 'integer');
+        
+//-bof-vat4eu-lat9  *** 1 of 7 ***
+      $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LIST_ADDRESSES', $addresses_query);
+//-eof-vat4eu-lat9  *** 1 of 7 ***
+
         $addresses = $db->Execute($addresses_query);
         $addressArray = array();
         while (!$addresses->EOF) {
@@ -248,9 +253,9 @@
         $entry_email_address_exists = false;
       }
       
-//-bof-vat4eu-lat9  *** 1 of 6 ***
+//-bof-vat4eu-lat9  *** 2 of 7 ***
       $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE', array(), $error);
-//-eof-vat4eu-lat9  *** 1 of 6 ***
+//-eof-vat4eu-lat9  *** 2 of 7 ***
 
       if ($error == false) {
 
@@ -298,9 +303,9 @@
           }
         }
         
-//-bof-vat4eu-lat9  *** 2 of 6 ***
+//-bof-vat4eu-lat9  *** 3 of 7 ***
         $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_B4_ADDRESS_UPDATE', array('customers_id' => $customers_id, 'address_book_id' => $default_address_id), $sql_data_array);
-//-eof-vat4eu-lat9  *** 2 of 6 ***
+//-eof-vat4eu-lat9  *** 3 of 7 ***
 
         $db->perform(TABLE_ADDRESS_BOOK, $sql_data_array, 'update', "customers_id = '" . (int)$customers_id . "' and address_book_id = '" . (int)$default_address_id . "'");
         zen_record_admin_activity('Customer record updated for customer ID ' . (int)$customers_id, 'notice');
@@ -722,11 +727,11 @@ function check_form() {
           </tr>
           
 <?php
-//-bof-vat4eu-lat9  *** 3 of 6 ***
+//-bof-vat4eu-lat9  *** 4 of 7 ***
     $additional_fields = '';
     $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT', $cInfo, $additional_fields);
     echo $additional_fields;
-//-eof-vat4eu-lat9  *** 3 of 6 ***
+//-eof-vat4eu-lat9  *** 4 of 7 ***
 ?>
 
         </table></td>
@@ -1082,11 +1087,11 @@ if ($processed == true) {
                 </td>
                 
 <?php
-//-bof-vat4eu-lat9  *** 4 of 6 ***
+//-bof-vat4eu-lat9  *** 5 of 7 ***
            $additional_heading = '';
            $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER', array(), $additional_heading);
            echo $additional_heading;
-//-eof-vat4eu-lat9  *** 4 of 6 ***
+//-eof-vat4eu-lat9  *** 5 of 7 ***
 ?>
 
                 <td class="dataTableHeadingContent" align="left" valign="top">
@@ -1132,9 +1137,9 @@ if ($processed == true) {
     }
     $new_fields=', c.customers_telephone, a.entry_company, a.entry_street_address, a.entry_city, a.entry_postcode, c.customers_authorization, c.customers_referral';
     
-//-bof-vat4eu-lat9  *** 5 of 6 ***
+//-bof-vat4eu-lat9  *** 6 of 7 ***
     $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_NEW_FIELDS', array(), $new_fields, $disp_order);
-//-eof-vat4eu-lat9  *** 5 of 6 ***
+//-eof-vat4eu-lat9  *** 6 of 7 ***
 
     $customers_query_raw = "select c.customers_id, c.customers_lastname, c.customers_firstname, c.customers_email_address, c.customers_group_pricing, a.entry_country_id, a.entry_company, ci.customers_info_date_of_last_logon, ci.customers_info_date_account_created " . $new_fields . ",
     cgc.amount
@@ -1220,11 +1225,11 @@ if (($_GET['page'] == '' or $_GET['page'] == '1') and $_GET['cID'] != '') {
                 <td class="dataTableContent"><?php echo $customers->fields['customers_firstname']; ?></td>
                 <td class="dataTableContent"><?php echo $customers->fields['entry_company']; ?></td>
 <?php
-//-bof-vat4eu-lat9  *** 6 of 6 ***
+//-bof-vat4eu-lat9  *** 7 of 7 ***
            $additional_column = '';
            $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT', $customers->fields, $additional_column);
            echo $additional_column;
-//-eof-vat4eu-lat9  *** 6 of 6 ***
+//-eof-vat4eu-lat9  *** 7 of 7 ***
 ?>
                 <td class="dataTableContent"><?php echo zen_date_short($info->fields['date_account_created']); ?></td>
                 <td class="dataTableContent"><?php echo zen_date_short($customers->fields['customers_info_date_of_last_logon']); ?></td>

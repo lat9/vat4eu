@@ -49,6 +49,9 @@ class Vat4EuAdminObserver extends base
             if (isset($_GET['oID'])) {
                 $this->oID = (int)$_GET['oID'];
             }
+            // -----
+            // Note: Notifiers that are added by this plugin's file-set are marked with (*)
+            //
             $this->attach(
                 $this, 
                 array(
@@ -59,19 +62,20 @@ class Vat4EuAdminObserver extends base
                     'NOTIFY_ORDER_AFTER_QUERY',                     //- Reconstructing a previously-placed order (Edit Orders)
                     
                     //- From admin/customers.php
-                    'NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE',       //- Allows us to check/validate any entered VAT Number
-                    'NOTIFY_ADMIN_CUSTOMERS_B4_ADDRESS_UPDATE',     //- Gives us the chance to insert the VAT-related fields
-                    'NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT',         //- The point at which the VAT Number fields are inserted
-                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER',        //- The point at which we add columns to the listing heading
-                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_NEW_FIELDS',    //- The point at which we insert additional fields for the listing
-                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT',       //- The point at which we insert a customer record in the listing
+                    'NOTIFY_ADMIN_CUSTOMERS_LIST_ADDRESSES',        //- Allows us to add the number/validation status to address list (*)
+                    'NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE',       //- Allows us to check/validate any entered VAT Number (*)
+                    'NOTIFY_ADMIN_CUSTOMERS_B4_ADDRESS_UPDATE',     //- Gives us the chance to insert the VAT-related fields (*)
+                    'NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT',         //- The point at which the VAT Number fields are inserted (*)
+                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER',        //- The point at which we add columns to the listing heading (*)
+                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_NEW_FIELDS',    //- The point at which we insert additional fields for the listing (*)
+                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT',       //- The point at which we insert a customer record in the listing (*)
                     
                     //- From admin/edit_orders.php
                     'EDIT_ORDERS_PRE_UPDATE_ORDER',                 //- Allows us to update any VAT Number associated with the order
                     'EDIT_ORDERS_ADDITIONAL_ADDRESS_ROWS',          //- Allows us to insert a "VAT Number" input field.
 
                     //- From admin/includes/functions/functions_customers.php
-                    'NOTIFY_END_ZEN_ADDRESS_FORMAT',                //- Issued at the end of the zen_address_format function
+                    'NOTIFY_END_ZEN_ADDRESS_FORMAT',                //- Issued at the end of the zen_address_format function (*)
                 )
             );
 
@@ -127,6 +131,18 @@ class Vat4EuAdminObserver extends base
                     $this->vatNumber = $class->billing['billing_vat_number'] = $vat_info->fields['billing_vat_number'];
                     $this->vatValidated = $class->billing['billing_vat_validated'] = $vat_info->fields['billing_vat_validated'];
                 }
+                break;
+                
+            // -----
+            // Issued by Customers->Customers when a customer's address-list is being displayed.  We'll gather
+            // the VAT numbers and associated status for future calls to zen_address_format.
+            //
+            // On entry:
+            //
+            // $p1 ... (r/o) A copy of the to-be-issued SQL query to gather the addresses.
+            //
+            case 'NOTIFY_ADMIN_CUSTOMERS_LIST_ADDRESSES':
+                $this->gatherCustomersAddressBookVatNumbers($p1);
                 break;
                 
             // -----
@@ -545,6 +561,8 @@ class Vat4EuAdminObserver extends base
         // Determine whether the address being formatted "qualifies" for the insertion of the VAT Number.
         //
         $address_out = false;
+        $use_vat_from_address_book = false;
+        
         $this->addressFormatCount++;
 
         // -----
@@ -573,9 +591,17 @@ class Vat4EuAdminObserver extends base
                 break;
                 
             // -----
-            // Some of the other pages have multiple address-blocks with conditional displays, so weed them
-            // out now.
+            // These pages include multiple address-blocks' display; all blocks should include the associated VAT
+            // Number and its status.
             //
+            case 'customers.php':
+                if (isset($_GET['action']) && $_GET['action'] == 'list_addresses') {
+                    $show_vat_number = true;
+                    $use_vat_from_address_book = true;
+                }
+                break;
+                
+            // -----
             // Any other page, the VAT Number is not displayed.  A notification is made, however, to enable
             // other pages that display order-related addresses to "tack on".
             //
@@ -590,12 +616,49 @@ class Vat4EuAdminObserver extends base
         // end of the address, including the "unverified" tag if the number has not been validated.
         //
         if ($show_vat_number) {
-            $address_out = $current_address . $address_elements['cr'] . VAT4EU_DISPLAY_VAT_NUMBER . $this->vatNumber;
-            if ($this->vatValidated != VatValidation::VAT_VIES_OK && $this->vatValidated != VatValidation::VAT_ADMIN_OVERRIDE) {
-                $address_out .= VAT4EU_UNVERIFIED;
+            if ($use_vat_from_address_book) {
+                $vat_index = $this->addressFormatCount - 1;
+                $vat_number = $this->addressBookVats[$vat_index]['vat_number'];
+                $vat_status = $this->addressBookVats[$vat_index]['vat_validated'];
+            } else {
+                $vat_number = $this->vatNumber;
+                $vat_status = $this->vatValidated;
+            }
+            if ($vat_number != '') {
+                $address_out = $current_address . $address_elements['cr'] . VAT4EU_DISPLAY_VAT_NUMBER . $vat_number;
+                if ($vat_status != VatValidation::VAT_VIES_OK && $vat_status != VatValidation::VAT_ADMIN_OVERRIDE) {
+                    $address_out .= VAT4EU_UNVERIFIED;
+                }
             }
         }
         return $address_out;
+    }
+    
+    protected function gatherCustomersAddressBookVatNumbers($sql_query)
+    {
+        $debug_message = "gatherCustomersAddressBookVatNumbers($sql_query)." . PHP_EOL;
+        
+        // -----
+        // Modify the base SQL query for the addresses to include the VAT number and its associated
+        // validation status for each address.
+        //
+        // - Remove all carriage-return, new-line and tab characters, compress all consecutive spaces to a single space.
+        // - Insert the VAT Number and VAT validation status fields into the query
+        //
+        $sql_query = strtolower(preg_replace("/\s+/", " ", $sql_query));
+        $sql_query = str_replace(' from', ', entry_vat_number, entry_vat_validated from', $sql_query);
+        $debug_message .= "\tModified SQL query: $sql_query" . PHP_EOL;
+        
+        $addresses = $GLOBALS['db']->Execute($sql_query);
+        $this->addressBookVats = array();
+        while (!$addresses->EOF) {
+            $this->addressBookVats[] = array(
+                'vat_number' => $addresses->fields['entry_vat_number'],
+                'vat_validated' => $addresses->fields['entry_vat_validated']
+            );
+            $addresses->MoveNext();
+        }
+        $this->debug($debug_message . var_export($this->addressBookVats, true));
     }
     
     // -----
