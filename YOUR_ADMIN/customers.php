@@ -32,9 +32,9 @@
 
         $addresses_query = $db->bindVars($addresses_query, ':customersID', $_GET['cID'], 'integer');
         
-//-bof-vat4eu-lat9  *** 1 of 7 ***
+//-bof-vat4eu-lat9  *** 1 of 8 ***
       $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LIST_ADDRESSES', $addresses_query);
-//-eof-vat4eu-lat9  *** 1 of 7 ***
+//-eof-vat4eu-lat9  *** 1 of 8 ***
 
         $addresses = $db->Execute($addresses_query);
         $addressArray = array();
@@ -253,9 +253,9 @@
         $entry_email_address_exists = false;
       }
       
-//-bof-vat4eu-lat9  *** 2 of 7 ***
+//-bof-vat4eu-lat9  *** 2 of 8 ***
       $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE', array(), $error);
-//-eof-vat4eu-lat9  *** 2 of 7 ***
+//-eof-vat4eu-lat9  *** 2 of 8 ***
 
       if ($error == false) {
 
@@ -303,9 +303,9 @@
           }
         }
         
-//-bof-vat4eu-lat9  *** 3 of 7 ***
+//-bof-vat4eu-lat9  *** 3 of 8 ***
         $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_B4_ADDRESS_UPDATE', array('customers_id' => $customers_id, 'address_book_id' => $default_address_id), $sql_data_array);
-//-eof-vat4eu-lat9  *** 3 of 7 ***
+//-eof-vat4eu-lat9  *** 3 of 8 ***
 
         $db->perform(TABLE_ADDRESS_BOOK, $sql_data_array, 'update', "customers_id = '" . (int)$customers_id . "' and address_book_id = '" . (int)$default_address_id . "'");
         zen_record_admin_activity('Customer record updated for customer ID ' . (int)$customers_id, 'notice');
@@ -727,11 +727,33 @@ function check_form() {
           </tr>
           
 <?php
-//-bof-vat4eu-lat9  *** 4 of 7 ***
-    $additional_fields = '';
+//-bof-vat4eu-lat9  *** 4 of 8 ***
+    // -----
+    // If a plugin has additional fields to add to the form, it supplies that information here.  The
+    // additional fields are specified as a simply array of arrays, with each array element identifying
+    // a new input element:
+    //
+    // $additional_fields = array(
+    //      array(
+    //          'label' => 'The text to include for the field label',
+    //          'input' => 'The form-related portion of the field',
+    //      ),
+    //      ...
+    // );
+    //
+    $additional_fields = array();
     $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT', $cInfo, $additional_fields);
-    echo $additional_fields;
-//-eof-vat4eu-lat9  *** 4 of 7 ***
+    if (is_array($additional_fields)) {
+        foreach ($additional_fields as $current_field) {
+?>
+          <tr>
+            <td class="main"><?php echo $current_field['label']; ?></td>
+            <td class="main"><?php echo $current_field['input']; ?></td>
+          </tr>
+<?php
+        }
+    }
+//-eof-vat4eu-lat9  *** 4 of 8 ***
 ?>
 
         </table></td>
@@ -1087,11 +1109,40 @@ if ($processed == true) {
                 </td>
                 
 <?php
-//-bof-vat4eu-lat9  *** 5 of 7 ***
-           $additional_heading = '';
-           $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER', array(), $additional_heading);
-           echo $additional_heading;
-//-eof-vat4eu-lat9  *** 5 of 7 ***
+//-bof-vat4eu-lat9  *** 5 of 8 ***
+            // -----
+            // If a plugin has additional columns to add to the display, it attaches to both this "listing header" and (see below)
+            // the "listing data" notifications.
+            //
+            // For the header "insert", the observer sets the $additional_headings to include a simple array of arrays.  Each
+            // entry contains the information for one heading column in the format:
+            //
+            // $additional_headings = array(
+            //      array(
+            //          'content' => 'The content for the column',
+            //          'class' => 'Any additional class for the display',
+            //          'parms' => 'Any additional parameters for the display',
+            //      ),
+            //      ...
+            // );
+            //
+            // The 'content' element is required; the 'class' and 'parms' are optional.
+            //
+            $additional_headings = array();
+            $additional_heading_count = 0;
+            $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER', array(), $additional_headings);
+            if (is_array($additional_headings) && count($additional_headings) != 0) {
+                $additional_heading_count = count($additional_headings);
+                foreach ($additional_headings as $heading_data) {
+                    $additional_class = (isset($heading_data['class'])) ? (' ' . $heading_data['class']) : '';
+                    $additional_parms = (isset($heading_data['parms'])) ? (' ' . $heading_data['parms']) : '';
+                    $heading_content = $heading_data['content'];
+?>
+                <td class="dataTableHeadingContent<?php echo $additional_class; ?>"<?php echo $additional_parms; ?>><?php echo $heading_content; ?></td>
+<?php
+                }
+            }
+//-eof-vat4eu-lat9  *** 5 of 8 ***
 ?>
 
                 <td class="dataTableHeadingContent" align="left" valign="top">
@@ -1137,9 +1188,9 @@ if ($processed == true) {
     }
     $new_fields=', c.customers_telephone, a.entry_company, a.entry_street_address, a.entry_city, a.entry_postcode, c.customers_authorization, c.customers_referral';
     
-//-bof-vat4eu-lat9  *** 6 of 7 ***
+//-bof-vat4eu-lat9  *** 6 of 8 ***
     $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_NEW_FIELDS', array(), $new_fields, $disp_order);
-//-eof-vat4eu-lat9  *** 6 of 7 ***
+//-eof-vat4eu-lat9  *** 6 of 8 ***
 
     $customers_query_raw = "select c.customers_id, c.customers_lastname, c.customers_firstname, c.customers_email_address, c.customers_group_pricing, a.entry_country_id, a.entry_company, ci.customers_info_date_of_last_logon, ci.customers_info_date_account_created " . $new_fields . ",
     cgc.amount
@@ -1225,11 +1276,41 @@ if (($_GET['page'] == '' or $_GET['page'] == '1') and $_GET['cID'] != '') {
                 <td class="dataTableContent"><?php echo $customers->fields['customers_firstname']; ?></td>
                 <td class="dataTableContent"><?php echo $customers->fields['entry_company']; ?></td>
 <?php
-//-bof-vat4eu-lat9  *** 7 of 7 ***
-           $additional_column = '';
-           $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT', $customers->fields, $additional_column);
-           echo $additional_column;
-//-eof-vat4eu-lat9  *** 7 of 7 ***
+//-bof-vat4eu-lat9  *** 7 of 8 ***
+            // -----
+            // If a plugin has additional columns to add to the display, it attaches to both this "listing element" and (see above)
+            // the "listing heading" notifications.
+            //
+            // For the element "insert", the observer sets the $additional_headings to include a simple array of arrays.  Each
+            // entry contains the information for one element column in the format:
+            //
+            // $additional_columns = array(
+            //      array(
+            //          'content' => 'The content for the column',
+            //          'class' => 'Any additional class for the display',
+            //          'parms' => 'Any additional parameters for the display',
+            //      ),
+            //      ...
+            // );
+            //
+            // The 'content' element is required; the 'class' and 'parms' are optional.
+            //
+            $additional_columns = array();
+            $zco_notifier->notify('NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT', $customers->fields, $additional_columns);
+            if (is_array($additional_columns) && count($additional_columns) != 0) {
+                if (count($additional_columns) != $additional_heading_count) {
+                    trigger_error("Mismatched additional column heading ($additional_heading_count) and column element (" . count($additional_columns) . ") counts detected for the Customers listing.", E_USER_WARNING);
+                }
+                foreach ($additional_columns as $column_data) {
+                    $additional_class = (isset($column_data['class'])) ? (' ' . $column_data['class']) : '';
+                    $additional_parms = (isset($column_data['parms'])) ? (' ' . $column_data['parms']) : '';
+                    $element_content = $column_data['content'];
+?>
+                <td class="dataTableContent<?php echo $additional_class; ?>"<?php echo $additional_parms; ?>><?php echo $element_content; ?></td>
+<?php
+                }
+            }
+//-eof-vat4eu-lat9  *** 7 of 8 ***
 ?>
                 <td class="dataTableContent"><?php echo zen_date_short($info->fields['date_account_created']); ?></td>
                 <td class="dataTableContent"><?php echo zen_date_short($customers->fields['customers_info_date_of_last_logon']); ?></td>
@@ -1258,7 +1339,14 @@ if (($_GET['page'] == '' or $_GET['page'] == '1') and $_GET['cID'] != '') {
     }
 ?>
               <tr>
-                <td colspan="5"><table border="0" width="100%" cellspacing="0" cellpadding="2">
+<?php
+//-bof-vat4eu-lat9  *** 8 of 8 ***
+//                <td colspan="5"><table border="0" width="100%" cellspacing="0" cellpadding="2">
+?>
+                <td colspan="<?php echo $additional_heading_count + 5; ?>"><table border="0" width="100%" cellspacing="0" cellpadding="2">
+<?php
+//-eof-vat4eu-lat9  *** 8 of 8 ***
+?>
                   <tr>
                     <td class="smallText" valign="top"><?php echo $customers_split->display_count($customers_query_numrows, MAX_DISPLAY_SEARCH_RESULTS_CUSTOMER, $_GET['page'], TEXT_DISPLAY_NUMBER_OF_CUSTOMERS); ?></td>
                     <td class="smallText" align="right"><?php echo $customers_split->display_links($customers_query_numrows, MAX_DISPLAY_SEARCH_RESULTS_CUSTOMER, MAX_DISPLAY_PAGE_LINKS, $_GET['page'], zen_get_all_get_params(array('page', 'info', 'x', 'y', 'cID'))); ?></td>

@@ -185,10 +185,10 @@ class Vat4EuAdminObserver extends base
             // On entry:
             //
             // $p1 ... (r/o) An object containing the current customer's information.
-            // $p2 ... (r/w) A string to contain additional fields to be displayed.
+            // $p2 ... (r/w) An array to contain additional fields to be displayed.
             //
             case 'NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT':
-                $p2 .= $this->formatVatNumberDisplay($p1);
+                $p2 = array_merge($p2, $this->formatVatNumberDisplay($p1));
                 break;
                 
             // -----
@@ -197,7 +197,7 @@ class Vat4EuAdminObserver extends base
             //
             // On entry:
             //
-            // $p2 ... (r/w) A string value that can be updated to include any additional heading information.
+            // $p2 ... (r/w) An array value that can be updated to include any additional heading information.
             //
             case 'NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER':
                 $asc_class = $desc_class = 'SortOrderHeaderLink';
@@ -211,13 +211,14 @@ class Vat4EuAdminObserver extends base
                     }
                 }
                 $current_parms = zen_get_all_get_params(array('list_order', 'page'));
-                $heading = 
-                    '<td class="dataTableHeadingContent" align="center" valign="top">' . PHP_EOL .
+                $heading = array(
+                    'content' =>
                         $heading_text . '<br />' . PHP_EOL .
                         '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-asc') . '"><span class="' . $asc_class . '" title="' . VAT4EU_SORT_ASC . '">Asc</span></a>&nbsp;' . PHP_EOL . 
-                        '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-desc') . '"><span class="' . $desc_class . '" title="'. VAT4EU_SORT_DESC . '">Desc</span></a>' . PHP_EOL .
-                    '</td>' . PHP_EOL;
-                $p2 .= $heading;
+                        '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-desc') . '"><span class="' . $desc_class . '" title="'. VAT4EU_SORT_DESC . '">Desc</span></a>' . PHP_EOL,
+                    'class' => 'center',
+                );
+                $p2[] = $heading;
                 break;
                 
             // -----
@@ -245,7 +246,7 @@ class Vat4EuAdminObserver extends base
             // On entry:
             //
             // $p1 ... (r/o) An array containing the current customer's information
-            // $p2 ... (r/w) A string value to contain an updated table-column for the display.
+            // $p2 ... (r/w) An array value to contain an updated table-column for the display.
             //
             case 'NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT':
                 $vat_number = $p1['entry_vat_number'];
@@ -253,9 +254,11 @@ class Vat4EuAdminObserver extends base
                 if ($vat_number != '') {
                     $vat_validated = $this->showVatNumberStatus($p1['entry_vat_validated']);
                 }
-                $vat_column =
-                    '<td class="dataTableContent" align="center">' . $vat_validated . $vat_number . '</td>';
-                $p2 .= $vat_column;
+                $vat_column = array(
+                    'content' => $vat_validated . $vat_number,
+                    'class' => 'center'
+                );
+                $p2[] = $vat_column;
                 break;
                 
             // -----
@@ -488,9 +491,16 @@ class Vat4EuAdminObserver extends base
             $vat_override = zen_draw_checkbox_field('vat_number_override', '', ($info->fields['entry_vat_validated'] == VatValidation::VAT_ADMIN_OVERRIDE));
         }
         
-        $vat_number_display = '<tr><td class="main">' . VAT4EU_ENTRY_VAT_NUMBER . '</td><td class="main">' . $vat_field . '</td></tr>' . PHP_EOL;
+        $vat_number_display = array();
+        $vat_number_display[] = array(
+            'label' => VAT4EU_ENTRY_VAT_NUMBER,
+            'input' => $vat_field
+        );
         if ($vat_override !== false) {
-            $vat_number_display .= '<tr><td class="main">' . VAT4EU_ENTRY_OVERRIDE_VALIDATION . '</td><td class="main">' . $vat_override . '</td></tr>' . PHP_EOL;
+            $vat_number_display[] = array(
+                'label' => VAT4EU_ENTRY_OVERRIDE_VALIDATION,
+                'input' => $vat_override
+            );
         }
             
         return $vat_number_display;
