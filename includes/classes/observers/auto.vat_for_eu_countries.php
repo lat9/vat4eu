@@ -1,7 +1,7 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2018 Vinos de Frutas Tropicales
 //
 class zcObserverVatForEuCountries extends base 
 {
@@ -367,6 +367,7 @@ class zcObserverVatForEuCountries extends base
                         $this->vatNumberStatus = VatValidation::VAT_VIES_OK;
                     } else {
                         $this->vatNumberStatus = VatValidation::VAT_VIES_NOT_OK;
+                        $vat_ok = false;
                         $GLOBALS['messageStack']->add_session($message_location, VAT4EU_VAT_NOT_VALIDATED, 'warning');
                     }
                 }                

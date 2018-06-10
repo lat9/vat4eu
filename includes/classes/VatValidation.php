@@ -1,7 +1,7 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2018 Vinos de Frutas Tropicales
 //
 // This class derived from a similarly-named class provided here: https://github.com/herdani/vat-validation
 //
@@ -74,6 +74,7 @@ class VatValidation
                     trigger_error("VAT Number validation not possible, VAT Translation Error: " . $e->getMessage(), E_USER_WARNING);
                 }
             }
+            $this->trace("__construct($countryCode, $vatNumber)");
         }
     }
     
@@ -116,6 +117,7 @@ class VatValidation
                 $rc = self::VAT_OK;
             }
         }
+        $this->trace("vatNumberPreCheck({$this->vatNumber}), returning $rc.");
         return $rc;
     }        
 
@@ -128,16 +130,21 @@ class VatValidation
     {
         $this->_valid = false;
         if ($this->soapInstalled) {
-            $rs = $this->_client->checkVat(
-                array(
-                    'countryCode' => $this->countryCode, 
-                    'vatNumber' => substr($this->vatNumber, 2)
-                ) 
-            );
+            $number_validated = true;
+            try {
+                $rs = $this->_client->checkVat(
+                    array(
+                        'countryCode' => $this->countryCode, 
+                        'vatNumber' => substr($this->vatNumber, 2)
+                    ) 
+                );
+            } catch(Exception $e) {
+                $number_validated = false;
+            }
 
             $this->trace("Web Service result (" . $this->countryCode . ', ' . $this->vatNumber . "): " . $this->_client->__getLastResponse());    
 
-            if ($rs->valid) {
+            if ($number_validated && $rs->valid) {
                 $this->_valid = true;
             }
         }
