@@ -82,7 +82,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 
 <body>
   <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.5a and later</h1>
-  <p>Version 1.0.0 by lat9.  Copyright &copy; 2017, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
+  <p>Version 1.0.1 by lat9.  Copyright &copy; 2017-2018, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
   <p>Current Support Thread on the Zen Cart forums: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></p>
   
   <p><strong>Usage Notes:</strong></p>
@@ -474,6 +474,16 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
         <ul>
           <li>v1.0.0, 2017-10-23: Initial release.</li>
+          <li>v1.0.1, 2018-06-10: This version contains changes for the following issues:<ul>
+            <li>BUGFIX: Correct PHP Fatal error thrown when a VAT Number is rejected by the online service.</li>
+            <li>BUGFIX: Correct shipping/billing address additions &quot;don't stick&quot;.</li>
+            <li>The following files were changed:<ol>
+                <li>/includes/classes/VatValidation.php</li>
+                <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                <li>/includes/modules/YOUR_TEMPLATE/checkout_new_address.php</li>
+                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+            </ol></li>
+          </ul></li>
         </ul>
       </div>
       <!-- end history section -->
