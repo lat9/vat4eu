@@ -134,9 +134,9 @@ if (isset($_POST['action']) && ($_POST['action'] == 'submit')) {
       $messageStack->add('checkout_address', ENTRY_COUNTRY_ERROR);
     }
     
-//-bof-vat4eu-lat9  *** 1 of 1 ***
+//-bof-vat4eu-lat9  *** 1 of 2 ***
     $zco_notifier->notify('NOTIFY_MODULE_CHECKOUT_NEW_ADDRESS_VALIDATION', array(), $error);
-//-eof-vat4eu-lat9  *** 1 of 1 ***
+//-eof-vat4eu-lat9  *** 1 of 2 ***
 
     if ($error == false) {
       $sql_data_array = array(array('fieldName'=>'customers_id', 'value'=>$_SESSION['customer_id'], 'type'=>'integer'),
@@ -161,15 +161,27 @@ if (isset($_POST['action']) && ($_POST['action'] == 'submit')) {
         }
       }
       $db->perform(TABLE_ADDRESS_BOOK, $sql_data_array);
-      $zco_notifier->notify('NOTIFY_MODULE_CHECKOUT_ADDED_ADDRESS_BOOK_RECORD', array_merge(array('address_id' => $db->Insert_ID() ), $sql_data_array));
+      
+//-bof-vat4eu-lat9  *** 2 of 2 ***
+      // -----
+      // Need to capture the address_book_id just created, since the observer processing "might" perform
+      // database actions that change that value!
+      //
+      $address_book_id = $db->Insert_ID();
+//      $zco_notifier->notify('NOTIFY_MODULE_CHECKOUT_ADDED_ADDRESS_BOOK_RECORD', array_merge(array('address_id' => $db->Insert_ID() ), $sql_data_array));
+      $zco_notifier->notify('NOTIFY_MODULE_CHECKOUT_ADDED_ADDRESS_BOOK_RECORD', array_merge(array('address_id' => $address_book_id ), $sql_data_array));
       switch($addressType) {
         case 'billto':
-        $_SESSION['billto'] = $db->Insert_ID();
+//        $_SESSION['billto'] = $db->Insert_ID();
+        $_SESSION['billto'] = $address_book_id;
         $_SESSION['payment'] = '';
         zen_redirect(zen_href_link(FILENAME_CHECKOUT_PAYMENT, '', 'SSL'));
         break;
         case 'shipto':
-        $_SESSION['sendto'] = $db->Insert_ID();
+//        $_SESSION['sendto'] = $db->Insert_ID();
+        $_SESSION['sendto'] = $address_book_id;
+//-eof-vat4eu-lat9  *** 2 of 2 ***
+
         unset($_SESSION['shipping']);
         zen_redirect(zen_href_link(FILENAME_CHECKOUT_SHIPPING, '', 'SSL'));
         break;
