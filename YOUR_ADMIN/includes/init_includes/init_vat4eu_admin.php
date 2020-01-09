@@ -1,14 +1,14 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2019 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2020 Vinos de Frutas Tropicales
 //
 if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('VAT4EU_CURRENT_RELEASE', '2.0.0');
-define('VAT4EU_CURRENT_UPDATE_DATE', '2019-01-06');
+define('VAT4EU_CURRENT_RELEASE', '2.0.1-beta1');
+define('VAT4EU_CURRENT_UPDATE_DATE', '2020-01-09');
 
 define('VAT4EU_CURRENT_VERSION', VAT4EU_CURRENT_RELEASE . ': ' . VAT4EU_CURRENT_UPDATE_DATE);
 
@@ -33,7 +33,7 @@ if (isset($_SESSION['admin_id'])) {
             "INSERT INTO " . TABLE_CONFIGURATION_GROUP . " 
                 (configuration_group_title, configuration_group_description, sort_order, visible) 
              VALUES 
-                ('$configurationGroupTitle', '$configurationGroupTitle Settings', '1', '1');"
+                ('$configurationGroupTitle', '$configurationGroupTitle Settings', 1, 1);"
         );
         $cgi = $db->Insert_ID(); 
         $db->Execute(

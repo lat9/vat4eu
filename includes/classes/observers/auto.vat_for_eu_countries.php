@@ -1,7 +1,7 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2018 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2020 Vinos de Frutas Tropicales
 //
 class zcObserverVatForEuCountries extends base 
 {
@@ -546,7 +546,7 @@ class zcObserverVatForEuCountries extends base
                     // If the "One-Page Checkout" plugin is installed, the billing address-block is the first
                     // one requested on both the main, data-gathering, and confirmation pages.
                     //
-                    } elseif (defined('FILENAME_CHECKOUT_ONE') && $current_page_base == FILENAME_CHECKOUT_ONE || $current_page_base == FILENAME_CHECKOUT_ONE_CONFIRMATION) {
+                    } elseif (defined('FILENAME_CHECKOUT_ONE') && ($current_page_base == FILENAME_CHECKOUT_ONE || $current_page_base == FILENAME_CHECKOUT_ONE_CONFIRMATION)) {
                         $this->addressFormatCount++;
                         if ($this->addressFormatCount == 1) {
                             $show_vat_number = true;
