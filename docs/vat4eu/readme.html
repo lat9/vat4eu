@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>VAT for EU Countries (VAT4EU)</title>
 <link rel="icon" href="../vinos_favicon.ico" type="image/x-icon" />
-<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
-<style type="text/css">
+<link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+<style>
 <!--
 a, a:active, a:visited { color: #006666; text-decoration: none; }
 a:hover { color:#00CC99; text-decoration: underline; }
@@ -70,9 +70,9 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 .panel-container { margin-bottom: 10px; }
 -->
 </style>
-<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script> 
-<script src="../jquery.easytabs.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+<script src="../jquery.easytabs.min.js"></script>
 <script type="text/javascript">
     $(document).ready( function() {
         $('#tab-container').easytabs();
@@ -82,7 +82,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 
 <body>
   <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.6 and later</h1>
-  <p>Version 2.0.0 by lat9.  Copyright &copy; 2017-2019, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
+  <p>Version 2.0.1 by lat9.  Copyright &copy; 2017-2020, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
   <p>Current Support Thread on the Zen Cart forums: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></p>
   
   <p><strong>Usage Notes:</strong></p>
@@ -484,6 +484,13 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         <noscript><h3>Version History</h3></noscript>
         <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
         <ul>
+          <li>v2.0.1, 2020-01-09:<ul>
+            <li>BUGFIX: Correct PHP Warning when <em>One-Page Checkout</em> is not also installed.</li>
+            <li>The following files were changed:<ol>
+                <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+            </ol></li>
+          </ul></li>
           <li>v2.0.0, 2019-01-06: This version contains changes for the following issues:<ul>
             <li>CHANGE: Use zc156a as the basis for all changes.</li>
             <li>The following files were changed or <span class="removed">removed</span>:<ol>
