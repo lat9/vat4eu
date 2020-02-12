@@ -1,7 +1,7 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2020 Vinos de Frutas Tropicales
 ///
 if (!defined('IS_ADMIN_FLAG')) {
     die('Invalid access.');
@@ -19,7 +19,10 @@ class ot_vat_refund extends base
         $this->code = 'ot_vat_refund';
         $this->title = MODULE_ORDER_TOTAL_VAT_REFUND_TITLE;
         $this->description = MODULE_ORDER_TOTAL_VAT_REFUND_DESCRIPTION;
-        $this->sort_order = MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER;
+        $this->sort_order = defined('MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER') ? (int)MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER : null;
+        if ($this->sort_order === null) {
+            return false;
+        }
         
         $this->isEnabled = (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED == 'true');
 
