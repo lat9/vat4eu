@@ -1,7 +1,7 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2020 Vinos de Frutas Tropicales
 //
 if (!defined('IS_ADMIN_FLAG') || IS_ADMIN_FLAG !== true) {
     die('Illegal Access');
@@ -302,7 +302,7 @@ class Vat4EuAdminObserver extends base
                     '    <td>&nbsp;</td>' . PHP_EOL .
                     '    <td>&nbsp;</td>' . PHP_EOL .
                     '    <td><strong>' . VAT4EU_ENTRY_VAT_NUMBER . '</strong></td>' . PHP_EOL .
-                    '    <td>' . zen_draw_input_field('vat_number', zen_html_quotes($vat_number), 'size="45"') . $valid_indicator . $hidden_fields . '</td>' . PHP_EOL .
+                    '    <td>' . zen_draw_input_field('vat_number', zen_db_output($vat_number), 'size="45"') . $valid_indicator . $hidden_fields . '</td>' . PHP_EOL .
                     '    <td>&nbsp;</td>' . PHP_EOL .
                     '    <td>&nbsp;</td>' . PHP_EOL .
                     '</tr>' . PHP_EOL .
