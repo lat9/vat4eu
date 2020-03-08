@@ -579,7 +579,8 @@ class Vat4EuAdminObserver extends base
         // Determine whether the VAT Number should be appended to the specified address, based
         // on the page from which the zen_address_format request was made.
         //
-        switch ($GLOBALS['current_page']) {                   
+        $show_vat_number = false;
+        switch ($GLOBALS['current_page']) {
             // -----
             // These pages include multiple address-blocks' display; the second call to zen_address_format references
             // the billing address, so the VAT Number is displayed.
