@@ -1,7 +1,7 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2018 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2020 Vinos de Frutas Tropicales
 //
 // This class derived from a similarly-named class provided here: https://github.com/herdani/vat-validation
 //
@@ -60,7 +60,10 @@ class VatValidation
         if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED == 'true') {
             $this->debug = (defined('VAT4EU_DEBUG') && VAT4EU_DEBUG == 'true');
             
-            $this->countryCode = $countryCode;
+            // -----
+            // Greek VAT numbers start with 'EL' instead of their country-code ('GR').
+            //
+            $this->countryCode = ($countryCode == 'GR') ? 'EL' : $countryCode;
             $this->vatNumber = strtoupper($vatNumber);
             
             if (!class_exists('SoapClient')) {
