@@ -248,8 +248,8 @@ div.totals-desc h4 { border-top: 1px solid #666; }
                 </tr>
                 <tr>
                   <td>European Union Countries List</td>
-                  <td>Contains a comma-separated list of the ISO-code-2 values, e.g. DE for Germany, of the countries currently in the European Union &mdash; with intervening blanks allowed.  The list is updateable since countries can move in and out of the EU!</td>
-                  <td>AT,BE,BG,CY,CZ,DE, DK,EE,EL,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK</td>
+                  <td>Contains a comma-separated list of the ISO-code-2 values, e.g. DE for Germany, of the countries currently in the European Union &mdash; with intervening blanks allowed.  The list is updateable since countries can move in and out of the EU!<br><br><b>Note:</b> Versions of <em>VAT4EU</em> prior to v2.0.4 improperly used the country code <code>EL</code> in this setting instead of the correct <code>GR</code> for <em>Greece</em>.  On installation of v2.0.4 or later, any reference to <code>EL</code> will be automatically changed to <code>GR</code> &hellip; unless the <code>GR</code> country-code is already present in this setting.</td>
+                  <td>AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK</td>
                 </tr>
                 <tr>
                   <td>Enable storefront processing?</td>
@@ -484,7 +484,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         <noscript><h3>Version History</h3></noscript>
         <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
         <ul>
-          <li>v2.0.4, 2020-03-07:<ul>
+          <li>v2.0.4, 2020-03-14:<ul>
             <li>BUGFIX: Correct checks for Greek VAT numbers.</li>
             <li>BUGFIX: Correct PHP notice when VAT number shouldn't be added to an address.</li>
             <li>The following files were changed:<ol>

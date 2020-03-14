@@ -8,7 +8,7 @@ if (!defined('IS_ADMIN_FLAG')) {
 }
 
 define('VAT4EU_CURRENT_RELEASE', '2.0.4');
-define('VAT4EU_CURRENT_UPDATE_DATE', '2020-03-07');
+define('VAT4EU_CURRENT_UPDATE_DATE', '2020-03-14');
 
 define('VAT4EU_CURRENT_VERSION', VAT4EU_CURRENT_RELEASE . ': ' . VAT4EU_CURRENT_UPDATE_DATE);
 
@@ -64,7 +64,7 @@ if (isset($_SESSION['admin_id'])) {
            "INSERT INTO " . TABLE_CONFIGURATION . " 
                 ( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
             VALUES 
-                ( 'European Union Countries List', 'VAT4EU_EU_COUNTRIES', 'AT,BE,BG,CY,CZ,DE, DK,EE,EL,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', 'This comma-separated list identifies the countries that are in the EU by their 2-character ISO codes; intervening blanks are allowed. You normally will not need to change this list; it is provided as member countries move in and out of the EU.<br /><br/><b>Default</b>: AT,BE,BG,CY,CZ,DE, DK,EE,EL,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', $cgi, 15, now(), NULL, NULL)"        
+                ( 'European Union Countries List', 'VAT4EU_EU_COUNTRIES', 'AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', 'This comma-separated list identifies the countries that are in the EU by their 2-character ISO codes; intervening blanks are allowed. You normally will not need to change this list; it is provided as member countries move in and out of the EU.<br /><br/><b>Default</b>: AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', $cgi, 15, now(), NULL, NULL)"
         );
         
         $db->Execute(
@@ -147,6 +147,19 @@ if (isset($_SESSION['admin_id'])) {
         // Register the plugin's configuration group with the admin menus.
         //
         zen_register_admin_page('configVat4Eu', 'BOX_CONFIG_VAT4EU', 'FILENAME_CONFIGURATION', "gID=$cgi", 'configuration', 'Y', $cgi);
+    }
+    
+    // -----
+    // If the VAT4EU countries' list currently references 'EL', change those occurrences to 'GR' (the countries::countries_iso_code_2
+    // value for Greece).
+    //
+    if (defined('VAT4EU_EU_COUNTRIES') && strpos(VAT4EU_EU_COUNTRIES, 'GR') === false && strpos(VAT4EU_EU_COUNTRIES, 'EL') !== false) {
+        $db->Execute(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET configuration_value = '" . str_replace('EL', 'GR', VAT4EU_EU_COUNTRIES) . "'
+              WHERE configuration_key = 'VAT4EU_EU_COUNTRIES'
+              LIMIT 1"
+        );
     }
 
     // -----
