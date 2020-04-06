@@ -1,10 +1,10 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2020 Vinos de Frutas Tropicales
 //
 if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED == 'true') {
-    $popup_link = '<a href="javascript:popupVat4EuWindow(\'' . zen_href_link(FILENAME_POPUP_VAT4EU_FORMATS) . '\')">' . VAT4EU_WHATS_THIS . '</a>'
+    $popup_link = '<a href="javascript:popupVat4EuWindow(\'' . zen_href_link(FILENAME_POPUP_VAT4EU_FORMATS) . '\')">' . VAT4EU_WHATS_THIS . '</a>';
 ?>
 <script type="text/javascript">
 function popupVat4EuWindow(url) {
@@ -13,7 +13,7 @@ function popupVat4EuWindow(url) {
 </script>
 <div class="clearBoth"></div>
 <label class="inputLabel" for="vat-number"><?php echo VAT4EU_ENTRY_VAT_NUMBER; ?></label>
-<?php echo zen_draw_input_field('vat_number', $vat_number, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_vat_number', '40') . ' id="vat-number"') . $popup_link; ?>
+<?php echo zen_draw_input_field('vat_number', (!empty($vat_number)) ? $vat_number : '', zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_vat_number', '40') . ' id="vat-number"') . $popup_link; ?>
 <div class="clearBoth"></div>
 <?php
 }
