@@ -7,8 +7,8 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('VAT4EU_CURRENT_RELEASE', '2.0.4');
-define('VAT4EU_CURRENT_UPDATE_DATE', '2020-03-14');
+define('VAT4EU_CURRENT_RELEASE', '2.0.5-beta1');
+define('VAT4EU_CURRENT_UPDATE_DATE', '2020-04-06');
 
 define('VAT4EU_CURRENT_VERSION', VAT4EU_CURRENT_RELEASE . ': ' . VAT4EU_CURRENT_UPDATE_DATE);
 
@@ -123,7 +123,7 @@ if (isset($_SESSION['admin_id'])) {
         $db->Execute(
             "ALTER TABLE " . TABLE_ADDRESS_BOOK . " 
                ADD entry_vat_number varchar(32) DEFAULT NULL AFTER entry_company,
-               ADD entry_vat_validated tinyint(1) NOT NULL default '0' AFTER entry_vat_number"
+               ADD entry_vat_validated tinyint(1) NOT NULL default 0 AFTER entry_vat_number"
         );
         
         // -----
@@ -133,7 +133,7 @@ if (isset($_SESSION['admin_id'])) {
         $db->Execute(
             "ALTER TABLE " . TABLE_ORDERS . "
                ADD billing_vat_number varchar(32) NOT NULL DEFAULT '' AFTER billing_company,
-               ADD billing_vat_validated tinyint(1) NOT NULL default '0' AFTER billing_vat_number"
+               ADD billing_vat_validated tinyint(1) NOT NULL default 0 AFTER billing_vat_number"
         );
         
         // -----
