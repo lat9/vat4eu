@@ -82,14 +82,14 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 
 <body>
   <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.6 and later</h1>
-  <p>Version 2.0.5 by lat9.  Copyright &copy; 2017-2020, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
+  <p>Version 3.0.0 by lat9.  Copyright &copy; 2017-2020, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
   <p>Current Support Thread on the Zen Cart forums: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></p>
   
   <p><strong>Usage Notes:</strong></p>
   <ol>
-    <li>A working copy of Zen Cart (v1.5.6 or later) must be previously installed.</li>
+    <li>A working copy of Zen Cart (v1.5.6<b>b</b> or later) must be previously installed.</li>
     <li>Integration with <em>Edit Orders</em> requires EO version 4.3.0 or later.  See the <em>Interaction with Other Plugins</em> tab for more information.</li>
-    <li>If you require the automatic VAT validation service (via <a href="http://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools-&gt;Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
+    <li>If you require the automatic VAT validation service (via <a href="https://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools-&gt;Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
   </ol>
   
   <div class="tab-container" id="outer-container">
@@ -143,22 +143,14 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 
             <div id="initial">
               <noscript><h3>Installation</h3></noscript>
-              <p>There are <span class="corefile">core-file overwrites</span> and <span class="template">template-overrides</span> required by this plugin; you should <strong>always</strong> backup your cart's database and files prior to making any changes.  All <span class="corefile">core-</span> and <span class="template">template-</span>overrides use the like-named files in the Zen Cart 1.5.6a distribution as their change-basis.  Template-file changes are based on those present in the <code>template_default</code> directories.</p>
-              <p><strong>Note:</strong> These changes are, for the most part, the addition of a &quot;notifier&quot; to allow <em>VAT4EU</em> to provide its changes.</p>
+              <p>There are <span class="template">template-overrides</span> required by this plugin; you should <strong>always</strong> backup your cart's database and files prior to making any changes.  All <span class="template">template-overrides</span> use the like-named files in the Zen Cart 1.5.6b distribution as their change-basis.  Template-file changes are based on those present in that release's <code>template_default</code> directories.</p>
               <p>Unzip the plugin's package file and then:</p>
               <ol type="A">
                 <li>Rename the YOUR_ADMIN folder to match your custom admin folder's name.</li>
-                <li>Merge any pre-existing <span class="corefile">core-file</span> changes with the changes required by <em>VAT4EU</em>:<ol>
-                  <li><span class="corefile">/includes/functions/functions_customers.php</span> <span class="smaller">(2 marked change-sections)</span></li>
-                  <li><span class="corefile">/includes/modules/pages/address_book_process/header_php.php</span> <span class="smaller">(1 marked change-section)</span></li>
-                </ol> These changes have been submitted to be (hopefully) included in a subsequent Zen Cart release.
-                </li>
-                <li>Rename the two YOUR_TEMPLATE folders to match your current template's name:<ol>
-                  <li>/includes/modules/YOUR_TEMPLATE</li>
+                <li>Rename the YOUR_TEMPLATE sub-directory to match your current template's name:<ol>
                   <li>/includes/templates/YOUR_TEMPLATE</li>
                 </ol></li>
                 <li>Merge any pre-existing <span class="template">template-file</span> changes with the changes required by <em>VAT4EU</em>:<ol>
-                  <li><span class="template">/includes/modules/YOUR_TEMPLATE/checkout_address_book.php</span> <span class="smaller">(1 marked change-section)</span></li>
                   <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_address_book_details.php</span> <span class="smaller">(1 marked change-section)</span></li>
                   <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_checkout_new_address.php</span> <span class="smaller">(1 marked change-section)</span></li>
                   <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_create_account.php</span> <span class="smaller">(1 marked change-section)</span></li>
@@ -168,15 +160,12 @@ div.totals-desc h4 { border-top: 1px solid #666; }
                   <li>/includes/classes/VatValidation.php</li>
                   <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
                   <li>/includes/extra_datafiles/vat4eu_filenames.php</li>
-                  <li><span class="corefile">/includes/functions/functions_customers.php</span></li>
                   <li>/includes/languages/english/extra_definitions/vat4eu_extra_definitions.php</li>
                   <li>/includes/languages/english/html_includes/define_popup_vat4eu_formats.php</li>
                   <li>/includes/languages/english/modules/order_total/ot_vat_refund.php</li>
                   <li>/includes/languages/english/modules/order_total/ot_vat_reverse_charges.php</li>
                   <li>/includes/modules/order_total/ot_vat_refund.php</li>
                   <li>/includes/modules/order_total/ot_vat_reverse_charges.php</li>
-                  <li><span class="corefile">/includes/modules/pages/address_book_process/header_php.php</span></li>
-                  <li><span class="template">/includes/modules/YOUR_TEMPLATE/checkout_address_book.php</span></li>
                   <li>/includes/modules/pages/popup_vat4eu_formats/header_php.php</li>
                   <li>/includes/modules/pages/popup_vat4eu_formats/jscript_main.php</li>
                   <li>/includes/templates/template_default/css/popup_vat4eu_formats.css</li>
@@ -199,11 +188,8 @@ div.totals-desc h4 { border-top: 1px solid #666; }
             <div id="upgrade">
               <noscript><h3>Upgrading From a Version Prior to v2.0.0</h3></noscript>
               <p><em>Most</em> of the notifications used by <em>VAT4EU</em> are built into the Zen Cart 1.5.6 release; those contained in the current <span class="corefile">corefile</span> overwrites have been submitted to the Zen Cart GitHub repository for inclusion in a version later than 1.5.6a.</p>
-              <p>If you are upgrading your store to Zen Cart 1.5.6 or later and have a pre-existing version of <em>VAT4EU</em> installed, follow the following steps to merge the two.  If your store has additional changes to any of the <span class="corefile">core</span> or <span class="template">template</span> files, you'll need to merge those changes with the <em>VAT4EU</em> changes.</p>
+              <p>If you are upgrading your store to Zen Cart 1.5.6b or later and have a pre-existing version of <em>VAT4EU</em> installed, follow the following steps to merge the two.  If your store has additional changes to any of the <span class="template">template</span> files, you'll need to merge those changes with the <em>VAT4EU</em> changes.</p>
               <ol>
-                <li><span class="corefile">/includes/functions/functions_customers.php</span>.  The <em>VAT4EU</em> modifications are the addition of two (2) notifiers to allow the plugin to add a customer's VAT number to any generated address block.</li>
-                <li><span class="corefile">/includes/modules/pages/address_book_process.php</span>.  The <em>VAT4EU</em> modification is a single notification added to allow the plugin to note an error in an entered VAT number.</li>
-                <li><span class="template">/includes/modules/YOUR_TEMPLATE/checkout_new_address.php</span>.  The <em>VAT4EU</em> modification is a single notification added at the bottom of the module.</li>
                 <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_create_account.php</span>.  The <em>VAT4EU</em> modification is the inclusion of a module to display the VAT Number's entry field.</li>
                 <li><span class="corefile">/YOUR_ADMIN/customers.php</span>.  <em>VAT4EU</em> no longer requires changes to this module.  If you have no other changes, use the version included in the Zen Cart distribution.  Otherwise, you'll need to merge your other changes with the as-distributed module.</li>
                 <li><span class="corefile">/YOUR_ADMIN/includes/functions/functions_customers.php</span>.  Zen Cart 1.5.6 (and later) use the same version of this module in both the admin and the storefront.  Overwrite your previous version of this file with that included in the Zen Cart distribution.</li>
@@ -484,12 +470,18 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         <noscript><h3>Version History</h3></noscript>
         <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
         <ul>
-          <li>v2.0.5-beta1, 2020-04-06:<ul>
+          <li>v3.0.0, 2020-07-14:<ul>
             <li>BUGFIX: Correct PHP notice during account-creation.</li>
             <li>BUGFIX: Apply numeric defaults to added numeric fields (strict MySQL).</li>
+            <li>CHANGE: The minimum Zen Cart version for an initial install is now <code>zc156b</code> as the non-template overwrites are now 'baked into' that release.</li>
             <li>The following files were changed:<ol>
                 <li>/includes/templates/template_default/templates/tpl_modules_vat4eu_display.php</li>
                 <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+            </ol></li>
+            <li>The following files were removed from this plugin's distribution, but shouldn't be removed from your store if you are upgrading from a previous version of <em>VAT4EU</em>:<ol>
+                <li><span class="corefile">/includes/functions/functions_customers.php</span></li>
+                <li><span class="corefile">/includes/modules/pages/address_book_process/header_php.php</span></li>
+                <li><span class="template">/includes/modules/YOUR_TEMPLATE/checkout_address_book.php</span></li>
             </ol></li>
           </ul></li>
           <li>v2.0.4, 2020-03-14:<ul>

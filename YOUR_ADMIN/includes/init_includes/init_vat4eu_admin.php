@@ -7,8 +7,8 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('VAT4EU_CURRENT_RELEASE', '2.0.5-beta1');
-define('VAT4EU_CURRENT_UPDATE_DATE', '2020-04-06');
+define('VAT4EU_CURRENT_RELEASE', '3.0.0');
+define('VAT4EU_CURRENT_UPDATE_DATE', '2020-07-14');
 
 define('VAT4EU_CURRENT_VERSION', VAT4EU_CURRENT_RELEASE . ': ' . VAT4EU_CURRENT_UPDATE_DATE);
 
@@ -62,9 +62,9 @@ if (isset($_SESSION['admin_id'])) {
         
         $db->Execute(
            "INSERT INTO " . TABLE_CONFIGURATION . " 
-                ( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
+                (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
             VALUES 
-                ( 'European Union Countries List', 'VAT4EU_EU_COUNTRIES', 'AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', 'This comma-separated list identifies the countries that are in the EU by their 2-character ISO codes; intervening blanks are allowed. You normally will not need to change this list; it is provided as member countries move in and out of the EU.<br /><br/><b>Default</b>: AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', $cgi, 15, now(), NULL, NULL)"
+                ('European Union Countries List', 'VAT4EU_EU_COUNTRIES', 'AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', 'This comma-separated list identifies the countries that are in the EU by their 2-character ISO codes; intervening blanks are allowed. You normally will not need to change this list; it is provided as member countries move in and out of the EU.<br /><br/><b>Default</b>: AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', $cgi, 15, now(), NULL, NULL)"
         );
         
         $db->Execute(
@@ -76,16 +76,16 @@ if (isset($_SESSION['admin_id'])) {
 
         $db->Execute(
             "INSERT INTO " . TABLE_CONFIGURATION . " 
-                ( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
+                (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
              VALUES 
-                ( 'VAT Number Required?', 'VAT4EU_REQUIRED', 'false', 'Should the <em>VAT Number</em> be a <b>required</b> field?', $cgi, 30, now(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),')"
+                ('VAT Number Required?', 'VAT4EU_REQUIRED', 'false', 'Should the <em>VAT Number</em> be a <b>required</b> field?', $cgi, 30, now(), NULL, 'zen_cfg_select_option(array(\'true\', \'false\'),')"
         );
 
         $db->Execute(
             "INSERT INTO " . TABLE_CONFIGURATION . " 
-                ( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
+                (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
              VALUES 
-                ( 'Minimum VAT Number Length', 'VAT4EU_MIN_LENGTH', '10', 'Identify the minimum length of an entered VAT Number, used as a pre-check for any input value. Set the value to <em>0</em> to disable this check.', $cgi, 31, now(), NULL, NULL)"
+                ('Minimum VAT Number Length', 'VAT4EU_MIN_LENGTH', '10', 'Identify the minimum length of an entered VAT Number, used as a pre-check for any input value. Set the value to <em>0</em> to disable this check.', $cgi, 31, now(), NULL, NULL)"
         );
         
         $db->Execute(
@@ -104,9 +104,9 @@ if (isset($_SESSION['admin_id'])) {
                 
         $db->Execute(
            "INSERT INTO " . TABLE_CONFIGURATION . " 
-                ( configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
+                (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function ) 
             VALUES 
-                ( 'VAT Number: Unvalidated Indicator', 'VAT4EU_UNVERIFIED', '*', 'Identify the indicator that you want to give your customers who have entered a <em>VAT Number</em> when that number is not yet validated.<br /><br />Default: <b>*</b>', $cgi, 52, now(), NULL, NULL)"        
+                ('VAT Number: Unvalidated Indicator', 'VAT4EU_UNVERIFIED', '*', 'Identify the indicator that you want to give your customers who have entered a <em>VAT Number</em> when that number is not yet validated.<br /><br />Default: <b>*</b>', $cgi, 52, now(), NULL, NULL)"        
         );
         
         $db->Execute(
@@ -141,7 +141,7 @@ if (isset($_SESSION['admin_id'])) {
         //
         $messageStack->add(sprintf(VAT4EU_TEXT_MESSAGE_INSTALLED, VAT4EU_CURRENT_VERSION), 'success');
       
-        define ('VAT4EU_MODULE_VERSION', '0.0.0');
+        define('VAT4EU_MODULE_VERSION', '0.0.0');
         
         // -----
         // Register the plugin's configuration group with the admin menus.
