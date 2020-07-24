@@ -82,7 +82,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 
 <body>
   <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.6 and later</h1>
-  <p>Version 3.0.0 by lat9.  Copyright &copy; 2017-2020, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
+  <p>Version 3.0.1 by lat9.  Copyright &copy; 2017-2020, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
   <p>Current Support Thread on the Zen Cart forums: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></p>
   
   <p><strong>Usage Notes:</strong></p>
@@ -119,7 +119,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
             </ol></li>
             <li>Unlike the previous (see below) version of this processing, <em>no alteration is made to product prices</em>; your store will continue to display prices inclusive of VAT (if so configured).  The <em>VAT Refund</em> processing simply inserts an order-total element that backs-out any tax charged for <em>qualified</em> orders.</li>
           </ul></li>
-          <li>The plugin's processing makes use of the <a href="http://ec.europa.eu/taxation_customs/vies/faq.html" target="_blank">VIES (VAT Information Exchange System)</a> on-line validation service to automatically validate any <em>VAT Number</em> entered &mdash; either by the customer or an admin.  Admin processing includes a validation-override.</li>
+          <li>The plugin's processing makes use of the <a href="https://ec.europa.eu/taxation_customs/vies/faq.html" target="_blank">VIES (VAT Information Exchange System)</a> on-line validation service to automatically validate any <em>VAT Number</em> entered &mdash; either by the customer or an admin.  Admin processing includes a validation-override.</li>
         </ol>
         
         <p><strong>Note:</strong> This plugin is derived from the similarly-named plugin <a href="https://www.zen-cart.com/showthread.php?35744-VAT-mod-for-European-companies&p=201772#post201772" target="_blank">VAT-mod for European companies</a>, but its processing is quite different!</p>
@@ -308,7 +308,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
             <div id="taxes">
               <noscript><h3>Tax-Related Settings</h3></noscript>
               <p>If you haven't already set up the taxes for your store, now is the time!.</p>
-              <p><strong>Note:</strong> I am neither an accountant nor a tax attorney; the configuration suggested here is, I believe, the minimum required for the EU <a href="http://europa.eu/youreurope/business/vat-customs/moss-scheme/index_en.htm" target="_blank"><em>MOSS Scheme</em></a>.  Please consult your tax authority for verification!</p>
+              <p><strong>Note:</strong> I am neither an accountant nor a tax attorney; the configuration suggested here is, I believe, the minimum required for the EU <a href="https://europa.eu/youreurope/business/vat-customs/moss-scheme/index_en.htm" target="_blank"><em>MOSS Scheme</em></a>.  Please consult your tax authority for verification!</p>
 
               <div class="totals-desc">
                 <h4>Configure Your Store</h4>
@@ -409,7 +409,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
                 <li>create_account</li>
                 <li>login</li>
               </ol>
-              <p>The <em>What's this?</em> link, when clicked, displays a popup window that illustrates the varied VAT formats for the EU countries.  That information is a re-formatted version of the information on the <a href="http://ec.europa.eu/taxation_customs/vies/faq.html#item_11" target="_blank">VIES</a> website, and is current as of 2017-09-29.  The content is provided by <code>/includes/languages/english/html_includes/define_popup_vat4eu_formats.php</code>.</p>
+              <p>The <em>What's this?</em> link, when clicked, displays a popup window that illustrates the varied VAT formats for the EU countries.  That information is a re-formatted version of the information on the <a href="https://ec.europa.eu/taxation_customs/vies/faq.html#item_11" target="_blank">VIES</a> website, and is current as of 2017-09-29.  The content is provided by <code>/includes/languages/english/html_includes/define_popup_vat4eu_formats.php</code>.</p>
               <p><strong>Note:</strong> The <em>VAT Number</em> input will be added <b>only if</b> you have set <em>Configuration-&gt;Customer Details-&gt;Company</em> to <b>true</b>!</p>
               <div class="clearBoth"></div>
             </div>
@@ -470,6 +470,13 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         <noscript><h3>Version History</h3></noscript>
         <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
         <ul>
+          <li>v3.0.1, 2020-07-24:<ul>
+            <li>BUGFIX: Access VIES WSDL via https protocol.</li>
+            <li>The following files were changed:<ol>
+                <li>/includes/classes/VatValidation.php</li>
+                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+            </ol></li>
+          </ul></li>
           <li>v3.0.0, 2020-07-14:<ul>
             <li>BUGFIX: Correct PHP notice during account-creation.</li>
             <li>BUGFIX: Apply numeric defaults to added numeric fields (strict MySQL).</li>

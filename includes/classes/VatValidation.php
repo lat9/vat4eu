@@ -7,7 +7,7 @@
 //
 class VatValidation
 {
-    const WSDL = "http://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl";
+    const WSDL = "https://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl";
     
     // -----
     // These class constants define the possible values for the entry_vat_validated field, present
