@@ -7,8 +7,8 @@ if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('VAT4EU_CURRENT_RELEASE', '3.1.0-beta1');
-define('VAT4EU_CURRENT_UPDATE_DATE', '2021-11-18');
+define('VAT4EU_CURRENT_RELEASE', '3.1.0');
+define('VAT4EU_CURRENT_UPDATE_DATE', '2021-11-19');
 
 define('VAT4EU_CURRENT_VERSION', VAT4EU_CURRENT_RELEASE . ': ' . VAT4EU_CURRENT_UPDATE_DATE);
 
