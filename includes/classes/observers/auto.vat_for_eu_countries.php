@@ -12,10 +12,10 @@ class zcObserverVatForEuCountries extends base
     private $addressBookVats;
     private $vatGathered = false;
     private $addressFormatCount = 0;
-    private $vatCountries = array();
+    private $vatCountries = [];
     private $debug = false;
     private $logfile;
-    
+
     // -----
     // On construction, this auto-loaded observer checks to see that the plugin is enabled and, if so:
     //
@@ -23,7 +23,7 @@ class zcObserverVatForEuCountries extends base
     // - Create an instance of the "VAT Validation" class, for possible future use.
     // - Set initial values base on the plugin's database configuration.
     //
-    public function __construct() 
+    public function __construct()
     {
         // -----
         // Pull in the VatValidation class, enabling its constants to be used even if the plugin
@@ -32,7 +32,7 @@ class zcObserverVatForEuCountries extends base
         if (!class_exists('VatValidation')) {
             require DIR_WS_CLASSES . 'VatValidation.php';
         }
-        
+
         // -----
         // If the plugin is enabled ...
         //
@@ -44,49 +44,49 @@ class zcObserverVatForEuCountries extends base
             } else {
                 $this->logfile = DIR_FS_LOGS . '/vat4eu.log';
             }
-            
+
             // -----
             // Attach to the various notifications associated with this plugin's processing.  Events that have been added
             // for VAT4EU's processing are noted with a (*) within their description-comment.
             //
             $this->attach(
                 $this, 
-                array(
+                [
                     //- From /includes/classes/order.php
                     'NOTIFY_ORDER_AFTER_QUERY',                         //- Reconstructing a previously-placed order
                     'NOTIFY_ORDER_DURING_CREATE_ADDED_ORDER_HEADER',    //- Creating an order, after the main orders-table entry has been created
-                    
+
                     //- From /includes/modules/create_account.php
                     'NOTIFY_CREATE_ACCOUNT_VALIDATION_CHECK',                   //- Allows us to check/validate any supplied VAT Number
                     'NOTIFY_MODULE_CREATE_ACCOUNT_ADDED_ADDRESS_BOOK_RECORD',   //- Indicates that the account was created successfully
-                    
+
                     //- From /includes/modules/checkout_new_address.php
                     'NOTIFY_MODULE_CHECKOUT_NEW_ADDRESS_VALIDATION',        //- Allows us to check/validate any supplied VAT Number (*)
                     'NOTIFY_MODULE_CHECKOUT_ADDED_ADDRESS_BOOK_RECORD',     //- Indicates that the record was created successfully
-                    
+
                     //- From /includes/modules/checkout_address_book.php
                     'NOTIFY_MODULE_END_CHECKOUT_ADDRESS_BOOK',              //- Allows us to note any VAT Numbers associated with the customer's address book (*)
-                    
+
                     //- From /includes/modules/pagea/address_book/header_php.php
                     'NOTIFY_HEADER_END_ADDRESS_BOOK',                       //- Allows us to note any VAT Numbers associated with the customer's address book
-                    
+
                     //- From /includes/modules/pages/address_book_process/header_php.php
                     'NOTIFY_ADDRESS_BOOK_PROCESS_VALIDATION',                   //- Allows us to check/validate any supplied VAT Number (*)
                     'NOTIFY_MODULE_ADDRESS_BOOK_UPDATED_ADDRESS_BOOK_RECORD',   //- Indicates that an address-record was just updated
                     'NOTIFY_MODULE_ADDRESS_BOOK_ADDED_ADDRESS_BOOK_RECORD',     //- Indicates that an address-record was just created
                     'NOTIFY_HEADER_END_ADDRESS_BOOK_PROCESS',                   //- Allows us to gather any existing VAT number for display
-                    
+
                     //- From /includes/modules/pages/shopping_cart/header_php.php
                     'NOTIFY_HEADER_END_SHOPPING_CART',          //- End of the "standard" page's processing
-                    
+
                     //- From /includes/functions/functions_customers.php
                     'NOTIFY_END_ZEN_ADDRESS_FORMAT',            //- Issued at the end of the zen_address_format function (*)
                     'NOTIFY_ZEN_ADDRESS_LABEL',                 //- Issued during the zen_address_label function (*)
-                )
+                ]
             );
 
             $this->vatCountries = explode(',', str_replace(' ', '', VAT4EU_EU_COUNTRIES));
-            
+
             if (isset($_SESSION['customer_id'])) {
                 $address_id = (isset($_SESSION['billto'])) ? $_SESSION['billto'] : $_SESSION['customer_default_address_id'];
                 $this->getVatNumber($_SESSION['customer_id'], $address_id);
@@ -100,7 +100,8 @@ class zcObserverVatForEuCountries extends base
     // -----
     // This function receives control when one of its attached notifications is "fired".
     //
-    public function update(&$class, $eventID, $p1, &$p2, &$p3, &$p4, &$p5) {
+    public function update(&$class, $eventID, $p1, &$p2, &$p3, &$p4, &$p5)
+    {
         switch ($eventID) {
             // -----
             // Issued by the order-class after completing its base reconstruction of a 
@@ -124,7 +125,7 @@ class zcObserverVatForEuCountries extends base
                     $class->billing['billing_vat_validated'] = $vat_info->fields['billing_vat_validated'];
                 }
                 break;
-                
+
             // -----
             // Issued by the order-class after completing its base construction of an order's
             // information.
@@ -146,7 +147,7 @@ class zcObserverVatForEuCountries extends base
                     );
                 }
                 break;
-                
+
             // -----
             // Issued during the create-account, address-book or checkout-new-address processing, gives us a chance to validate (if
             // required) the customer's entered VAT Number.
@@ -168,7 +169,7 @@ class zcObserverVatForEuCountries extends base
                     $p2 = true;
                 }
                 break;
-                
+
             // -----
             // Issued during the create-account, address-book or checkout-new-address processing, indicates that an address record
             // has been created/updated and gives us a chance to record the customer's VAT Number.
@@ -191,7 +192,7 @@ class zcObserverVatForEuCountries extends base
                       LIMIT 1"
                 );
                 break;
-                
+
             // -----
             // Issued by the "address_book_process" page's header, preparing to display (or re-display
             // on error) the address-book entry form.  Gives us the opportunity to gather any pre-existing
@@ -211,7 +212,7 @@ class zcObserverVatForEuCountries extends base
                     }
                 }
                 break;
-                
+
             // -----
             // Issued at the end of the 'address_book' page's processing.  We'll gather up the VAT Numbers
             // associated with each of those addresses for display via future call to zen_address_format
@@ -220,7 +221,7 @@ class zcObserverVatForEuCountries extends base
             case 'NOTIFY_HEADER_END_ADDRESS_BOOK':
                 $this->gatherAccountAddressBookVatNumbers();
                 break;
-                
+
             // -----
             // Issued at the end of the 'checkout_address_book' module's processing.  We'll gather up the VAT Numbers
             // associated with each of those existing addresses for display via future call to zen_address_format
@@ -233,7 +234,7 @@ class zcObserverVatForEuCountries extends base
             case 'NOTIFY_MODULE_END_CHECKOUT_ADDRESS_BOOK':
                 $this->gatherCheckoutAddressBookVatNumbers($p1);
                 break;
-                
+
             // -----
             // Issued by the "shopping_cart" page's header when it's completed its processing.  Allows us to
             // determine whether a currently-logged-in customer qualifies for a VAT refund.
@@ -255,7 +256,7 @@ class zcObserverVatForEuCountries extends base
                     $this->debug($debug_message);
                 }
                 break;
-                
+
             // -----
             // Issued at the end of the zen_address_format function, just prior to return.  Gives us a chance to
             // insert the "VAT Number" value, if indicated.
@@ -277,7 +278,7 @@ class zcObserverVatForEuCountries extends base
                 $this->debug($eventID . ': ' . var_export($this, true));
                 $this->vatGathered = false;
                 break;
-                
+
             // -----
             // Issued by zen_address_label after gathering the address fields for a specified customer's address.  Gives this plugin
             // the opportunity to capture any "VAT Number" associated with the associated address ... for use by
@@ -296,12 +297,12 @@ class zcObserverVatForEuCountries extends base
                 $this->checkVatIsRefundable($p2, $p3);
                 $this->vatGathered = true;
                 break;
-                
+
             default:
                 break;
         }
     }
-    
+
     public function isVatRefundable()
     {
         return $this->checkVatIsRefundable();
@@ -317,7 +318,7 @@ class zcObserverVatForEuCountries extends base
         );
         return ($check->EOF) ? 'Unknown' : $check->fields['countries_iso_code_2'];
     }
-    
+
     // -----
     // This function, called for pages that make modifications to an account's
     // VAT Number, provides basic validation for that number.
@@ -326,35 +327,35 @@ class zcObserverVatForEuCountries extends base
     {
         $vat_ok = false;
         $GLOBALS['vat_number'] = $vat_number = strtoupper(zen_db_prepare_input($_POST['vat_number']));
-        
+
         $countries_id = $_POST['zone_country_id'];
         $country_iso_code_2 = $this->getCountryIsoCode2($countries_id);
-        
+
         $this->vatNumberStatus = VatValidation::VAT_NOT_VALIDATED;
-        
+
         $validation = new VatValidation($country_iso_code_2, $vat_number);
         $precheck_status = $validation->vatNumberPreCheck();
         switch ($precheck_status) {
             case VatValidation::VAT_NOT_SUPPLIED:
                 $vat_ok = true;
                 break;
-                
+
             case VatValidation::VAT_REQUIRED:
                 $GLOBALS['messageStack']->add($message_location, VAT4EU_ENTRY_REQUIRED_ERROR, 'error');
                 break;
-                
+
             case VatValidation::VAT_MIN_LENGTH:
                 $GLOBALS['messageStack']->add($message_location, VAT4EU_ENTRY_VAT_MIN_ERROR, 'error');
                 break;
-                
+
             case VatValidation::VAT_BAD_PREFIX:
                 $GLOBALS['messageStack']->add($message_location, sprintf(VAT4EU_ENTRY_VAT_PREFIX_INVALID, $country_iso_code_2, zen_get_country_name($countries_id)), 'error');
                 break;
-                
+
             case VatValidation::VAT_INVALID_CHARS:
                 $GLOBALS['messageStack']->add_session($message_location, VAT4EU_VAT_NOT_VALIDATED, 'warning');
                 break;
-                
+
             case VatValidation::VAT_OK:
                 $vat_ok = true;
                 if ($message_location == 'create_account') {
@@ -370,16 +371,16 @@ class zcObserverVatForEuCountries extends base
                         $vat_ok = false;
                         $GLOBALS['messageStack']->add_session($message_location, VAT4EU_VAT_NOT_VALIDATED, 'warning');
                     }
-                }                
+                }
                 break;
-                
+
             default:
                 trigger_error("Unexpected return value from vatNumberPreCheck: $precheck_status, VAT number not authorized.", E_USER_WARNING);
                 break;
         }
-        return $vat_ok;    
+        return $vat_ok;
     }
-    
+
     protected function getVatNumber($customers_id, $address_id)
     {
         $debug_message = "getVatNumber($customers_id, $address_id)" . PHP_EOL;
@@ -400,11 +401,11 @@ class zcObserverVatForEuCountries extends base
                 $debug_message .= "\tBilling country is part of the EU, VAT Number (" . $this->vatNumber . "), validation status: " . $this->vatNumberStatus . PHP_EOL;
             }
         }
-        
+
         $this->debug($debug_message . "\tReturning (" . $this->vatNumberStatus . ")" . PHP_EOL);
         return $this->vatNumberStatus;
     }
-    
+
     protected function checkVatIsRefundable($customers_id = false, $address_id = false)
     {
         if (!$this->vatGathered) {
@@ -420,7 +421,7 @@ class zcObserverVatForEuCountries extends base
                     $address_id = (isset($_SESSION['billto'])) ? $_SESSION['billto'] : $_SESSION['customer_default_address_id'];
                 }
                 $debug_message .= "\tCustomer is logged in ($customers_id, $address_id)" . PHP_EOL;
-                
+
                 if ($this->getVatNumber($customers_id, $address_id) !== false) {
                     $sendto_address_id = (isset($_SESSION['sendto'])) ? $_SESSION['sendto'] : $_SESSION['customer_default_address_id'];
                     if ($sendto_address_id !== false) {
@@ -447,7 +448,7 @@ class zcObserverVatForEuCountries extends base
         }
         return $this->vatIsRefundable;
     }
-    
+
     // ------
     // This function determines, based on the currently-active page, whether a zen_address_format
     // function call should have the VAT Number appended and, if so, appends it!
@@ -479,7 +480,7 @@ class zcObserverVatForEuCountries extends base
                         $use_vat_from_address_book = true;
                     }
                     break;
-                    
+
                 // -----
                 // These pages include a single address reference, so the VAT Number is always displayed.  For these
                 // pages, the current customer/checkout session values provide the values associated with the vatNumber
@@ -490,7 +491,7 @@ class zcObserverVatForEuCountries extends base
                 case FILENAME_CREATE_ACCOUNT_SUCCESS:
                     $show_vat_number = true;
                     break;
-                    
+
                 // -----
                 // These pages include multiple address-blocks' display; the second call to zen_address_format references
                 // the billing address, so the VAT Number is displayed.
@@ -507,7 +508,7 @@ class zcObserverVatForEuCountries extends base
                         $this->vatNumberStatus = $GLOBALS['order']->billing['billing_vat_validated'];
                     }
                     break;
-                    
+
                 // -----
                 // These pages include multiple address-blocks' display; the first call to zen_address_format references
                 // the billing address, so the VAT Number is displayed.
@@ -518,7 +519,7 @@ class zcObserverVatForEuCountries extends base
                         $show_vat_number = true;
                     }
                     break;
-                    
+
                 // -----
                 // Some of the other pages have multiple address-blocks with conditional displays, so weed them
                 // out now.
@@ -585,7 +586,7 @@ class zcObserverVatForEuCountries extends base
         }
         return $address_out;
     }
-    
+
     // -----
     // Gather, and insert into the address-book array, the VAT numbers associated with each of the
     // customer's defined addresses.
@@ -596,8 +597,7 @@ class zcObserverVatForEuCountries extends base
         $sql_query = $GLOBALS['db']->bindVars($sql_query, ':customersID', $_SESSION['customer_id'], 'integer');
         $this->gatherAddressBookVatNumbers($sql_query);
     }
-    
-    
+
     // -----
     // Gather, and insert into the address-book array, the VAT numbers associated with each of the
     // customer's defined addresses, for use during the checkout_payment_address or checkout_shipping_address
@@ -607,7 +607,7 @@ class zcObserverVatForEuCountries extends base
     {
         $this->gatherAddressBookVatNumbers($sql_query);
     }
-    
+
     protected function gatherAddressBookVatNumbers($sql_query)
     {
         $debug_message = "gatherAddressBookVatNumbers($sql_query)." . PHP_EOL;
@@ -622,19 +622,19 @@ class zcObserverVatForEuCountries extends base
         $sql_query = strtolower(preg_replace("/\s+/", " ", $sql_query));
         $sql_query = str_replace(' from', ', entry_vat_number, entry_vat_validated from', $sql_query);
         $debug_message .= "\tModified SQL query: $sql_query" . PHP_EOL;
-        
+
         $addresses = $GLOBALS['db']->Execute($sql_query);
-        $this->addressBookVats = array();
+        $this->addressBookVats = [];
         while (!$addresses->EOF) {
-            $this->addressBookVats[] = array(
+            $this->addressBookVats[] = [
                 'vat_number' => $addresses->fields['entry_vat_number'],
                 'vat_validated' => $addresses->fields['entry_vat_validated']
-            );
+            ];
             $addresses->MoveNext();
         }
         $this->debug($debug_message . var_export($this->addressBookVats, true));
     }
-    
+
     // -----
     // This function returns a boolean indicator, identifying whether (true) or not (false) the
     // country associated with the "countries_id" input qualifies for this plugin's processing.
@@ -643,12 +643,11 @@ class zcObserverVatForEuCountries extends base
     {
         return in_array($this->getCountryIsoCode2($countries_id), $this->vatCountries);
     }
-    
+
     private function debug($message)
     {
         if ($this->debug) {
             error_log(date('Y-m-d H:i:s') . ": $message" . PHP_EOL, 3, $this->logfile);
         }
     }
-
 }

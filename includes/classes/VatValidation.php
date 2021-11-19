@@ -1,14 +1,14 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2020 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2021 Vinos de Frutas Tropicales
 //
 // This class derived from a similarly-named class provided here: https://github.com/herdani/vat-validation
 //
 class VatValidation
 {
     const WSDL = "https://ec.europa.eu/taxation_customs/vies/checkVatService.wsdl";
-    
+
     // -----
     // These class constants define the possible values for the entry_vat_validated field, present
     // in the Zen Cart address_book table.
@@ -17,7 +17,7 @@ class VatValidation
     const VAT_VIES_OK        = 1;       //- The VAT Number was validated via VIES
     const VAT_NOT_VALIDATED  = 0;       //- The VAT Number has not been validated; initial setting when admin-validation is configured
     const VAT_VIES_NOT_OK    = -1;      //- The VAT Number was indicated to be invalid via VIES.
-    
+
     // -----
     // These class constants are returned by the vatNumberPreCheck function, identifying the pre-check's
     // completion status.
@@ -28,7 +28,7 @@ class VatValidation
     const VAT_BAD_PREFIX     = -2;      //- The first 2 characters of the number don't match the associated country-code
     const VAT_INVALID_CHARS  = -3;      //- There is at least one "invalid" character in the supplied VAT number
     const VAT_REQUIRED       = -4;      //- No VAT Number was supplied and it's required
-    
+
     // -----
     // This constant defines the characters (used in preg_match) that are "valid" for a VAT Number.  Note
     // that characters that are valid for one country might not be valid for another!
@@ -36,17 +36,16 @@ class VatValidation
     // Valid characters are alphanumerics, space (' '), plus-sign ('+') and asterisk ('*').
     //
     const VAT_VALIDATION     = '/[A-Z0-9 \+*]+/';
-    
 
     private $_client = null;
     private $_valid = false;
-    
+
     private $vatNumber;
     private $countryCode;
-    
+
     private $debug = false;
     private $soapInstalled = false;
-    
+
     // -----
     // The class constructor gathers the to-be-verified country-code (2-character ISO) and
     // the associated VAT Number.  The "VAT Number" value must include any country code
@@ -57,21 +56,21 @@ class VatValidation
     //
     public function __construct($countryCode, $vatNumber) 
     {
-        if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED == 'true') {
-            $this->debug = (defined('VAT4EU_DEBUG') && VAT4EU_DEBUG == 'true');
-            
+        if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED === 'true') {
+            $this->debug = (defined('VAT4EU_DEBUG') && VAT4EU_DEBUG === 'true');
+
             // -----
             // Greek VAT numbers start with 'EL' instead of their country-code ('GR').
             //
-            $this->countryCode = ($countryCode == 'GR') ? 'EL' : $countryCode;
+            $this->countryCode = ($countryCode === 'GR') ? 'EL' : $countryCode;
             $this->vatNumber = strtoupper($vatNumber);
-            
+
             if (!class_exists('SoapClient')) {
                 trigger_error('VAT Number validation not possible, "SoapClient" class is not available.', E_USER_WARNING);;
             } else {
                 $this->soapInstalled = true;
                 try {
-                    $this->_client = new SoapClient(self::WSDL, array('trace' => true) );
+                    $this->_client = new SoapClient(self::WSDL, ['trace' => true]);
                 } catch(Exception $e) {
                     $this->soapInstalled = false;
                     trigger_error("VAT Number validation not possible, VAT Translation Error: " . $e->getMessage(), E_USER_WARNING);
@@ -80,7 +79,7 @@ class VatValidation
             $this->trace("__construct($countryCode, $vatNumber)");
         }
     }
-    
+
     // -----
     // This function performs a quick pre-check of the VAT Number, weeding out some simple errors
     // prior to requesting VIES validation.
@@ -95,7 +94,7 @@ class VatValidation
         // know.
         //
         if ($this->vatNumber == '') {
-            if (VAT4EU_REQUIRED == 'true') {
+            if (VAT4EU_REQUIRED === 'true') {
                 $rc = self::VAT_REQUIRED;
             } else {
                 $rc = self::VAT_NOT_SUPPLIED;
@@ -122,7 +121,7 @@ class VatValidation
         }
         $this->trace("vatNumberPreCheck({$this->vatNumber}), returning $rc.");
         return $rc;
-    }        
+    }
 
     // -----
     // This function calls, via SOAP, the VIES VAT validation service to see if the current
@@ -136,10 +135,10 @@ class VatValidation
             $number_validated = true;
             try {
                 $rs = $this->_client->checkVat(
-                    array(
+                    [
                         'countryCode' => $this->countryCode, 
                         'vatNumber' => substr($this->vatNumber, 2)
-                    ) 
+                    ] 
                 );
             } catch(Exception $e) {
                 $number_validated = false;
