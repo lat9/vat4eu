@@ -473,9 +473,11 @@ div.totals-desc h4 { border-top: 1px solid #666; }
           <li>v3.1.0, 2021-11-19:<ul>
             <li>CHANGE: Various refactors; the minimum PHP version supported is now PHP 5.6.0.</li>
             <li>CHANGE: Since Brexit, 'GB' is no longer a VAT4EU country; it's now auto-removed from configuration.</li>
+            <li>CHANGE: Use zen_is_logged_in() and zen_is_guest_checkout() to determine logged-in status.</li>
             <li>The following files were changed:<ol>
                 <li>/includes/classes/VatValidation.php</li>
                 <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                <li>/includes/languages/english/html_includes/define_popup_vat4eu_formats.php</li>
                 <li>/YOUR_ADMIN/includes/languages/extra_definitions/vat4eu_extra_definitions_admin.php</li>
                 <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
             </ol></li>

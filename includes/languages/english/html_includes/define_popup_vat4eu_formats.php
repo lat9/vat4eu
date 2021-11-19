@@ -75,11 +75,6 @@
         <td>1 block of 2 characters, 1 block of 9 digits</td>
     </tr>
     <tr>
-        <td>GB-United Kingdom</td>
-        <td>GB999 9999 99 or<br />GB999 9999 99 999<sup>5</sup> or<br />GBGD999<sup>6</sup> or<br />GBHA999<sup>7</sup></td>
-        <td>1 block of 3 digits, 1 block of 4 digits and 1 block of 2 digits; or<br />the above followed by a block of 3 digits; or <br />1 block of 5 characters</td>
-    </tr>
-    <tr>
         <td>HR-Croatia</td>
         <td>HR99999999999</td>
         <td>1 block of 11 digits</td>
