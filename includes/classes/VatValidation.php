@@ -109,7 +109,7 @@ class VatValidation
         //    characters allowed for some countries.
         } else {
             $vat_number_length = strlen($this->vatNumber);
-            if (VAT4EU_MIN_LENGTH != '0' && $vat_number_length < VAT4EU_MIN_LENGTH) {
+            if (VAT4EU_MIN_LENGTH !== '0' && $vat_number_length < VAT4EU_MIN_LENGTH) {
                 $rc = self::VAT_MIN_LENGTH;
             } elseif (strpos($this->vatNumber, $this->countryCode) !== 0) {
                 $rc = self::VAT_BAD_PREFIX;  
