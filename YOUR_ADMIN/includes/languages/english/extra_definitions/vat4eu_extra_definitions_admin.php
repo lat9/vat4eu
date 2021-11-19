@@ -1,10 +1,12 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2021 Vinos de Frutas Tropicales
 //
 define('VAT4EU_TEXT_MESSAGE_INSTALLED', 'v%s of the <em>VAT Mod</em> plugin has been successfully installed.');
 define('VAT4EU_TEXT_MESSAGE_UPDATED', 'The <em>VAT4EU</em> plugin has been successfully updated from v%1$s to v%2$s.');
+
+define('VAT4EU_GB_COUNTRY_REMOVED', 'The country \'GB\' has been removed from the VAT4EU <em>EU Countries</em> list.');
 
 define('BOX_CONFIG_VAT4EU', 'VAT for EU Countries');
 

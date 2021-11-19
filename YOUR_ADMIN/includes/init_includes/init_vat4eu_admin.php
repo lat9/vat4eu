@@ -64,7 +64,7 @@ if (isset($_SESSION['admin_id'])) {
            "INSERT INTO " . TABLE_CONFIGURATION . "
                 (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function)
             VALUES 
-                ('European Union Countries List', 'VAT4EU_EU_COUNTRIES', 'AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', 'This comma-separated list identifies the countries that are in the EU by their 2-character ISO codes; intervening blanks are allowed. You normally will not need to change this list; it is provided as member countries move in and out of the EU.<br /><br/><b>Default</b>: AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, GB,HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', $cgi, 15, now(), NULL, NULL)"
+                ('European Union Countries List', 'VAT4EU_EU_COUNTRIES', 'AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', 'This comma-separated list identifies the countries that are in the EU by their 2-character ISO codes; intervening blanks are allowed. You normally will not need to change this list; it is provided as member countries move in and out of the EU.<br><br><b>Default</b>: AT,BE,BG,CY,CZ,DE, DK,EE,GR,ES,FI,FR, HR,HU,IE,IT,LT, LU,LV,MT,NL,PL, PT,RO,SE,SI,SK', $cgi, 15, now(), NULL, NULL)"
         );
 
         $db->Execute(
@@ -99,14 +99,14 @@ if (isset($_SESSION['admin_id'])) {
             "INSERT INTO " . TABLE_CONFIGURATION . "
                 (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function)
              VALUES 
-                ('<em>VAT Number</em> Validation', 'VAT4EU_VALIDATION', 'Admin', 'A <em>VAT Number</em> requires validation prior to granting the customer a VAT Refund. Choose the validation method to use for your store, one of:<br /><br /><b>Customer</b> ... validate on any customer update<br /><b>Admin</b> ... only validated by admin action.<br />', $cgi, 50, now(), NULL, 'zen_cfg_select_option(array(\'Customer\', \'Admin\'),')"
+                ('<em>VAT Number</em> Validation', 'VAT4EU_VALIDATION', 'Admin', 'A <em>VAT Number</em> requires validation prior to granting the customer a VAT Refund. Choose the validation method to use for your store, one of:<br><br><b>Customer</b> ... validate on any customer update<br><b>Admin</b> ... only validated by admin action.<br>', $cgi, 50, now(), NULL, 'zen_cfg_select_option(array(\'Customer\', \'Admin\'),')"
         );
 
         $db->Execute(
            "INSERT INTO " . TABLE_CONFIGURATION . "
                 (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function)
             VALUES 
-                ('VAT Number: Unvalidated Indicator', 'VAT4EU_UNVERIFIED', '*', 'Identify the indicator that you want to give your customers who have entered a <em>VAT Number</em> when that number is not yet validated.<br /><br />Default: <b>*</b>', $cgi, 52, now(), NULL, NULL)"        
+                ('VAT Number: Unvalidated Indicator', 'VAT4EU_UNVERIFIED', '*', 'Identify the indicator that you want to give your customers who have entered a <em>VAT Number</em> when that number is not yet validated.<br><br>Default: <b>*</b>', $cgi, 52, now(), NULL, NULL)"        
         );
 
         $db->Execute(
@@ -160,6 +160,21 @@ if (isset($_SESSION['admin_id'])) {
               WHERE configuration_key = 'VAT4EU_EU_COUNTRIES'
               LIMIT 1"
         );
+    }
+
+    // -----
+    // Fixup any previous configuration, removing 'GB' from the EU Countries' list (no longer supported due to Brexit).
+    //
+    if (defined('VAT4EU_EU_COUNTRIES') && strpos(VAT4EU_EU_COUNTRIES, 'GB') !== false) {
+        $vat_countries = explode(',', strtoupper(str_replace(' ', '', VAT4EU_EU_COUNTRIES)));
+        $vat_countries = array_diff($vat_countries, ['GB']);
+        $db->Execute(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET configuration_value = '" . implode(', ', array_diff($vat_countries, ['GB'])) . "'
+              WHERE configuration_key = 'VAT4EU_EU_COUNTRIES'
+              LIMIT 1"
+        );
+        $messageStack->add(VAT4EU_GB_COUNTRY_REMOVED, 'caution');
     }
 
     // -----
