@@ -183,7 +183,8 @@ if (isset($_SESSION['admin_id'])) {
     if (VAT4EU_MODULE_VERSION != VAT4EU_CURRENT_VERSION) {
         $db->Execute(
             "UPDATE " . TABLE_CONFIGURATION . " 
-                SET configuration_value = '" . VAT4EU_CURRENT_VERSION . "' 
+                SET configuration_value = '" . VAT4EU_CURRENT_VERSION . "',
+                    set_function = 'zen_cfg_read_only('
               WHERE configuration_key = 'VAT4EU_MODULE_VERSION'
               LIMIT 1"
         );

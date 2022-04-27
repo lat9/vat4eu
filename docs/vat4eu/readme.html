@@ -472,8 +472,10 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         <ul>
           <li>v3.1.1, 2022-04-27:<ul>
             <li>BUGFIX: Correct integration with &quot;Edit Orders&quot;, v4.6.0+ &mdash; notifications changed.</li>
+            <li>BUGFIX: Use <code>zen_cfg_read_only</code> so that the plugin's version/release date don't get updated on a configuration update.</li>
             <li>The following files were changed:<ol>
                 <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
+                <li>/YOUR_ADMIN/includes/functions/extra_functions/zen_cfg_read_only.php <span class="smaller">(Added)</span></li>
                 <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
             </ol></li>
           </ul></li>
