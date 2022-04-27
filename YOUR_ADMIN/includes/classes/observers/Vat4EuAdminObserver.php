@@ -1,7 +1,7 @@
 <?php
 // -----
-// Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2020 Vinos de Frutas Tropicales
+// Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9
+// Copyright (c) 2017-2022 Vinos de Frutas Tropicales
 //
 if (!defined('IS_ADMIN_FLAG') || IS_ADMIN_FLAG !== true) {
     die('Illegal Access');
@@ -9,16 +9,17 @@ if (!defined('IS_ADMIN_FLAG') || IS_ADMIN_FLAG !== true) {
 
 class Vat4EuAdminObserver extends base 
 {
-    private $isEnabled = false;
-    private $vatValidated = false;
-    private $vatIsRefundable = false;
-    private $vatNumber = '';
-    private $vatNumberStatus = 0;
-    private $addressFormatCount = 0;
-    private $vatCountries = array();
-    private $debug = false;
-    private $oID = 0;
-    
+    private
+        $isEnabled = false,
+        $vatValidated = false,
+        $vatIsRefundable = false,
+        $vatNumber = '',
+        $vatNumberStatus = 0,
+        $addressFormatCount = 0,
+        $vatCountries = [],
+        $debug = false,
+        $oID = 0;
+
     // -----
     // On construction, this auto-loaded observer checks to see that the plugin is enabled and, if so:
     //
@@ -34,13 +35,13 @@ class Vat4EuAdminObserver extends base
         if (!class_exists('VatValidation')) {
             require DIR_FS_CATALOG . DIR_WS_CLASSES . 'VatValidation.php';
         }
-        
+
         // -----
         // If the plugin is enabled ...
         //
-        if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED == 'true') {
+        if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED === 'true') {
             $this->isEnabled = true;
-            $this->debug = (defined('VAT4EU_DEBUG') && VAT4EU_DEBUG == 'true');
+            $this->debug = (defined('VAT4EU_DEBUG') && VAT4EU_DEBUG === 'true');
             if (isset($_SESSION['admin_id'])) {
                 $this->logfile = DIR_FS_LOGS . '/vat4eu_adm_' . $_SESSION['admin_id'] . '.log';
             } else {
@@ -57,10 +58,10 @@ class Vat4EuAdminObserver extends base
                 array(
                     //- From admin/includes/classes/order.php
                     'ORDER_QUERY_ADMIN_COMPLETE',                   //- Reconstructing a previously-placed order
-                    
+
                     //- From /includes/classes/order.php
                     'NOTIFY_ORDER_AFTER_QUERY',                     //- Reconstructing a previously-placed order (Edit Orders)
-                    
+
                     //- From admin/customers.php
                     'NOTIFY_ADMIN_CUSTOMERS_LIST_ADDRESSES',        //- Allows us to add the number/validation status to address list (*)
                     'NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE',       //- Allows us to check/validate any entered VAT Number (*)
@@ -69,10 +70,11 @@ class Vat4EuAdminObserver extends base
                     'NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER',        //- The point at which we add columns to the listing heading (*)
                     'NOTIFY_ADMIN_CUSTOMERS_LISTING_NEW_FIELDS',    //- The point at which we insert additional fields for the listing (*)
                     'NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT',       //- The point at which we insert a customer record in the listing (*)
-                    
+
                     //- From admin/edit_orders.php
                     'EDIT_ORDERS_PRE_UPDATE_ORDER',                 //- Allows us to update any VAT Number associated with the order
-                    'EDIT_ORDERS_ADDITIONAL_ADDRESS_ROWS',          //- Allows us to insert a "VAT Number" input field.
+                    'EDIT_ORDERS_ADDITIONAL_ADDRESS_ROWS',          //- Allows us to insert a "VAT Number" input field, for versions of EO prior to v4.6.0.
+                    'EDIT_ORDERS_ADDL_BILLING_ADDRESS_ROWS',        //- As above, but for EO v4.6.0+.
 
                     //- From admin/includes/functions/functions_customers.php
                     'NOTIFY_END_ZEN_ADDRESS_FORMAT',                //- Issued at the end of the zen_address_format function (*)
@@ -109,7 +111,7 @@ class Vat4EuAdminObserver extends base
                     $this->vatValidated = $class->billing['billing_vat_validated'] = $vat_info->fields['billing_vat_validated'];
                 }
                 break;
-                
+
             // -----
             // Issued by the storefront order-class after completing its base reconstruction of a 
             // previously-placed order.  We'll tack any "VAT Number" recorded in the order
@@ -132,7 +134,7 @@ class Vat4EuAdminObserver extends base
                     $this->vatValidated = $class->billing['billing_vat_validated'] = $vat_info->fields['billing_vat_validated'];
                 }
                 break;
-                
+
             // -----
             // Issued by Customers->Customers when a customer's address-list is being displayed.  We'll gather
             // the VAT numbers and associated status for future calls to zen_address_format.
@@ -144,7 +146,7 @@ class Vat4EuAdminObserver extends base
             case 'NOTIFY_ADMIN_CUSTOMERS_LIST_ADDRESSES':
                 $this->gatherCustomersAddressBookVatNumbers($p1);
                 break;
-                
+
             // -----
             // Issued by Customers->Customers at the end of its field validation, giving us the
             // chance to validate the Vat-related fields.
@@ -157,7 +159,7 @@ class Vat4EuAdminObserver extends base
                 $this->vatNumberUpdateError = !$this->validateVatNumber();
                 $p2 = $this->vatNumberUpdateError;
                 break;
-                
+
             // -----
             // Issued by Customers->Customers just prior to an address-book update, allows
             // us to insert any updated value for the customer's VAT Number.
@@ -171,7 +173,7 @@ class Vat4EuAdminObserver extends base
                 $p2[] = array('fieldName' => 'entry_vat_number', 'value' => $_POST['vat_number'], 'type' => 'stringIgnoreNull');
                 $p2[] = array('fieldName' => 'entry_vat_validated', 'value' => $this->vatNumberStatus, 'type' => 'integer');
                 break;
-                
+
             // -----
             // Issued by Customers->Customers during a customer-information edit.  Allows us to
             // insert additional input fields associated with the VAT Number.
@@ -190,7 +192,7 @@ class Vat4EuAdminObserver extends base
             case 'NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT':
                 $p2 = array_merge($p2, $this->formatVatNumberDisplay($p1));
                 break;
-                
+
             // -----
             // Issued by Customers->Customers prior to listing generation, allows us to insert
             // additional column heading(s).
@@ -220,7 +222,7 @@ class Vat4EuAdminObserver extends base
                 );
                 $p2[] = $heading;
                 break;
-                
+
             // -----
             // Issued by Customers->Customers prior to listing generation, allows us to "tack on"
             // the VAT-related fields.
@@ -238,7 +240,7 @@ class Vat4EuAdminObserver extends base
                     $p3 .= ', a.entry_vat_number DESC, c.customers_lastname, c.customers_firstname';
                 }
                 break;
-                
+ 
             // -----
             // Issued by Customers->Customers during listing generation, allows us to insert
             // additional VAT-related columns.
@@ -260,7 +262,7 @@ class Vat4EuAdminObserver extends base
                 );
                 $p2[] = $vat_column;
                 break;
-                
+
             // -----
             // Issued by "Edit Orders" just prior to updating an order's header information, allows us to
             // process any update to the VAT Number associated with the billing address.
@@ -279,7 +281,7 @@ class Vat4EuAdminObserver extends base
                     $GLOBALS['messageStack']->add_session(VAT4EU_EO_CUSTOMER_UPDATE_REQUIRED, 'warning');
                 }
                 break;
-                
+
             // -----
             // Issued by "Edit Orders" during its rendering of the address blocks.  Allows us to
             // insert the fields associated with the VAT Number's display/modification.
@@ -316,7 +318,40 @@ class Vat4EuAdminObserver extends base
                     '</tr>' . PHP_EOL;
                 $p2 .= $vat_info;
                 break;
-                
+
+            // -----
+            // Issued by "Edit Orders", v4.6.0+, when rendering the billing-address block.  We'll insert the fields
+            // associated with the VAT Number's display/modification.
+            // On entry:
+            //
+            // $p1 ... (r/o) A copy of the address-related fields for the current order's billing address.
+            // $p2 ... (r/w) A reference to an associated array containing additional fields to be added, in the following format:
+            //
+            // $extra_data = [
+            //     [
+            //       'label' => 'label_name',   //-No trailing ':', that will be added by EO.
+            //       'value' => $value          //-This is the form-field to be added
+            //     ],
+            // ];
+            //
+            case 'EDIT_ORDERS_ADDL_BILLING_ADDRESS_ROWS':
+                $vat_number = !empty($p1['billing_vat_number']) ? $p1['billing_vat_number'] : '';
+                $vat_validated = !empty($p1['billing_vat_validated']) ? $p1['billing_vat_validated'] : '0';
+                $valid_indicator = '';
+                if ($vat_number !== '' && $vat_validated != VatValidation::VAT_VIES_OK && $vat_validated != VatValidation::VAT_ADMIN_OVERRIDE) {
+                    $valid_indicator = '&nbsp;&nbsp;' . VAT4EU_UNVERIFIED;
+                }
+                $hidden_fields = zen_draw_hidden_field('current_vat_number', $vat_number) . zen_draw_hidden_field('current_vat_validated', $vat_validated);
+                $p2[] = [
+                    'label' => rtrim(VAT4EU_ENTRY_VAT_NUMBER, ':'),
+                    'value' => zen_draw_input_field('vat_number', zen_db_output($vat_number), 'size="45"') . $valid_indicator . $hidden_fields
+                ];
+                $p2[] = [
+                    'label' => rtrim(VAT4EU_ENTRY_OVERRIDE_VALIDATION, ':'),
+                    'value' => zen_draw_checkbox_field('vat_number_override', '', ($vat_validated == VatValidation::VAT_ADMIN_OVERRIDE))
+                ];
+                break;
+
             // -----
             // Issued at the end of the zen_address_format function, just prior to return.  Gives us a chance to
             // insert the "VAT Number" value, if indicated.
@@ -333,12 +368,12 @@ class Vat4EuAdminObserver extends base
                 }
                 $this->debug($eventID . ': ' . var_export($this, true));
                 break;
-                
+
             default:
                 break;
         }
     }
-    
+
     // -----
     // Returns a boolean status indicating whether (true) or not (false) the currently-active
     // order-class object (if present) qualifies for a VAT refund.
@@ -347,7 +382,7 @@ class Vat4EuAdminObserver extends base
     {
         return $this->checkVatIsRefundable();
     }
-    
+
     // -----
     // This helper function retrieves the 2-character ISO code for the specified country.
     //
@@ -361,7 +396,7 @@ class Vat4EuAdminObserver extends base
         );
         return ($check->EOF) ? 'Unknown' : $check->fields['countries_iso_code_2'];
     }
-    
+
     // -----
     // This function returns a Font-Awesome glyph that represents the specified
     // VAT-validation status.
@@ -392,7 +427,7 @@ class Vat4EuAdminObserver extends base
         }
         return '<i class="' . $glyph . '" aria-hidden="true" title="' . $title . '" style="color: ' . $color . '"></i> ';
     }
-    
+
     // -----
     // This function, called during form validation where a VAT Number can be entered, e.g. Customers->Customers, returning
     // a boolean value that indicates whether (true) or not (false) the VAT Number is 'valid'.
@@ -407,37 +442,37 @@ class Vat4EuAdminObserver extends base
         $this->vatNumberError = true;
         $this->vatNumberMessage = '';
         $this->vatNumberStatus = VatValidation::VAT_NOT_VALIDATED;
-        
+
         if ($GLOBALS['current_page'] == 'edit_orders.php') {
             $countries_id = $_POST['update_billing_country'];
         } else {
             $countries_id = $_POST['entry_country_id'];
         }
         $country_iso_code_2 = $this->getCountryIsoCode2($countries_id);
-        
+
         $validation = new VatValidation($country_iso_code_2, $vat_number);
         $precheck_status = $validation->vatNumberPreCheck();
         switch ($precheck_status) {
             case VatValidation::VAT_NOT_SUPPLIED:
                 $vat_ok = true;
                 break;
-                
+
             case VatValidation::VAT_REQUIRED:
                 $this->vatNumberMessage = VAT4EU_ENTRY_VAT_REQUIRED;
                 break;
-                
+
             case VatValidation::VAT_MIN_LENGTH:
                 $this->vatNumberMessage = VAT4EU_ENTRY_VAT_MIN_ERROR;
                 break;
-                
+
             case VatValidation::VAT_BAD_PREFIX:
                 $this->vatNumberMessage = sprintf(VAT4EU_ENTRY_VAT_PREFIX_INVALID, $country_iso_code_2, zen_get_country_name($countries_id));
                 break;
-                
+
             case VatValidation::VAT_INVALID_CHARS:
                 $this->vatNumberMessage = VAT4EU_ENTRY_VAT_INVALID_CHARS;
                 break;
-                
+
             case VatValidation::VAT_OK:
                 $vat_ok = true;
                 $this->vatNumberError = false;
@@ -451,17 +486,17 @@ class Vat4EuAdminObserver extends base
                         $this->vatNumberStatus = VatValidation::VAT_VIES_NOT_OK;
                         $this->vatNumberMessage = VAT4EU_ENTRY_VAT_VIES_INVALID;
                     }
-                }                
+                }
                 break;
-                
+
             default:
                 $this->vatNumberMessage = "Unexpected return value from vatNumberPreCheck: $precheck_status, VAT number not authorized.";
                 trigger_error($this->vatNumberMessage, E_USER_WARNING);
                 break;
         }
-        return $vat_ok;    
+        return $vat_ok;
     }
-    
+
     // -----
     // This function creates (and returns) the HTML associated with a "VAT Number".
     //
@@ -490,7 +525,7 @@ class Vat4EuAdminObserver extends base
             $vat_field = zen_draw_input_field('vat_number', $info->fields['entry_vat_number'], zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_vat_number', 50));
             $vat_override = zen_draw_checkbox_field('vat_number_override', '', ($info->fields['entry_vat_validated'] == VatValidation::VAT_ADMIN_OVERRIDE));
         }
-        
+
         $vat_number_display = array();
         $vat_number_display[] = array(
             'label' => VAT4EU_ENTRY_VAT_NUMBER,
@@ -502,10 +537,10 @@ class Vat4EuAdminObserver extends base
                 'input' => $vat_override
             );
         }
-            
+
         return $vat_number_display;
     }
-    
+
     // -----
     // This function checks the currently-active "order", if present, to see if a VAT "reverse charge" (aka refund) is appropriate.
     // An order's VAT is refundable, i.e. not charged, to the buyer if all of the following conditions are true:
@@ -548,7 +583,7 @@ class Vat4EuAdminObserver extends base
         }
         return $this->vatIsRefundable;
     }
-    
+
     // -----
     // Pull the countries_id value from the supplied country field, as formatted by the storefront orders' class.
     // If the value supplied is not an array or doesn't have a country-id value, then the country field supplied is
@@ -560,7 +595,7 @@ class Vat4EuAdminObserver extends base
     {
         return (is_array($country_info) && isset($country_info['id'])) ? $country_info['id'] : false;
     }
-    
+
     // ------
     // This function determines, based on the admin page currently active, whether a zen_address_format
     // function call should have the VAT Number appended and, if so, appends it!
@@ -593,14 +628,14 @@ class Vat4EuAdminObserver extends base
                     $show_vat_number = true;
                 }
                 break;
-                
+
             case 'invoice.php':
             case 'packingslip.php':
                 if ($this->addressFormatCount == 1) {
                     $show_vat_number = true;
                 }
                 break;
-                
+
             // -----
             // These pages include multiple address-blocks' display; all blocks should include the associated VAT
             // Number and its status.
@@ -611,7 +646,7 @@ class Vat4EuAdminObserver extends base
                     $use_vat_from_address_book = true;
                 }
                 break;
-                
+
             // -----
             // Any other page, the VAT Number is not displayed.  A notification is made, however, to enable
             // other pages that display order-related addresses to "tack on".
@@ -644,7 +679,7 @@ class Vat4EuAdminObserver extends base
         }
         return $address_out;
     }
-    
+
     protected function gatherCustomersAddressBookVatNumbers($sql_query)
     {
         $debug_message = "gatherCustomersAddressBookVatNumbers($sql_query)." . PHP_EOL;
@@ -659,7 +694,7 @@ class Vat4EuAdminObserver extends base
         $sql_query = strtolower(preg_replace("/\s+/", " ", $sql_query));
         $sql_query = str_replace(' from', ', entry_vat_number, entry_vat_validated from', $sql_query);
         $debug_message .= "\tModified SQL query: $sql_query" . PHP_EOL;
-        
+
         $addresses = $GLOBALS['db']->Execute($sql_query);
         $this->addressBookVats = array();
         while (!$addresses->EOF) {
@@ -671,7 +706,7 @@ class Vat4EuAdminObserver extends base
         }
         $this->debug($debug_message . var_export($this->addressBookVats, true));
     }
-    
+
     // -----
     // This function returns a boolean indicator, identifying whether (true) or not (false) the
     // country associated with the "countries_id" input qualifies for this plugin's processing.
@@ -680,12 +715,11 @@ class Vat4EuAdminObserver extends base
     {
         return in_array($this->getCountryIsoCode2($countries_id), $this->vatCountries);
     }
-    
+
     private function debug($message)
     {
         if ($this->debug) {
             error_log(date('Y-m-d H:i:s') . ": $message" . PHP_EOL, 3, $this->logfile);
         }
     }
-
 }
