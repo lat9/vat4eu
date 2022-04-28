@@ -1,7 +1,7 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2021 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2022 Vinos de Frutas Tropicales
 //
 class zcObserverVatForEuCountries extends base 
 {
@@ -419,7 +419,7 @@ class zcObserverVatForEuCountries extends base
             $debug_message .= "\tAddress located, country #" . $check->fields['entry_country_id'] . PHP_EOL;
             if ($this->isVatCountry($check->fields['entry_country_id'])) {
                 $this->vatNumber = $check->fields['entry_vat_number'];
-                $this->vatNumberStatus = $check->fields['entry_vat_validated'];
+                $this->vatNumberStatus = (int)$check->fields['entry_vat_validated'];
                 $debug_message .= "\tBilling country is part of the EU, VAT Number (" . $this->vatNumber . "), validation status: " . $this->vatNumberStatus . PHP_EOL;
             }
         }
@@ -486,6 +486,8 @@ class zcObserverVatForEuCountries extends base
         //
         $address_out = false;
         $use_vat_from_address_book = false;
+        $show_vat_number = false;
+
         if ($this->vatNumber !== '' || $current_page_base === FILENAME_ADDRESS_BOOK || $current_page_base === FILENAME_CHECKOUT_PAYMENT_ADDRESS) {
             // -----
             // Determine whether the VAT Number should be appended to the specified address, based
