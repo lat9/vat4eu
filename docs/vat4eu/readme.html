@@ -73,7 +73,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
 <script src="../jquery.easytabs.min.js"></script>
-<script type="text/javascript">
+<script>
     $(document).ready( function() {
         $('#tab-container').easytabs();
     });
@@ -82,7 +82,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 
 <body>
   <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.6 and later</h1>
-  <p>Version 3.1.1 by lat9.  Copyright &copy; 2017-2022, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
+  <p>Version 3.1.2 by lat9.  Copyright &copy; 2017-2022, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
   <p>Current Support Thread on the Zen Cart forums: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></p>
   
   <p><strong>Usage Notes:</strong></p>
@@ -470,6 +470,14 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         <noscript><h3>Version History</h3></noscript>
         <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
         <ul>
+          <li>v3.1.2-beta1, 2022-06-04:<ul>
+            <li>BUGFIX: Correct text hidden on VAT4EU help-text pop-up.</li>
+            <li>The following files were changed:<ol>
+                <li>/includes/templates/template_default/css/popup_vat4eu_formats.css</li>
+                <li><span class="template">/includes/templates/YOUR_TEMPLATE/css/popup_vat4eu_formats.css</span></li>
+                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+            </ol></li>
+          </ul></li>
           <li>v3.1.1, 2022-04-28:<ul>
             <li>BUGFIX: Correct integration with &quot;Edit Orders&quot;, v4.6.0+ &mdash; notifications changed.</li>
             <li>BUGFIX: Use <code>zen_cfg_read_only</code> so that the plugin's version/release date don't get updated on a configuration update.</li>
