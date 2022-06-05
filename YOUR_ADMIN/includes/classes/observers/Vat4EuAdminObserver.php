@@ -472,7 +472,7 @@ class Vat4EuAdminObserver extends base
                 break;
 
             case VatValidation::VAT_MIN_LENGTH:
-                $this->vatNumberMessage = VAT4EU_ENTRY_VAT_MIN_ERROR;
+                $this->vatNumberMessage = sprintf(VAT4EU_ENTRY_VAT_MIN_ERROR, (int)VAT4EU_MIN_LENGTH);;
                 break;
 
             case VatValidation::VAT_BAD_PREFIX:

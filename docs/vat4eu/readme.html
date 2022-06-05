@@ -472,10 +472,13 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         <ul>
           <li>v3.1.2-beta1, 2022-06-04:<ul>
             <li>BUGFIX: Correct text hidden on VAT4EU help-text pop-up.</li>
+            <li>BUGFIX: Correct PHP Warning (PHP 8.0) on initial installation.</li>
             <li>The following files were changed:<ol>
                 <li>/includes/templates/template_default/css/popup_vat4eu_formats.css</li>
                 <li><span class="template">/includes/templates/YOUR_TEMPLATE/css/popup_vat4eu_formats.css</span></li>
+                <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
                 <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                <li>/YOUR_ADMIN/includes/languages/english/extra_definitions/vat4eu_extra_definitions_admin.php</li>
             </ol></li>
           </ul></li>
           <li>v3.1.1, 2022-04-28:<ul>
