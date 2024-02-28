@@ -1,7 +1,9 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2022 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2024 Vinos de Frutas Tropicales
+//
+// Last updated: v3.1.2
 //
 class zcObserverVatForEuCountries extends base 
 {
@@ -69,7 +71,7 @@ class zcObserverVatForEuCountries extends base
             //
             if (zen_is_logged_in() && !zen_in_guest_checkout()) {
                 $this->attach(
-                    $this, 
+                    $this,
                     [
                         //- From /includes/classes/order.php
                         'NOTIFY_ORDER_AFTER_QUERY',                         //- Reconstructing a previously-placed order
@@ -103,7 +105,7 @@ class zcObserverVatForEuCountries extends base
             if (zen_is_logged_in() && !zen_in_guest_checkout()) {
                 $address_id = (isset($_SESSION['billto'])) ? $_SESSION['billto'] : $_SESSION['customer_default_address_id'];
                 $this->getVatNumber($_SESSION['customer_id'], $address_id);
-                if ($this->vatNumber !== '' && $this->vatNumberStatus !== VatValidation::VAT_ADMIN_OVERRIDE && $this->vatNumberStatus !== VatValidation::VAT_VIES_OK) {
+                if (!empty($this->vatNumber) && $this->vatNumberStatus !== VatValidation::VAT_ADMIN_OVERRIDE && $this->vatNumberStatus !== VatValidation::VAT_VIES_OK) {
                     $messageStack->add('header', sprintf(VAT4EU_APPROVAL_PENDING, $this->vatNumber), 'warning');
                 }
             }
@@ -152,7 +154,7 @@ class zcObserverVatForEuCountries extends base
             //
             case 'NOTIFY_ORDER_DURING_CREATE_ADDED_ORDER_HEADER':
                 $this->checkVatIsRefundable();
-                if ($this->vatNumber !== '') {
+                if (!empty($this->vatNumber)) {
                     $db->Execute(
                         "UPDATE " . TABLE_ORDERS . "
                             SET billing_vat_number = '" . zen_db_prepare_input($this->vatNumber) . "',
@@ -488,7 +490,7 @@ class zcObserverVatForEuCountries extends base
         $use_vat_from_address_book = false;
         $show_vat_number = false;
 
-        if ($this->vatNumber !== '' || $current_page_base === FILENAME_ADDRESS_BOOK || $current_page_base === FILENAME_CHECKOUT_PAYMENT_ADDRESS) {
+        if (!empty($this->vatNumber) || $current_page_base === FILENAME_ADDRESS_BOOK || $current_page_base === FILENAME_CHECKOUT_PAYMENT_ADDRESS) {
             // -----
             // Determine whether the VAT Number should be appended to the specified address, based
             // on the page from which the zen_address_format request was made.
@@ -606,7 +608,7 @@ class zcObserverVatForEuCountries extends base
                     $vat_number = $this->vatNumber;
                     $vat_validated = $this->vatNumberStatus;
                 }
-                if ($vat_number !== '') {
+                if (!empty($vat_number)) {
                     $address_out = $current_address . $address_elements['cr'] . VAT4EU_DISPLAY_VAT_NUMBER . $vat_number;
                     if ($vat_validated !== VatValidation::VAT_VIES_OK && $vat_validated !== VatValidation::VAT_ADMIN_OVERRIDE) {
                         $address_out .= VAT4EU_UNVERIFIED;

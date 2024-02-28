@@ -2,12 +2,11 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VAT for EU Countries (VAT4EU)</title>
-<link rel="icon" href="../vinos_favicon.ico" type="image/x-icon" />
+<link rel="icon" href="../vinos_favicon.ico" type="image/x-icon">
 <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 <style>
-<!--
 a, a:active, a:visited { color: #006666; text-decoration: none; }
 a:hover { color:#00CC99; text-decoration: underline; }
 body, p, h1, h2, h3, h4, h5, h6, li, td, dd, img, dt, dl, table { font-family: Roboto, verdana, avantgarde, tahoma, arial, sans-serif; font-size: 12pt; color: black; padding: 0px; margin: 10px 20px; line-height: 1.75em; }
@@ -68,10 +67,9 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 .tab a.active { font-weight: bold; }
 .tab-container .panel-container { background: #fff; border: solid #666 1px; padding: 10px; border-radius: 0 4px 4px 4px; }
 .panel-container { margin-bottom: 10px; }
--->
 </style>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" />
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="../jquery.easytabs.min.js"></script>
 <script>
     $(document).ready( function() {
@@ -81,17 +79,17 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 </head>
 
 <body>
-  <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.6 and later</h1>
-  <p>Version 3.1.2 by lat9.  Copyright &copy; 2017-2022, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
+  <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.8a and later</h1>
+  <p>Version 3.1.2 by lat9 and webchills.  Copyright &copy; 2017-2024, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
   <p>Current Support Thread on the Zen Cart forums: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></p>
   
   <p><strong>Usage Notes:</strong></p>
   <ol>
-    <li>A working copy of Zen Cart (v1.5.6<b>b</b> or later) must be previously installed.</li>
-    <li>Integration with <em>Edit Orders</em> requires EO version 4.3.0 or later.  See the <em>Interaction with Other Plugins</em> tab for more information.</li>
-    <li>If you require the automatic VAT validation service (via <a href="https://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools-&gt;Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
+    <li>A working copy of Zen Cart (v1.5.8<b>a</b> or later) must be previously installed.</li>
+    <li>Integration with <em>Edit Orders</em> requires EO version 4.6.2 or later.  See the <em>Interaction with Other Plugins</em> tab for more information.</li>
+    <li>If you require the automatic VAT validation service (via <a href="https://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools :: Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
   </ol>
-  
+
   <div class="tab-container" id="outer-container">
     <ul class="etabs">
       <li class="tab"><a href="#overview">Overview</a></li>
@@ -101,9 +99,9 @@ div.totals-desc h4 { border-top: 1px solid #666; }
       <li class="tab"><a href="#interactions">Interaction with Other Plugins</a></li>
       <li class="tab"><a href="#history">Change History</a></li>
     </ul>
-    
+
     <div class="panel-container">
-  
+
       <!-- start overview section -->
       <div id="overview">
         <noscript><h2>Overview</h2></noscript>
@@ -121,11 +119,11 @@ div.totals-desc h4 { border-top: 1px solid #666; }
           </ul></li>
           <li>The plugin's processing makes use of the <a href="https://ec.europa.eu/taxation_customs/vies/faq.html" target="_blank">VIES (VAT Information Exchange System)</a> on-line validation service to automatically validate any <em>VAT Number</em> entered &mdash; either by the customer or an admin.  Admin processing includes a validation-override.</li>
         </ol>
-        
+
         <p><strong>Note:</strong> This plugin is derived from the similarly-named plugin <a href="https://www.zen-cart.com/showthread.php?35744-VAT-mod-for-European-companies&p=201772#post201772" target="_blank">VAT-mod for European companies</a>, but its processing is quite different!</p>
       </div>
       <!-- end overview section -->
-    
+
       <!-- start installation section -->
       <div id="installation">
         <noscript><h2>Installing and Uninstalling</h2></noscript>
@@ -184,7 +182,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
                 <li>Next step &hellip; Configuration!</li>
               </ol>
             </div>
-            
+
             <div id="upgrade">
               <noscript><h3>Upgrading From a Version Prior to v2.0.0</h3></noscript>
               <p><em>Most</em> of the notifications used by <em>VAT4EU</em> are built into the Zen Cart 1.5.6 release; those contained in the current <span class="corefile">corefile</span> overwrites have been submitted to the Zen Cart GitHub repository for inclusion in a version later than 1.5.6a.</p>
@@ -195,7 +193,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
                 <li><span class="corefile">/YOUR_ADMIN/includes/functions/functions_customers.php</span>.  Zen Cart 1.5.6 (and later) use the same version of this module in both the admin and the storefront.  Overwrite your previous version of this file with that included in the Zen Cart distribution.</li>
               </ol>
             </div>
-            
+
             <div id="uninstall">
               <noscript><h3>Uninstalling</h3></noscript>
               <p>First, delete the files that were copied to your Zen Cart's file-system during the installation process, then copy the contents of the plugin's <code>/docs/vat4eu/uninstall/uninstall_vat4eu.sql</code> to your clipboard and paste into your admin's <em>Tools-&gt;Install SQL Patches</em> to complete the uninstall process.</p>
@@ -205,7 +203,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         </div>
        </div>
        <!-- end installation section -->
-       
+
       <!-- start customization section -->
       <div id="customization">
         <noscript><h2>Configuration</em></h2></noscript>
@@ -216,7 +214,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
             <li class="tab"><a href="#other">Other Settings</a></li>
             <li class="tab"><a href="#taxes">Tax-Related Settings</a></li>
           </ul>
-          
+
           <div class="panel-container">
             <div id="config">
               <noscript><h3>VAT4EU Settings</h3></noscript>
@@ -282,7 +280,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
               </table>
               <div class="clearBoth"></div>
             </div>
-            
+
             <div id="modules">
               <noscript><h3>Order-Total Modules</h3></noscript>
               <img class="forward" src="order_total_block.png" alt="Sample order-total display" title="Sample order-total display" />
@@ -294,7 +292,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
               <p>The image illustrates a sample order-total block for an order that <em>qualifies</em> the purchaser for a <em>VAT Refund</em>, essentially backing-out any tax-related charges for the order and adding the &quot;reverse charge&quot; disclaimer.</p>
               <div class="clearBoth"></div>
             </div>
-            
+
             <div id="other">
               <noscript><h3>Other Settings</h3></noscript>
               <p>The following configuration settings are also required for full <em>VAT4EU</em> customization:</p>
@@ -304,7 +302,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
               </ol>
               <div class="clearBoth"></div>
             </div>
-            
+
             <div id="taxes">
               <noscript><h3>Tax-Related Settings</h3></noscript>
               <p>If you haven't already set up the taxes for your store, now is the time!.</p>
@@ -352,7 +350,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         </div>
       </div>
       <!-- end customization section -->
-      
+
       <!-- start visual changes section -->
       <div id="visual-changes">
         <noscript><h2>Visual Changes</h2></noscript>
@@ -366,9 +364,9 @@ div.totals-desc h4 { border-top: 1px solid #666; }
             <li class="tab"><a href="#store-address-entry">Storefront Address Entry</a></li>
             <li class="tab"><a href="#store-address-display">Storefront Address Display</a></li>
           </ul>
-          
+
           <div class="panel-container">
-           
+
             <div id="admin-customers">
               <noscript><h3>Customers-&gt;Customers</h3></noscript>
               <img class="forward" src="customers_listing.png" alt="Admin Customers Listing" title="Admin Customers Listing" />
@@ -384,21 +382,21 @@ div.totals-desc h4 { border-top: 1px solid #666; }
               <p>When you click on the &quot;Edit&quot; button associated with a customer, the information-gathering page now includes fields where you can enter (or correct) a customer's <em>VAT Number</em> entry.  If that <em>VAT Number</em> can't be automatically verified by the <em>VIES</em> service, there's a <em>VAT Validation Override</em> checkbox; ticking that box will allow the customer to create an order that <em>qualifies</em> for a VAT refund.</p>
               <div class="clearBoth"></div>
             </div>
-                        
+
             <div id="admin-orders">
               <noscript><h3>Customers-&gt;Orders</h3></noscript>
               <img src="orders.png" alt="Customer Order Display" title="Customer Order Display" />
               <p><em>VAT4EU</em> also updates your admin's <em>Customers-&gt;Orders</em> display (as well as the display for any <em>Invoice</em> or <em>Packing-slip</em>) to include the VAT Number associated with the <em>billing address</em> for the order.</p>
               <div class="clearBoth"></div>
             </div>
-                        
+
             <div id="ot-display">
               <noscript><h3>Order-Totals' Block</h3></noscript>
               <img src="order_total_block.png" alt="Order-Total Block Display" title="Order-Total Block Display" />
               <p>When a customer places an order with a <em>validated</em> VAT Number, <em>VAT4EU</em>'s order-total modules update the order's &quot;order-total&quot; block to identify that the VAT has been removed from the order and includes a &quot;reverse charge&quot; disclaimer.  This change is visible both in the storefront and the admin post-order displays.</p>
               <div class="clearBoth"></div>
             </div>
-            
+
             <div id="store-address-entry">
               <noscript><h3>Storefront Address Entry</h3></noscript>
               <img class="forward" src="vat_number_entry.png" alt="Sample VAT Number Entry" title="Sample VAT Number Entry" />
@@ -413,7 +411,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
               <p><strong>Note:</strong> The <em>VAT Number</em> input will be added <b>only if</b> you have set <em>Configuration-&gt;Customer Details-&gt;Company</em> to <b>true</b>!</p>
               <div class="clearBoth"></div>
             </div>
-            
+
             <div id="store-address-display">
               <noscript><h3>Storefront Address Display</h3></noscript>
               <img class="forward" src="address_block.png" alt="Sample address blocks" title="Sample Address Blocks" />
@@ -430,12 +428,12 @@ div.totals-desc h4 { border-top: 1px solid #666; }
               </ol>
               <div class="clearBoth"></div>
             </div>
-            
+
           </div>
         </div>
       </div>
       <!-- end visual changes section -->
-      
+
       <!-- start interactions section -->
       <div id="interactions">
         <noscript><h2>Integration With Other Modules</h2></noscript>
@@ -444,14 +442,14 @@ div.totals-desc h4 { border-top: 1px solid #666; }
             <li class="tab"><a href="#edit-orders">Edit Orders</a></li>
             <li class="tab"><a href="#other-plugins">Other Plugins</a></li>
           </ul>
-          
+
           <div class="panel-container">
-           
+
             <div id="edit-orders">
               <noscript><h3>Edit Orders</h3></noscript>
-              <p><em>VAT4EU</em> integrates with <a href="https://www.zen-cart.com/downloads.php?do=file&id=1513" target="_blank">Edit Orders</a>, version 4.3.0 or later.  That version of <em>EO</em> provides additional notifiers that allow <em>VAT4EU</em>'s operations.  You'll need to install <em>EO</em> separately.</p>
+              <p><em>VAT4EU</em> integrates with <a href="https://www.zen-cart.com/downloads.php?do=file&id=1513" target="_blank">Edit Orders</a>, version 4.6.2 or later.  That version of <em>EO</em> provides additional notifiers that allow <em>VAT4EU</em>'s operations.  You'll need to install <em>EO</em> separately.</p>
             </div>
-                        
+
             <div id="other-plugins">
               <noscript><h3>Other Plugins</h3></noscript>
               <p>If you have additional plugins installed that also &quot;want to&quot; include the <em>VAT Number</em> display in an address block, <em>VAT4EU</em> has you covered!  Both the storefront and admin processing issue a notification when a <code>zen_address_format</code> function call is made on a page that isn't in the <em>VAT4EU</em> built-in processing.  An observer-class module can &quot;attach&quot; to that notifier and indicate (by setting the 3rd parameter to <em>(boolean)true</em> to indicate that the VAT Number should be included in that address block.</p>
@@ -464,16 +462,18 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         </div>
       </div>
       <!-- end interactions section -->
-      
+
       <!-- start history section -->
       <div id="history">
         <noscript><h3>Version History</h3></noscript>
         <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
         <ul>
-          <li>v3.1.2-beta1, 2022-06-04:<ul>
+          <li>v3.1.2-beta2, 2024-02-27 (lat9, webchills):<ul>
             <li>BUGFIX: Correct text hidden on VAT4EU help-text pop-up.</li>
             <li>BUGFIX: Correct PHP Warning (PHP 8.0) on initial installation.</li>
+            <li>BUGFIX: Correct unwanted customer message regarding VAT number validation.</li>
             <li>The following files were changed:<ol>
+                <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
                 <li>/includes/templates/template_default/css/popup_vat4eu_formats.css</li>
                 <li><span class="template">/includes/templates/YOUR_TEMPLATE/css/popup_vat4eu_formats.css</span></li>
                 <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
@@ -582,7 +582,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         </ul>
       </div>
       <!-- end history section -->
-      
+
     </div>
   </div>
 
