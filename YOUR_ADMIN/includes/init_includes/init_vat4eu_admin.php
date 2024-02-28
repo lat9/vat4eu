@@ -1,14 +1,14 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2022 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2024 Vinos de Frutas Tropicales
 //
 if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
 }
 
-define('VAT4EU_CURRENT_RELEASE', '3.1.2-beta2');
-define('VAT4EU_CURRENT_UPDATE_DATE', '2022-06-04');
+define('VAT4EU_CURRENT_RELEASE', '3.2.0-beta1');
+define('VAT4EU_CURRENT_UPDATE_DATE', '2024-02-28');
 
 define('VAT4EU_CURRENT_VERSION', VAT4EU_CURRENT_RELEASE . ': ' . VAT4EU_CURRENT_UPDATE_DATE);
 

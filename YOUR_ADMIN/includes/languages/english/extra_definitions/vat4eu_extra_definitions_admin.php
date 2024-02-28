@@ -1,7 +1,9 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2022 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2024 Vinos de Frutas Tropicales
+//
+// Last updated: v3.2.0
 //
 define('VAT4EU_TEXT_MESSAGE_INSTALLED', 'v%s of the <em>VAT Mod</em> plugin has been successfully installed.');
 define('VAT4EU_TEXT_MESSAGE_UPDATED', 'The <em>VAT4EU</em> plugin has been successfully updated from v%1$s to v%2$s.');
