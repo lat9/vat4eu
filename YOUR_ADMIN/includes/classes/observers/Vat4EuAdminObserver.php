@@ -3,7 +3,7 @@
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9
 // Copyright (c) 2017-2024 Vinos de Frutas Tropicales
 //
-// Last updated: v3.1.2
+// Last updated: v3.2.0
 //
 if (!defined('IS_ADMIN_FLAG') || IS_ADMIN_FLAG !== true) {
     die('Illegal Access');
@@ -52,9 +52,7 @@ class Vat4EuAdminObserver extends base
             if (isset($_GET['oID'])) {
                 $this->oID = (int)$_GET['oID'];
             }
-            // -----
-            // Note: Notifiers that are added by this plugin's file-set are marked with (*)
-            //
+
             $this->attach(
                 $this,
                 [
@@ -63,12 +61,12 @@ class Vat4EuAdminObserver extends base
 
                     //- From admin/customers.php
                     'NOTIFY_ADMIN_CUSTOMERS_LIST_ADDRESSES',        //- Allows us to add the number/validation status to address list (*)
-                    'NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE',       //- Allows us to check/validate any entered VAT Number (*)
-                    'NOTIFY_ADMIN_CUSTOMERS_B4_ADDRESS_UPDATE',     //- Gives us the chance to insert the VAT-related fields (*)
-                    'NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT',         //- The point at which the VAT Number fields are inserted (*)
-                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER',        //- The point at which we add columns to the listing heading (*)
-                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_NEW_FIELDS',    //- The point at which we insert additional fields for the listing (*)
-                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT',       //- The point at which we insert a customer record in the listing (*)
+                    'NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE',       //- Allows us to check/validate any entered VAT Number
+                    'NOTIFY_ADMIN_CUSTOMERS_B4_ADDRESS_UPDATE',     //- Gives us the chance to insert the VAT-related fields
+                    'NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT',         //- The point at which the VAT Number fields are inserted
+                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER',        //- The point at which we add columns to the listing heading
+                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_NEW_FIELDS',    //- The point at which we insert additional fields for the listing
+                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT',       //- The point at which we insert a customer record in the listing
 
                     //- From admin/edit_orders.php
                     'EDIT_ORDERS_PRE_UPDATE_ORDER',                 //- Allows us to update any VAT Number associated with the order
@@ -108,8 +106,10 @@ class Vat4EuAdminObserver extends base
                       LIMIT 1"
                 );
                 if (!$vat_info->EOF) {
-                    $this->vatNumber = $class->billing['billing_vat_number'] = $vat_info->fields['billing_vat_number'];
-                    $this->vatValidated = $class->billing['billing_vat_validated'] = $vat_info->fields['billing_vat_validated'];
+                    $class->billing['billing_vat_number'] = $vat_info->fields['billing_vat_number'];
+                    $this->vatNumber = $vat_info->fields['billing_vat_number'];
+                    $class->billing['billing_vat_validated'] = $vat_info->fields['billing_vat_validated'];
+                    $this->vatValidated = $vat_info->fields['billing_vat_validated'];
                 }
                 break;
 
@@ -339,7 +339,7 @@ class Vat4EuAdminObserver extends base
             // This notification includes the following variables:
             //
             // $p1 ... (r/o) An associative array containing the various elements of the to-be-formatted address
-            // $p2 ... (r/w) A reference to the functions return value, possibly modified by this processing.
+            // $p2 ... (r/w) A reference to the function's return value, possibly modified by this processing.
             //
             case 'NOTIFY_END_ZEN_ADDRESS_FORMAT':
                 $updated_address = $this->formatAddress($p1, $p2);
@@ -710,7 +710,7 @@ class Vat4EuAdminObserver extends base
     private function debug($message)
     {
         if ($this->debug) {
-            error_log(date('Y-m-d H:i:s') . ": $message" . PHP_EOL, 3, $this->logfile);
+            error_log(date('Y-m-d H:i:s') . ": $message\n", 3, $this->logfile);
         }
     }
 }
