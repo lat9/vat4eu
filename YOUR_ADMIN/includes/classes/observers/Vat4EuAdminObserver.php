@@ -339,7 +339,7 @@ class Vat4EuAdminObserver extends base
             // This notification includes the following variables:
             //
             // $p1 ... (r/o) An associative array containing the various elements of the to-be-formatted address
-            // $p2 ... (r/w) A reference to the functions return value, possibly modified by this processing.
+            // $p2 ... (r/w) A reference to the function's return value, possibly modified by this processing.
             //
             case 'NOTIFY_END_ZEN_ADDRESS_FORMAT':
                 $updated_address = $this->formatAddress($p1, $p2);
