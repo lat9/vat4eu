@@ -11,16 +11,16 @@ if (!defined('IS_ADMIN_FLAG') || IS_ADMIN_FLAG !== true) {
 
 class Vat4EuAdminObserver extends base
 {
-    private
-        $isEnabled = false,
-        $vatValidated = false,
-        $vatIsRefundable = false,
-        $vatNumber = '',
-        $vatNumberStatus = 0,
-        $addressFormatCount = 0,
-        $vatCountries = [],
-        $debug = false,
-        $oID = 0;
+    private $isEnabled = false;
+    private $vatValidated = false;
+    private $vatIsRefundable = false;
+    private $vatNumber = '';
+    private $vatNumberStatus = 0;
+    private $addressFormatCount = 0;
+    private $vatCountries = [];
+    private $debug = false;
+    private $logfile = '';
+    private $oID = 0;
 
     // -----
     // On construction, this auto-loaded observer checks to see that the plugin is enabled and, if so:
@@ -184,7 +184,7 @@ class Vat4EuAdminObserver extends base
                 $heading_text = VAT4EU_CUSTOMERS_HEADING;
                 if (isset($_GET['list_order']) && strpos($_GET['list_order'], 'vatnum') === 0) {
                     $heading_text = '<span class="SortOrderHeader">' . $heading_text . '</span>';
-                    if ($_GET['list_order'] == 'vatnum-asc') {
+                    if ($_GET['list_order'] === 'vatnum-asc') {
                         $asc_class = 'SortOrderHeader';
                     } else {
                         $desc_class = 'SortOrderHeader';
@@ -193,9 +193,18 @@ class Vat4EuAdminObserver extends base
                 $current_parms = zen_get_all_get_params(['list_order', 'page']);
                 $heading = [
                     'content' =>
-                        $heading_text . '<br>' . PHP_EOL .
-                        '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-asc') . '"><span class="' . $asc_class . '" title="' . VAT4EU_SORT_ASC . '">Asc</span></a>&nbsp;' . PHP_EOL . 
-                        '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-desc') . '"><span class="' . $desc_class . '" title="'. VAT4EU_SORT_DESC . '">Desc</span></a>' . PHP_EOL,
+                        $heading_text .
+                        '<br>' .
+                        '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-asc') . '">
+                            <span class="' . $asc_class . '" title="' . VAT4EU_SORT_ASC . '">
+                                Asc
+                            </span>
+                         </a>&nbsp;' .
+                        '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-desc') . '">
+                            <span class="' . $desc_class . '" title="'. VAT4EU_SORT_DESC . '">
+                                Desc
+                            </span>
+                         </a>',
                     'class' => 'center',
                 ];
                 $p2[] = $heading;
@@ -512,15 +521,16 @@ class Vat4EuAdminObserver extends base
             $vat_override = zen_draw_checkbox_field('vat_number_override', '', ($info->fields['entry_vat_validated'] == VatValidation::VAT_ADMIN_OVERRIDE));
         }
 
-        $vat_number_display = [];
-        $vat_number_display[] = [
-            'label' => VAT4EU_ENTRY_VAT_NUMBER,
-            'input' => $vat_field
+        $vat_number_display = [
+            [
+                'label' => VAT4EU_ENTRY_VAT_NUMBER,
+                'input' => $vat_field,
+            ],
         ];
         if ($vat_override !== false) {
             $vat_number_display[] = [
                 'label' => VAT4EU_ENTRY_OVERRIDE_VALIDATION,
-                'input' => $vat_override
+                'input' => $vat_override,
             ];
         }
 
@@ -539,7 +549,7 @@ class Vat4EuAdminObserver extends base
     //      or the VAT4EU configuration indicates that in-country deliveries are also refundable.
     //
     // NOTE:  Since the "VAT Refundable" check occurs **ONLY** during Edit Orders' processing, the order-object is based
-    // on a storefront order-class query.  Virtual orders will have an empty string for the order's delivery country, while
+    // on a common order-class query.  Virtual orders will have an empty string for the order's delivery country, while
     // shippable orders will contain an array of country-related information.
     //
     protected function checkVatIsRefundable()
