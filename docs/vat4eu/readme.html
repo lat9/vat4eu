@@ -157,10 +157,10 @@ div.totals-desc h4 { border-top: 1px solid #666; }
                   <li>/includes/classes/VatValidation.php</li>
                   <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
                   <li>/includes/extra_datafiles/vat4eu_filenames.php</li>
-                  <li>/includes/languages/english/extra_definitions/vat4eu_extra_definitions.php</li>
+                  <li>/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions.php</li>
                   <li>/includes/languages/english/html_includes/define_popup_vat4eu_formats.php</li>
-                  <li>/includes/languages/english/modules/order_total/ot_vat_refund.php</li>
-                  <li>/includes/languages/english/modules/order_total/ot_vat_reverse_charges.php</li>
+                  <li>/includes/languages/english/modules/order_total/lang.ot_vat_refund.php</li>
+                  <li>/includes/languages/english/modules/order_total/lang.ot_vat_reverse_charges.php</li>
                   <li>/includes/modules/order_total/ot_vat_refund.php</li>
                   <li>/includes/modules/order_total/ot_vat_reverse_charges.php</li>
                   <li>/includes/modules/pages/popup_vat4eu_formats/header_php.php</li>
@@ -175,7 +175,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
                   <li>/YOUR_ADMIN/includes/auto_loaders/config.vat4eu_admin.php</li>
                   <li>/YOUR_ADMIN/includes/classes/Vat4EuAdminObserver.php</li>
                   <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
-                  <li>/YOUR_ADMIN/includes/languages/english/extra_definitions/vat4eu_admin_definitions.php</li>
+                  <li>/YOUR_ADMIN/includes/languages/english/extra_definitions/lang.vat4eu_admin_definitions.php</li>
                 </ol></li>
                 <li>Click the &quot;Admin Home&quot; link in your Zen Cart's top admin menu.  This action will cause the plugin's installation script to run.</li>
                 <li>Next step &hellip; Configuration!</li>
@@ -462,13 +462,20 @@ div.totals-desc h4 { border-top: 1px solid #666; }
             <li>BUGFIX: Correct unwanted customer message regarding VAT number validation.</li>
             <li>BUGFIX: Remove deprecated (and unneeded) notification from admin observer's watch-list.</li>
             <li>CHANGE: Drop support for Zen Cart versions prior to 1.5.8.</li>
-            <li>The following files were changed:<ol>
+            <li>The following files were changed, <span class="added">added</span>, or <span class="removed">removed</span>:<ol>
                 <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                <li><span class="added">/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions.php</span></li>
+                <li><span class="removed">/includes/languages/english/extra_definitions/vat4eu_extra_definitions.php</span></li>
+                <li><span class="added">/includes/languages/english/modules/order_total/lang.ot_vat_refund.php</span></li>
+                <li><span class="added">/includes/languages/english/modules/order_total/lang.ot_vat_reverse_charges.php</span></li>
+                <li><span class="removed">/includes/languages/english/modules/order_total/ot_vat_refund.php</span></li>
+                <li><span class="removed">/includes/languages/english/modules/order_total/ot_vat_reverse_charges.php</span></li>
                 <li>/includes/templates/template_default/css/popup_vat4eu_formats.css</li>
                 <li><span class="template">/includes/templates/YOUR_TEMPLATE/css/popup_vat4eu_formats.css</span></li>
                 <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
                 <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
-                <li>/YOUR_ADMIN/includes/languages/english/extra_definitions/vat4eu_extra_definitions_admin.php</li>
+                <li><span class="added">/YOUR_ADMIN/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions_admin.php</span></li>
+                <li><span class="removed">/YOUR_ADMIN/includes/languages/english/extra_definitions/vat4eu_extra_definitions_admin.php</span></li>
             </ol></li>
           </ul></li>
           <li>v3.1.1, 2022-04-28:<ul>
