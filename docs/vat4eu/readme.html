@@ -456,12 +456,13 @@ div.totals-desc h4 { border-top: 1px solid #666; }
         <noscript><h3>Version History</h3></noscript>
         <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
         <ul>
-          <li>v3.2.0-beta1, 2024-02-28 (lat9, webchills):<ul>
+          <li>v3.2.0-beta1, 2024-02-29 (lat9, webchills):<ul>
             <li>BUGFIX: Correct text hidden on VAT4EU help-text pop-up.</li>
             <li>BUGFIX: Correct PHP Warning (PHP 8.0) on initial installation.</li>
             <li>BUGFIX: Correct unwanted customer message regarding VAT number validation.</li>
             <li>BUGFIX: Remove deprecated (and unneeded) notification from admin observer's watch-list.</li>
             <li>CHANGE: Drop support for Zen Cart versions prior to 1.5.8<b>a</b>.</li>
+            <li>INTROP: Account for zc158a+ changes in address-handling in the <b>Customers :: Customers</b> tool.</li>
             <li>The following files were changed, <span class="added">added</span>, or <span class="removed">removed</span>:<ol>
                 <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
                 <li><span class="added">/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions.php</span></li>
