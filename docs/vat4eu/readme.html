@@ -85,7 +85,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
   
   <p><strong>Usage Notes:</strong></p>
   <ol>
-    <li>A working copy of Zen Cart (v1.5.8 or later) must be previously installed.</li>
+    <li>A working copy of Zen Cart (v1.5.8<b>a</b> or later) must be previously installed.</li>
     <li>Integration with <em>Edit Orders</em> requires EO version 4.7.0 or later.  See the <em>Interaction with Other Plugins</em> tab for more information.</li>
     <li>If you require the automatic VAT validation service (via <a href="https://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools :: Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
   </ol>
@@ -140,7 +140,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 
             <div id="initial">
               <noscript><h3>Installation</h3></noscript>
-              <p>There are <span class="template">template-overrides</span> required by this plugin; you should <strong>always</strong> backup your cart's database and files prior to making any changes.  All <span class="template">template-overrides</span> use the like-named files in the Zen Cart 1.5.8a distribution as their change-basis.  Template-file changes are based on those present in that release's <code>template_default</code> directories.</p>
+              <p>There are <span class="template">template-overrides</span> required by this plugin; you should <strong>always</strong> backup your cart's database and files prior to making any changes.  All <span class="template">template-overrides</span> use the like-named files in the Zen Cart 1.5.8<b>a</b> distribution as their change-basis.  Template-file changes are based on those present in that release's <code>template_default</code> directories.</p>
               <p>Unzip the plugin's package file and then:</p>
               <ol type="A">
                 <li>Rename the YOUR_ADMIN folder to match your custom admin folder's name.</li>
@@ -461,7 +461,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
             <li>BUGFIX: Correct PHP Warning (PHP 8.0) on initial installation.</li>
             <li>BUGFIX: Correct unwanted customer message regarding VAT number validation.</li>
             <li>BUGFIX: Remove deprecated (and unneeded) notification from admin observer's watch-list.</li>
-            <li>CHANGE: Drop support for Zen Cart versions prior to 1.5.8.</li>
+            <li>CHANGE: Drop support for Zen Cart versions prior to 1.5.8<b>a</b>.</li>
             <li>The following files were changed, <span class="added">added</span>, or <span class="removed">removed</span>:<ol>
                 <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
                 <li><span class="added">/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions.php</span></li>
