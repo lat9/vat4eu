@@ -18,7 +18,6 @@ class Vat4EuAdminObserver extends base
     private $vatNumberStatus = 0;
     private $vatNumberMessage = '';
     private $vatNumberError = false;
-    private $vatNumberUpdateError = false;
     private $addressFormatCount = 0;
     private $addressesToFormat;
     private $vatCountries = [];
@@ -124,8 +123,7 @@ class Vat4EuAdminObserver extends base
             // $p2 ... (r/w) A reference to the $error variable, set to true if the VAT is not valid.
             //
             case 'NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE':
-                $this->vatNumberUpdateError = !$this->validateVatNumber();
-                if ($this->vatNumberUpdateError === true) {
+                if ($this->validateVatNumber() === false) {
                     $p2 = true;
                 }
                 break;
@@ -188,14 +186,14 @@ class Vat4EuAdminObserver extends base
                         $heading_text .
                         '<br>' .
                         '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-asc') . '">
-                            <span class="' . $asc_class . '" title="' . VAT4EU_SORT_ASC . '">
-                                Asc
-                            </span>
+                            <span class="' . $asc_class . '" title="' . VAT4EU_SORT_ASC . '">' .
+                                TEXT_ASC .
+                            '</span>
                          </a>&nbsp;' .
                         '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-desc') . '">
-                            <span class="' . $desc_class . '" title="'. VAT4EU_SORT_DESC . '">
-                                Desc
-                            </span>
+                            <span class="' . $desc_class . '" title="'. VAT4EU_SORT_DESC . '">' .
+                                TEXT_DESC .
+                            '</span>
                          </a>',
                     'class' => 'center',
                 ];
@@ -401,26 +399,26 @@ class Vat4EuAdminObserver extends base
         switch ($vat_validation) {
             case VatValidation::VAT_ADMIN_OVERRIDE:
                 $glyph = 'fa fa-thumbs-up';
-                $color = 'orange';
+                $color = 'warning';
                 $title = VAT4EU_ADMIN_OVERRIDE;
                 break;
             case VatValidation::VAT_VIES_OK:
                 $glyph = 'fa fa-thumbs-up';
-                $color = 'green';
+                $color = 'success';
                 $title = VAT4EU_VIES_OK;
                 break;
             case VatValidation::VAT_VIES_NOT_OK:
                 $glyph = 'fa fa-thumbs-down';
-                $color = 'red';
+                $color = 'danger';
                 $title = VAT4EU_VIES_NOT_OK;
                 break;
             default:
                 $glyph = 'fa fa-thumbs-down';
-                $color = 'orange';
+                $color = 'warning';
                 $title = VAT4EU_NOT_VALIDATED;
                 break;
         }
-        return '<i class="' . $glyph . '" aria-hidden="true" title="' . $title . '" style="color: ' . $color . '"></i> ';
+        return '<i class="' . $glyph . ' text-' . $color . '" aria-hidden="true" title="' . $title . '"></i> ';
     }
 
     // -----
@@ -502,38 +500,35 @@ class Vat4EuAdminObserver extends base
         global $db;
 
         if (isset($_POST['vat_number'])) {
-            if ($this->vatNumberUpdateError === true) {
-                $vat_number = (string)$cInfo->vat_number;
-                $vat_field = zen_draw_input_field('vat_number', htmlspecialchars($vat_number, ENT_COMPAT, CHARSET, true), zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_vat_number', 50)) . '&nbsp;' . $this->vatNumberMessage;
-                if ($this->vatNumberError === true) {
-                    $vat_override = false;
-                } else {
-                    $vat_override = zen_draw_checkbox_field('vat_number_override');
-                }
-            } else {
-                $vat_field = $vat_number . zen_draw_hidden_field('vat_number', $vat_number);
-                $vat_override = zen_draw_checkbox_field('vat_number_override', '', isset($_POST['vat_number_override']), 'readonly"');
-            }
+            $vat_number = $cInfo->vat_number;
+            $vat_override = isset($_POST['vat_number_override']);
         } else {
             [$vat_number, $vat_validated] = $this->getVatInfoFromDb($cInfo->customers_default_address_id);
-            $vat_field = zen_draw_input_field('vat_number', (string)$vat_number, zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_vat_number', 50));
-            $vat_override = zen_draw_checkbox_field('vat_number_override', '', (((int)$vat_validated) === VatValidation::VAT_ADMIN_OVERRIDE));
+            $vat_override = (((int)$vat_validated) === VatValidation::VAT_ADMIN_OVERRIDE);
         }
 
-        $vat_number_display = [
+        return [
             [
                 'label' => VAT4EU_ENTRY_VAT_NUMBER,
-                'input' => $vat_field,
+                'fieldname' => 'vat-number',
+                'input' => zen_draw_input_field(
+                    'vat_number',
+                    zen_output_string_protected((string)$vat_number),
+                    zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_vat_number', 50) . ' class="form-control" id="vat-number"'
+                ) . '&nbsp' . $this->vatNumberMessage,
+            ],
+            [
+                'label' => VAT4EU_ENTRY_OVERRIDE_VALIDATION,
+                'fieldname' => 'vat-override',
+                'input' => zen_draw_checkbox_field(
+                    'vat_number_override',
+                    'on',
+                    $vat_override,
+                    '',
+                    'id="vat-override"'
+                ),
             ],
         ];
-        if ($vat_override !== false) {
-            $vat_number_display[] = [
-                'label' => VAT4EU_ENTRY_OVERRIDE_VALIDATION,
-                'input' => $vat_override,
-            ];
-        }
-
-        return $vat_number_display;
     }
 
     // -----

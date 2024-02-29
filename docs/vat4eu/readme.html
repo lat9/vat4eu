@@ -52,12 +52,13 @@ dd { margin-top: 0; padding-left: 40px; }
 ul.simple, ul.simple li { list-style-type: none; padding: 0 0 0 0.5em; margin: 0; }
 #table-config-osm tr td:first-child, #table-config-osm tr th:first-child { width: 30em; }
 #overview-images { margin-right: 0.5em; }
-.back { float: left; }
+.back { float: left; margin-right: 0.25em; }
 #fdcv ol { margin: 0; }
 .nowrap { white-space: nowrap; }
 .h-name { font-style: italic; font-weight: bold; }
 #t-handlers td, #t-handlers th { vertical-align: top; }
 div.totals-desc h4 { border-top: 1px solid #666; }
+a[target=_blank] { text-decoration: underline; }
 
 .etabs { margin: 0; padding: 0; }
 .tab { display: inline-block; zoom:1; *display:inline; background: #eee; border: solid 1px #999; border-bottom: none; border-radius: 4px 4px 0 0; margin: 0; }
@@ -68,7 +69,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 .tab-container .panel-container { background: #fff; border: solid #666 1px; padding: 10px; border-radius: 0 4px 4px 4px; }
 .panel-container { margin-bottom: 10px; }
 </style>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script src="../jquery.easytabs.min.js"></script>
 <script>
@@ -80,7 +81,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
 
 <body>
   <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.8a and later</h1>
-  <p>Version 3.1.2 by lat9 and webchills.  Copyright &copy; 2017-2024, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
+  <p>Version 3.2.0 by lat9 and webchills.  Copyright &copy; 2017-2024, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
   <p>Current Support Thread on the Zen Cart forums: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></p>
   
   <p><strong>Usage Notes:</strong></p>
@@ -90,7 +91,9 @@ div.totals-desc h4 { border-top: 1px solid #666; }
     <li>If you require the automatic VAT validation service (via <a href="https://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools :: Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
   </ol>
 
-  <div class="tab-container" id="outer-container">
+  <i class="fa fa-exclamation-circle fa-5x red back"></i>&nbsp;&nbsp;<B>Important:</b> If your site is using v1.5.8a, you'll need to update your <code>admin/customers.php</code> to include <a href="https://github.com/zencart/zencart/blob/7be3f744f7db0f381d3b9beb3166adb5ef5a1131/admin/customers.php#L393-L398" target="_blank">these</a> updates that were applied after v1.5.8a's release.  Without those changes, you will not be able to successfully update a customer's record if the VAT Number was found to be invalid!
+
+  <div class="tab-container clearBoth" id="outer-container">
     <ul class="etabs">
       <li class="tab"><a href="#overview">Overview</a></li>
       <li class="tab"><a href="#installation">Installation</a></li>
@@ -361,10 +364,10 @@ div.totals-desc h4 { border-top: 1px solid #666; }
               <p><em>VAT4EU</em> integrates with your admin's <em>Customers :: Customers</em> listing display, identifying which customers have supplied a <em>VAT Number</em> and the validation-status of each.  Clicking on the <b>Asc</b> or <b>Desc</b> links for the &quot;VAT Number&quot; column sorts the display based on the <em>status</em> of the associated <em>VAT Number</em>.</p>
               <p>When sorted in <b>Asc</b> order, the customer records are displayed in the following status-order:</p>
               <ol>
-                <li><em>Validated via Admin Override</em>, shows <i class="fa fa-thumbs-up" aria-hidden="true" style="color: orange;"></i></li>
-                <li><em>Validated via VIES</em>, shows <i class="fa fa-thumbs-up" aria-hidden="true" style="color: green;"></i></li>               
-                <li><em>Not Validated</em>, shows <i class="fa fa-thumbs-down" aria-hidden="true" style="color: orange;"></i></li>               
-                <li><em>Deemed Invalid by VIES</em>, shows <i class="fa fa-thumbs-down" aria-hidden="true" style="color: red;"></i></li>                
+                <li><em>Validated via Admin Override</em>, shows <i class="fa fa-thumbs-up" aria-hidden="true" style="color: #8a6d3b;"></i></li>
+                <li><em>Validated via VIES</em>, shows <i class="fa fa-thumbs-up" aria-hidden="true" style="color: #3c763d;"></i></li>
+                <li><em>Not Validated</em>, shows <i class="fa fa-thumbs-down" aria-hidden="true" style="color: #8a6d3b;"></i></li>
+                <li><em>Deemed Invalid by VIES</em>, shows <i class="fa fa-thumbs-down" aria-hidden="true" style="color: #a94442;"></i></li>
               </ol>
               <img src="customers_details.png" alt="Admin Customers Details" title="Admin Customers Details" />
               <p>When you click on the &quot;Edit&quot; button associated with a customer, the information-gathering page now includes fields where you can enter (or correct) a customer's <em>VAT Number</em> entry.  If that <em>VAT Number</em> can't be automatically verified by the <em>VIES</em> service, there's a <em>VAT Validation Override</em> checkbox; ticking that box will allow the customer to create an order that <em>qualifies</em> for a VAT refund.</p>
@@ -463,6 +466,7 @@ div.totals-desc h4 { border-top: 1px solid #666; }
             <li>BUGFIX: Remove deprecated (and unneeded) notification from admin observer's watch-list.</li>
             <li>CHANGE: Drop support for Zen Cart versions prior to 1.5.8<b>a</b>.</li>
             <li>INTROP: Account for zc158a+ changes in address-handling in the <b>Customers :: Customers</b> tool.</li>
+            <li>BUGFIX: Correct missing PHP Warning when editing a customer in the admin.</li>
             <li>The following files were changed, <span class="added">added</span>, or <span class="removed">removed</span>:<ol>
                 <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
                 <li><span class="added">/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions.php</span></li>
