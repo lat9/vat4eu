@@ -43,7 +43,7 @@
 <?php
 
 //-bof-vat4eu-lat9  *** 1 of 1 ***
-    require $template->get_template_dir('tpl_modules_vat4eu_display.php', DIR_WS_TEMPLATE, $current_page_base, 'templates') . '/tpl_modules_vat4eu_display.php'; 
+    include $template->get_template_dir('tpl_modules_vat4eu_display.php', DIR_WS_TEMPLATE, $current_page_base, 'templates') . '/tpl_modules_vat4eu_display.php'; 
 //-eof-vat4eu-lat9  *** 1 of 1 ***
 
   }
