@@ -1,7 +1,9 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2021 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2024 Vinos de Frutas Tropicales
+//
+// Last updated: v3.2.0
 //
 // This class derived from a similarly-named class provided here: https://github.com/herdani/vat-validation
 //
@@ -37,11 +39,10 @@ class VatValidation
     //
     const VAT_VALIDATION     = '/[A-Z0-9 \+*]+/';
 
-    private $_client = null;
-    private $_valid = false;
+    private $client = null;
 
-    private $vatNumber;
-    private $countryCode;
+    private $vatNumber = '';
+    private $countryCode = '';
 
     private $debug = false;
     private $soapInstalled = false;
@@ -54,7 +55,7 @@ class VatValidation
     // Since we'll need the SOAP service to automatically validate the VAT Number, check now
     // to see that the PHP installation includes that service, logging a warning if not.
     //
-    public function __construct($countryCode, $vatNumber) 
+    public function __construct($countryCode, $vatNumber)
     {
         if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED === 'true') {
             $this->debug = (defined('VAT4EU_DEBUG') && VAT4EU_DEBUG === 'true');
@@ -63,14 +64,14 @@ class VatValidation
             // Greek VAT numbers start with 'EL' instead of their country-code ('GR').
             //
             $this->countryCode = ($countryCode === 'GR') ? 'EL' : $countryCode;
-            $this->vatNumber = strtoupper($vatNumber);
+            $this->vatNumber = strtoupper((string)$vatNumber);
 
             if (!class_exists('SoapClient')) {
                 trigger_error('VAT Number validation not possible, "SoapClient" class is not available.', E_USER_WARNING);;
             } else {
                 $this->soapInstalled = true;
                 try {
-                    $this->_client = new SoapClient(self::WSDL, ['trace' => true]);
+                    $this->client = new SoapClient(self::WSDL, ['trace' => true]);
                 } catch(Exception $e) {
                     $this->soapInstalled = false;
                     trigger_error("VAT Number validation not possible, VAT Translation Error: " . $e->getMessage(), E_USER_WARNING);
@@ -87,13 +88,13 @@ class VatValidation
     // The return-code value returned (one of this class' constants) identifies the type of issue
     // or a successful pre-check.
     //
-    public function vatNumberPreCheck()
+    public function vatNumberPreCheck(): int
     {
         // -----
         // If the VAT Number isn't supplied, then check to see if it's required and let the caller
         // know.
         //
-        if ($this->vatNumber == '') {
+        if ($this->vatNumber === '') {
             if (VAT4EU_REQUIRED === 'true') {
                 $rc = self::VAT_REQUIRED;
             } else {
@@ -112,7 +113,7 @@ class VatValidation
             if (VAT4EU_MIN_LENGTH !== '0' && $vat_number_length < VAT4EU_MIN_LENGTH) {
                 $rc = self::VAT_MIN_LENGTH;
             } elseif (strpos($this->vatNumber, $this->countryCode) !== 0) {
-                $rc = self::VAT_BAD_PREFIX;  
+                $rc = self::VAT_BAD_PREFIX;
             } elseif (!preg_match(self::VAT_VALIDATION, $this->vatNumber)) {
                 $rc = self::VAT_INVALID_CHARS;
             } else {
@@ -128,38 +129,36 @@ class VatValidation
     // VAT Number is registered (aka valid), returning a boolean value indicating whether (true)
     // or not (false) the VIES service has validated the number.
     //
-    public function validateVatNumber() 
+    public function validateVatNumber(): bool
     {
-        $this->_valid = false;
-        if ($this->soapInstalled) {
+        $is_valid = false;
+        if ($this->soapInstalled === true) {
             $number_validated = true;
             try {
-                $rs = $this->_client->checkVat(
-                    [
-                        'countryCode' => $this->countryCode, 
-                        'vatNumber' => substr($this->vatNumber, 2)
-                    ] 
-                );
+                $rs = $this->client->checkVat([
+                    'countryCode' => $this->countryCode,
+                    'vatNumber' => substr($this->vatNumber, 2)
+                ]);
             } catch(Exception $e) {
                 $number_validated = false;
             }
 
-            $this->trace("Web Service result (" . $this->countryCode . ', ' . $this->vatNumber . "): " . $this->_client->__getLastResponse());    
+            $this->trace("Web Service result (" . $this->countryCode . ', ' . $this->vatNumber . "): " . $this->client->__getLastResponse());
 
-            if ($number_validated && $rs->valid) {
-                $this->_valid = true;
+            if ($number_validated === true && $rs->valid) {
+                $is_valid = true;
             }
         }
-        return $this->_valid;
+        return $is_valid;
     }
 
     // -----
     // Locally used to log any information, under the control of the VAT4EU's debug configuration.
     //
-    private function trace($message) 
+    private function trace($message)
     {
-        if ($this->debug) {
-            error_log(date('Y-m-d H:m:i: ') . $message . PHP_EOL . PHP_EOL, 3, DIR_FS_LOGS . '/VatValidate.log');
+        if ($this->debug === true) {
+            error_log(date('Y-m-d H:m:i: ') . $message . "\n\n", 3, DIR_FS_LOGS . '/VatValidate.log');
         }
     }
 }

@@ -80,18 +80,22 @@ a[target=_blank] { text-decoration: underline; }
 </head>
 
 <body>
-  <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.8a and later</h1>
+  <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.8a and 2.0.0</h1>
   <p>Version 3.2.0 by lat9 and webchills.  Copyright &copy; 2017-2024, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
   <p>Current Support Thread on the Zen Cart forums: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></p>
   
   <p><strong>Usage Notes:</strong></p>
   <ol>
-    <li>A working copy of Zen Cart (v1.5.8<b>a</b> or later) must be previously installed.</li>
+    <li>A working copy of Zen Cart (v1.5.8<b>a</b> or v2.0.0) must be previously installed.</li>
     <li>Integration with <em>Edit Orders</em> requires EO version 4.7.0 or later.  See the <em>Interaction with Other Plugins</em> tab for more information.</li>
     <li>If you require the automatic VAT validation service (via <a href="https://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools :: Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
   </ol>
 
-  <i class="fa fa-exclamation-circle fa-5x red back"></i>&nbsp;&nbsp;<B>Important:</b> If your site is using v1.5.8a, you'll need to update your <code>admin/customers.php</code> to include <a href="https://github.com/zencart/zencart/blob/7be3f744f7db0f381d3b9beb3166adb5ef5a1131/admin/customers.php#L393-L398" target="_blank">these</a> updates that were applied after v1.5.8a's release.  Without those changes, you will not be able to successfully update a customer's record if the VAT Number was found to be invalid!
+  <i class="fa fa-exclamation-circle fa-5x red back"></i>&nbsp;&nbsp;<b>Important:</b> If your site is using v1.5.8a, you'll need to update<ol>
+    <li><code>admin/customers.php</code> to include <a href="https://github.com/zencart/zencart/blob/7be3f744f7db0f381d3b9beb3166adb5ef5a1131/admin/customers.php#L393-L398" target="_blank">these</a> updates that were applied after v1.5.8a's release.  Without those changes, you will not be able to successfully update a customer's record if the VAT Number was found to be invalid!</li>
+    <li><code>includes/classes/Customer.php</code> to include <a href="https://github.com/zencart/zencart/pull/6266/files" target="_blank">this</a> change; otherwise, a customer's entered VAT Number won't be added to various pages' formatted-address(es) displays.</li>
+    <li><code>includes/functions/functions_addresses.php</code>, to include <a href="https://github.com/zencart/zencart/pull/6281/files" target="_blank">this</a> change; otherwise, formatted addresses that <em>should</em> contain a VAT Number might not.</li>
+  </ol>
 
   <div class="tab-container clearBoth" id="outer-container">
     <ul class="etabs">
@@ -398,7 +402,7 @@ a[target=_blank] { text-decoration: underline; }
                 <li>create_account</li>
                 <li>login</li>
               </ol>
-              <p>The <em>What's this?</em> link, when clicked, displays a popup window that illustrates the varied VAT formats for the EU countries.  That information is a re-formatted version of the information on the <a href="https://ec.europa.eu/taxation_customs/vies/faq.html#item_11" target="_blank">VIES</a> website, and is current as of 2017-09-29.  The content is provided by <code>/includes/languages/english/html_includes/define_popup_vat4eu_formats.php</code>.</p>
+              <p>The <em>What's this?</em> link, when clicked, displays a popup window that illustrates the varied VAT formats for the EU countries.  That information is a re-formatted version of the information on the <a href="https://ec.europa.eu/taxation_customs/vies/faq.html#item_11" target="_blank">VIES</a> website, and is current as of 2024-03-03.  The content is provided by <code>/includes/languages/english/html_includes/define_popup_vat4eu_formats.php</code>.</p>
               <p><strong>Note:</strong> The <em>VAT Number</em> input will be added <b>only if</b> you have set <em>Configuration :: Customer Details :: Company</em> to <b>true</b>!</p>
               <div class="clearBoth"></div>
             </div>
@@ -459,7 +463,7 @@ a[target=_blank] { text-decoration: underline; }
         <noscript><h3>Version History</h3></noscript>
         <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
         <ul>
-          <li>v3.2.0-beta1, 2024-02-29 (lat9, webchills):<ul>
+          <li>v3.2.0-beta2, 2024-03-04 (lat9, webchills):<ul>
             <li>BUGFIX: Correct text hidden on VAT4EU help-text pop-up.</li>
             <li>BUGFIX: Correct PHP Warning (PHP 8.0) on initial installation.</li>
             <li>BUGFIX: Correct unwanted customer message regarding VAT number validation.</li>
@@ -469,7 +473,9 @@ a[target=_blank] { text-decoration: underline; }
             <li>BUGFIX: Correct missing PHP Warning when editing a customer in the admin.</li>
             <li>BUGFIX: Pre-define all class properties; PHP 8.2+ requirement.</li>
             <li>INTROP: Account for zc158a+ changes in storefront notifications.</li>
+            <li>INTROP: Major storefront restructuring, based on a couple of zc200 changes.</li>
             <li>The following files were changed, <span class="added">added</span>, or <span class="removed">removed</span>:<ol>
+                <li>/includes/classes/VatValidation.php</li>
                 <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
                 <li><span class="added">/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions.php</span></li>
                 <li><span class="removed">/includes/languages/english/extra_definitions/vat4eu_extra_definitions.php</span></li>
@@ -480,6 +486,7 @@ a[target=_blank] { text-decoration: underline; }
                 <li>/includes/modules/order_total/ot_vat_refund.php</li>
                 <li>/includes/modules/order_total/ot_vat_reverse_charges.php</li>
                 <li>/includes/templates/template_default/css/popup_vat4eu_formats.css</li>
+                <li>/includes/templates/template_default/templates/tpl_modules_vat4eu_display.php</li>
                 <li><span class="template">/includes/templates/YOUR_TEMPLATE/css/popup_vat4eu_formats.css</span></li>
                 <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
                 <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
