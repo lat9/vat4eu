@@ -62,6 +62,9 @@ class zcObserverVatForEuCountries extends base
                 //- From /includes/modules/create_account.php
                 'NOTIFY_CREATE_ACCOUNT_VALIDATION_CHECK',                   //- Allows us to check/validate any supplied VAT Number
 
+                //- From /includes/modules/create_account_success.php
+                'NOTIFY_HEADER_END_CREATE_ACCOUNT_SUCCESS',                 //- Allows the inclusion of the VAT Number in the address
+
                 //- From /includes/classes/Customer.php
                 'NOTIFY_MODULE_CREATE_ACCOUNT_ADDED_CUSTOMER_RECORD',       //- Provides the customer_id to associate with the address-book record
                 'NOTIFY_MODULE_CREATE_ACCOUNT_ADDED_ADDRESS_BOOK_RECORD',   //- Provides the address_book_id for the customer's primary address
@@ -206,6 +209,18 @@ class zcObserverVatForEuCountries extends base
                           WHERE orders_id = " . (int)$p2 . "
                           LIMIT 1"
                     );
+                }
+                break;
+
+            // -----
+            // Issued at the end of the `create_account_success` page, giving us the opportunity to
+            // add any just-supplied VAT number to the address' confirmation.
+            //
+            case 'NOTIFY_HEADER_END_CREATE_ACCOUNT_SUCCESS':
+                global $addressArray;
+                for ($i = 0, $n = count($addressArray); $i < $n; $i++) {
+                    [$vat_number, $vat_number_status] = $this->getCustomersVatNumber($_SESSION['customer_id'], $addressArray[$i]['address_book_id']);
+                    $addressArray[$i]['address']['entry_vat_number'] = $vat_number;
                 }
                 break;
 
