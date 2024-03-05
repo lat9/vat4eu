@@ -89,6 +89,7 @@ a[target=_blank] { text-decoration: underline; }
     <li>A working copy of Zen Cart (v1.5.8<b>a</b> or v2.0.0) must be previously installed.</li>
     <li>Integration with <em>Edit Orders</em> requires EO version 4.7.0 or later.  See the <em>Interaction with Other Plugins</em> tab for more information.</li>
     <li>Integration with <em>One-Page Checkout</em> requires OPC version 2.4.6 or later.</li>
+    <li>Integration with the <em>Bootstrap</em> template requires v3.6.3 or later.</li>
     <li>If you require the automatic VAT validation service (via <a href="https://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools :: Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
   </ol>
 
@@ -152,13 +153,25 @@ a[target=_blank] { text-decoration: underline; }
               <p>Unzip the plugin's package file and then:</p>
               <ol type="A">
                 <li>Rename the YOUR_ADMIN folder to match your custom admin folder's name.</li>
-                <li>Rename the YOUR_TEMPLATE sub-directory to match your current template's name:<ol>
-                  <li>/includes/templates/YOUR_TEMPLATE</li>
+                <li><em>If you are using a template based on Zen-Cart's built-in <code>responsive_classic</code> or <code>template_default</code> templates</em>:<ol>
+                    <li>Rename the YOUR_TEMPLATE sub-directory to match your current template's name:<ol type="a">
+                        <li>/includes/templates/YOUR_TEMPLATE</li>
+                    </ol></li>
+                    <li>Merge any pre-existing <span class="template">template-file</span> changes with the changes required by <em>VAT4EU</em>:<ol type="a">
+                        <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_address_book_details.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                        <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_checkout_new_address.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                        <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_create_account.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                    </ol></li>
                 </ol></li>
-                <li>Merge any pre-existing <span class="template">template-file</span> changes with the changes required by <em>VAT4EU</em>:<ol>
-                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_address_book_details.php</span> <span class="smaller">(1 marked change-section)</span></li>
-                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_checkout_new_address.php</span> <span class="smaller">(1 marked change-section)</span></li>
-                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_create_account.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                <li><em>If you are using a template based on the Bootstrap template</em>:<ol>
+                    <li>Rename the bootstrap sub-directory to match your current Bootstrap template's name:<ol type="a">
+                        <li>/includes/templates/bootstrap</li>
+                    </ol></li>
+                    <li>Merge any pre-existing <span class="template">template-file</span> changes with the changes required by <em>VAT4EU</em>:<ol type="a">
+                        <li><span class="template">/includes/templates/bootstrap/templates/tpl_modules_common_address_format.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                        <li><span class="template">/includes/templates/bootstrap/templates/tpl_modules_create_account.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                        <li><span class="template">/includes/templates/bootstrap/templates/tpl_modules_opc_address_block.php</span> <span class="smaller">(1 marked change-section)</span></li>
+                    </ol></li>
                 </ol></li>
                 <li>Sign into your Zen Cart's admin panel.</li>
                 <li>Copy the plugin's files (including those possibly modified above) to your store's directory structure:<ol>
@@ -173,13 +186,17 @@ a[target=_blank] { text-decoration: underline; }
                   <li>/includes/modules/order_total/ot_vat_reverse_charges.php</li>
                   <li>/includes/modules/pages/popup_vat4eu_formats/header_php.php</li>
                   <li>/includes/modules/pages/popup_vat4eu_formats/jscript_main.php</li>
+                  <li>/includes/templates/bootstrap/css/popup_vat4eu_formats.css<sup>1</sup></li>
+                  <li><span class="template">/includes/templates/bootstrap/templates/tpl_modules_common_address_format.php</span><sup>1</sup></li>
+                  <li><span class="template">/includes/templates/bootstrap/templates/tpl_modules_create_account.php</span><sup>1</sup></li>
+                  <li><span class="template">/includes/templates/bootstrap/templates/tpl_modules_opc_address_block.php</span><sup>1</sup></li>
                   <li>/includes/templates/template_default/css/popup_vat4eu_formats.css</li>
                   <li>/includes/templates/template_default/popup_vat4eu_formats/tpl_main_page.php</li>
                   <li>/includes/templates/template_default/templates/tpl_modules_vat4eu_display.php</li>
-                  <li>/includes/templates/YOUR_TEMPLATE/css/popup_vat4eu_formats.css</li>
-                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_address_book_details.php</span></li>
-                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_checkout_new_address.php</span></li>
-                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_create_account.php</span></li>
+                  <li>/includes/templates/YOUR_TEMPLATE/css/popup_vat4eu_formats.css<sup>2</sup></li>
+                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_address_book_details.php</span><sup>2</sup></li>
+                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_checkout_new_address.php</span><sup>2</sup></li>
+                  <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_create_account.php</span><sup>2</sup></li>
                   <li>/YOUR_ADMIN/includes/auto_loaders/config.vat4eu_admin.php</li>
                   <li>/YOUR_ADMIN/includes/classes/Vat4EuAdminObserver.php</li>
                   <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
@@ -187,6 +204,10 @@ a[target=_blank] { text-decoration: underline; }
                 </ol></li>
                 <li>Click the &quot;Admin Home&quot; link in your Zen Cart's top admin menu.  This action will cause the plugin's installation script to run.</li>
                 <li>Next step &hellip; Configuration!</li>
+              </ol>
+              <p><strong>Notes:</strong></p><ol>
+                <li><code>bootstrap</code> possibly renamed in step <b>C</b>, above.</li>
+                <li><code>YOUR_TEMPLATE</code> possibly renamed in step <b>B</b>, above.</li>
               </ol>
             </div>
 
@@ -480,18 +501,24 @@ a[target=_blank] { text-decoration: underline; }
             <li>BUGFIX: Include any 'VAT Number' entered in the address on the <code>create_account_success</code> page.</li>
             <li>CHANGE: Limit pages on which the message about an unvalidated VAT Number is displayed.</li>
             <li>BUGFIX: Invalid characters in a submitted VAT Number aren't flagged as an error.</li>
+            <li>CHANGE: Provide integration with the <em>Bootstrap</em> template, v3.6.3 or later.</li>
             <li>The following files were changed, <span class="added">added</span>, or <span class="removed">removed</span>:<ol>
                 <li>/docs/vat4eu/uninstall/uninstall_vat4eu.sql</li>
                 <li>/includes/classes/VatValidation.php</li>
                 <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
                 <li><span class="added">/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions.php</span></li>
                 <li><span class="removed">/includes/languages/english/extra_definitions/vat4eu_extra_definitions.php</span></li>
+                <li>/includes/languages/english/html_includes/define_popup_var4eu_formats.php</li>
                 <li><span class="added">/includes/languages/english/modules/order_total/lang.ot_vat_refund.php</span></li>
                 <li><span class="added">/includes/languages/english/modules/order_total/lang.ot_vat_reverse_charges.php</span></li>
                 <li><span class="removed">/includes/languages/english/modules/order_total/ot_vat_refund.php</span></li>
                 <li><span class="removed">/includes/languages/english/modules/order_total/ot_vat_reverse_charges.php</span></li>
                 <li>/includes/modules/order_total/ot_vat_refund.php</li>
                 <li>/includes/modules/order_total/ot_vat_reverse_charges.php</li>
+                <li><span class="added">/includes/templates/bootstrap/css/popup_vat4eu_formats.css</span></li>
+                <li><span class="added">/includes/templates/bootstrap/templates/tpl_modules_common_address_format.php</span></li>
+                <li><span class="added">/includes/templates/bootstrap/templates/tpl_modules_create_account.php</span></li>
+                <li><span class="added">/includes/templates/bootstrap/templates/tpl_modules_opc_address_block.php</span></li>
                 <li>/includes/templates/template_default/css/popup_vat4eu_formats.css</li>
                 <li>/includes/templates/template_default/templates/tpl_modules_vat4eu_display.php</li>
                 <li><span class="template">/includes/templates/YOUR_TEMPLATE/css/popup_vat4eu_formats.css</span></li>
