@@ -104,6 +104,24 @@ class zcObserverVatForEuCountries extends base
                 ]
             );
 
+            // -----
+            // If the customer's currently-selected bill-to address or their default contains
+            // an unvalidated VAT Number, let the customer know.
+            //
+            $message_pages = [
+                FILENAME_CREATE_ACCOUNT_SUCCESS,
+                FILENAME_ADDRESS_BOOK,
+                FILENAME_CHECKOUT_CONFIRMATION,
+                FILENAME_CHECKOUT_PAYMENT,
+            ];
+            if (defined('FILENAME_CHECKOUT_ONE')) {
+                $message_pages[] = FILENAME_CHECKOUT_ONE;
+                $message_pages[] = FILENAME_CHECKOUT_ONE_CONFIRMATION;
+            }
+            if (!in_array($GLOBALS['current_page_base'], $message_pages)) {
+                return;
+            }
+
             $address_id = $_SESSION['billto'] ?? $_SESSION['customer_default_address_id'];
             [$vat_number, $vat_number_status] = $this->getCustomersVatNumber($_SESSION['customer_id'], $address_id);
             if ($vat_number !== '' && $vat_number_status !== VatValidation::VAT_ADMIN_OVERRIDE && $vat_number_status !== VatValidation::VAT_VIES_OK) {
