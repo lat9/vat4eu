@@ -569,10 +569,17 @@ class zcObserverVatForEuCountries extends base
 
         // -----
         // If the "One-Page Checkout" plugin is installed, and we're on either its data-gathering
-        // or confirmation page, the VAT Number is also inserted.
+        // or confirmation page, the VAT Number is conditionally inserted for the billing-related
+        // address-formatting.
         //
-        if (defined('FILENAME_CHECKOUT_ONE') && ($current_page_base === FILENAME_CHECKOUT_ONE || $current_page_base === FILENAME_CHECKOUT_ONE_CONFIRMATION)) {
-            $show_vat_number = true;
+        if (defined('FILENAME_CHECKOUT_ONE')) {
+            if ($current_page_base === FILENAME_CHECKOUT_ONE) {
+                if (($GLOBALS['which'] ?? '') === 'bill') {
+                    $show_vat_number = true;
+                }
+            } elseif ($current_page_base === FILENAME_CHECKOUT_ONE_CONFIRMATION) {
+                $show_vat_number = true;
+            }
         }
 
         // -----
@@ -622,13 +629,10 @@ class zcObserverVatForEuCountries extends base
     public function getVatNumberForFormEntry(string $current_page_base): string
     {
         $vat_number = $_POST['vat_number'] ?? null;
-        switch ($current_page_base) {
-            case FILENAME_ADDRESS_BOOK_PROCESS:
-                $vat_number = $vat_number ?? $GLOBALS['entry']->fields['entry_vat_number'] ?? '';
-                break;
-
-            default:
-                break;
+        if ($current_page_base === FILENAME_ADDRESS_BOOK_PROCESS) {
+            $vat_number = $vat_number ?? $GLOBALS['entry']->fields['entry_vat_number'] ?? '';
+        } elseif (defined('FILENAME_CHECKOUT_ONE') && $current_page_base === FILENAME_CHECKOUT_ONE) {
+            $vat_number = $GLOBALS['order']->billing['billing_vat_number'];
         }
         return (string)$vat_number;
     }

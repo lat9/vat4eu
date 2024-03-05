@@ -88,6 +88,7 @@ a[target=_blank] { text-decoration: underline; }
   <ol>
     <li>A working copy of Zen Cart (v1.5.8<b>a</b> or v2.0.0) must be previously installed.</li>
     <li>Integration with <em>Edit Orders</em> requires EO version 4.7.0 or later.  See the <em>Interaction with Other Plugins</em> tab for more information.</li>
+    <li>Integration with <em>One-Page Checkout</em> requires OPC version 2.4.6 or later.</li>
     <li>If you require the automatic VAT validation service (via <a href="https://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools :: Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
   </ol>
 
@@ -474,6 +475,7 @@ a[target=_blank] { text-decoration: underline; }
             <li>BUGFIX: Pre-define all class properties; PHP 8.2+ requirement.</li>
             <li>INTROP: Account for zc158a+ changes in storefront notifications.</li>
             <li>INTROP: Major storefront restructuring, based on a couple of zc200 changes.</li>
+            <li>INTROP: Add full support for <em>One-Page Checkout</em>, v2.4.6 and later.</li>
             <li>The following files were changed, <span class="added">added</span>, or <span class="removed">removed</span>:<ol>
                 <li>/includes/classes/VatValidation.php</li>
                 <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
