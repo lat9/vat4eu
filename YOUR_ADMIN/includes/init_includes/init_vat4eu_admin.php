@@ -74,7 +74,7 @@ if (!defined('VAT4EU_MODULE_VERSION')) {
         "INSERT INTO " . TABLE_CONFIGURATION . "
             (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function)
          VALUES 
-            ('Enable storefront processing?', 'VAT4EU_ENABLED', 'false', 'The <em>VAT4EU</em> processing is enabled when this setting is &quot;true&quot; and you have also set <em>Configuration :: Customer Details :: Company</em> to <b>true</b>.', $cgi, 20, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\']),')"
+            ('Enable storefront processing?', 'VAT4EU_ENABLED', 'false', 'The <em>VAT4EU</em> processing is enabled when this setting is &quot;true&quot; and you have also set <em>Configuration :: Customer Details :: Company</em> to <b>true</b>.', $cgi, 20, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],')"
     );
 
     $db->Execute(
@@ -109,7 +109,7 @@ if (!defined('VAT4EU_MODULE_VERSION')) {
        "INSERT INTO " . TABLE_CONFIGURATION . "
             (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function)
         VALUES 
-            ('VAT Number: Unvalidated Indicator', 'VAT4EU_UNVERIFIED', '*', 'Identify the indicator that you want to give your customers who have entered a <em>VAT Number</em> when that number is not yet validated.<br><br>Default: <b>*</b>', $cgi, 52, now(), NULL, NULL)"        
+            ('VAT Number: Unvalidated Indicator', 'VAT4EU_UNVERIFIED', '*', 'Identify the indicator that you want to give your customers who have entered a <em>VAT Number</em> when that number is not yet validated.<br><br>Default: <b>*</b>', $cgi, 52, now(), NULL, NULL)"
     );
 
     $db->Execute(
