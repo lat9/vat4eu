@@ -37,7 +37,7 @@ class VatValidation
     //
     // Valid characters are alphanumerics, space (' '), plus-sign ('+') and asterisk ('*').
     //
-    const VAT_VALIDATION     = '/[A-Z0-9 \+*]+/';
+    const VAT_VALIDATION     = '/[A-Z0-9 \+*]{%u}/';
 
     private $client = null;
 
@@ -114,7 +114,7 @@ class VatValidation
                 $rc = self::VAT_MIN_LENGTH;
             } elseif (strpos($this->vatNumber, $this->countryCode) !== 0) {
                 $rc = self::VAT_BAD_PREFIX;
-            } elseif (!preg_match(self::VAT_VALIDATION, $this->vatNumber)) {
+            } elseif (!preg_match(sprintf(self::VAT_VALIDATION, $vat_number_length), $this->vatNumber)) {
                 $rc = self::VAT_INVALID_CHARS;
             } else {
                 $rc = self::VAT_OK;

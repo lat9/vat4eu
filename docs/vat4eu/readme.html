@@ -479,6 +479,7 @@ a[target=_blank] { text-decoration: underline; }
             <li>CHANGE: Modify the uninstall-SQL script so that it works when run under the admin's <em>Install SQL Patches</em> tool.</li>
             <li>BUGFIX: Include any 'VAT Number' entered in the address on the <code>create_account_success</code> page.</li>
             <li>CHANGE: Limit pages on which the message about an unvalidated VAT Number is displayed.</li>
+            <li>BUGFIX: Invalid characters in a submitted VAT Number aren't flagged as an error.</li>
             <li>The following files were changed, <span class="added">added</span>, or <span class="removed">removed</span>:<ol>
                 <li>/docs/vat4eu/uninstall/uninstall_vat4eu.sql</li>
                 <li>/includes/classes/VatValidation.php</li>
