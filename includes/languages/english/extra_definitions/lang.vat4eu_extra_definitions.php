@@ -26,9 +26,10 @@ $define = [
     'VAT4EU_DISPLAY_VAT_NUMBER' => 'VAT Number: ',
 
     // -----
-    // This definition is used by tpl_modules_vat4eu_display.php's link to the popup_vat4eu_formats page.
+    // These definitions are used by tpl_modules_vat4eu_display.php's link to the popup_vat4eu_formats page.
     //
     'VAT4EU_WHATS_THIS' => 'What\'s this?',
+    'VAT4EU_CHANGE_IN_ADDRESS_BOOK' => 'To change the &quot;VAT Number&quot; to be used for this order, please update the value in your <a href="%s">address book</a> and then return to checkout.',
 
     'VAT4EU_ENTRY_VAT_MIN_ERROR' => 'Your <em>VAT Number</em> must contain a minimum of ' . VAT4EU_MIN_LENGTH . ' characters.',
     'VAT4EU_ENTRY_VAT_PREFIX_INVALID' => 'Your <em>VAT Number</em> must begin with <b>%1$s</b>, since the address is in <em>%2$s</em>.',

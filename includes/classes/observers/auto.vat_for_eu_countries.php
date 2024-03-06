@@ -86,9 +86,6 @@ class zcObserverVatForEuCountries extends base
                     'NOTIFY_ORDER_CART_FINISHED',                               //- Finished with the cart->order conversion, addresses available
                     'NOTIFY_ORDER_DURING_CREATE_ADDED_ORDER_HEADER',            //- Creating an order, after the main orders-table entry has been created
 
-                    //- From /includes/classes/OnePageCheckout.php
-                    'NOTIFY_OPC_ADDRESS_VALIDATION',                            //- Validating an address entered or changed via OPC's AJAX
-
                     //- From /includes/modules/checkout_new_address.php
                     'NOTIFY_MODULE_CHECKOUT_NEW_ADDRESS_VALIDATION',            //- Allows us to check/validate any supplied VAT Number
                     'NOTIFY_MODULE_CHECKOUT_ADDED_ADDRESS_BOOK_RECORD',         //- Indicates that the record was created successfully
@@ -196,6 +193,8 @@ class zcObserverVatForEuCountries extends base
                 // Number "doesn't count", so a quick return.
                 //
                 if (defined('CHECKOUT_ONE_GUEST_BILLTO_ADDRESS_BOOK_ID') && ((int)CHECKOUT_ONE_GUEST_BILLTO_ADDRESS_BOOK_ID) === $_SESSION['billto']) {
+                    $class->billing['billing_vat_number'] = '';
+                    $class->billing['billing_vat_validated'] = VatValidation::VAT_NOT_VALIDATED;
                     return;
                 }
 
@@ -240,57 +239,6 @@ class zcObserverVatForEuCountries extends base
                     [$vat_number, $vat_number_status] = $this->getCustomersVatNumber($_SESSION['customer_id'], $addressArray[$i]['address_book_id']);
                     $addressArray[$i]['address']['entry_vat_number'] = $vat_number;
                 }
-                break;
-
-            // -----
-            // Issued during OPC's `checkout_one` page's AJAX processing when an address update/addition
-            // has been submitted.  If it's the bill-to address and a vat-number has been
-            // included, validate the value at this time.
-            //
-            // Entry:
-            // $p1 ... (r/o) An associative array containing two keys:
-            //         - 'which' ............ contains either 'ship' or 'bill', identifying which address-type is being validated.
-            //         - 'address_values' ... contains an array of posted values associated with the to-be-validated address.
-            // $p2 ... (r/w) A reference to the, initially empty, $additional_messages associative array.  That array is keyed on the
-            //         like-named key within $p1's 'address_values' array, with the associated value being a language-specific message to
-            //         display to the customer.  If this array is _not empty_, the address is considered unvalidated.
-            // $p3 ... (r/w) A reference to the, initially empty, $additional_address_values associative array.  That array is keyed on
-            //         the like-named key within $p1's 'address_values' array, with the associated value being that to be stored for the
-            //         address.
-            //
-            // Note: The 'vat_number', if provided, has been gathered by tpl_modules_vat4eu_display.php.
-            //
-            case 'NOTIFY_OPC_ADDRESS_VALIDATION':
-                if ($p1['which'] !== 'bill' || !isset($_POST['vat_number'])) {
-                    break;
-                }
-
-                // -----
-                // Perform some formatting prechecks on the VAT number.
-                //
-                
-                // -----
-                // Next step in the OPC process, either adding or updating an address;
-                // attach to those notifications since the VAT Number was provided.
-                //
-                $this->attach(
-                    $this,
-                    [
-                        'NOTIFY_OPC_EXISTING_ADDRESS_BOOK_RECORD',  //- Using existing address for customer's saved address (OPC v2.5.0+).
-                        'NOTIFY_OPC_ADDED_ADDRESS_BOOK_RECORD',     //- Just added an address-book record
-                        'NOTIFY_OPC_ADDED_PRIMARY_ADDRESS',         //- Just updated the customer's "primary" address-book record
-                    ]
-                );
-                break;
-
-            // -----
-            // Issued during OPC's `checkout_one` page's AJAX processing when an address update/addition
-            // has been submitted and validated. Only 'attached' if the previous OPC step was seen and
-            // a billing-address VAT Number was supplied.
-            //
-            case 'NOTIFY_OPC_EXISTING_ADDRESS_BOOK_RECORD':
-            case 'NOTIFY_OPC_ADDED_ADDRESS_BOOK_RECORD':
-            case 'NOTIFY_OPC_ADDED_PRIMARY_ADDRESS':
                 break;
 
             // -----
@@ -527,7 +475,7 @@ class zcObserverVatForEuCountries extends base
             }
         }
 
-        $this->debug($debug_message . "\tReturning ($vat_number_status, $vat_number)\n");
+        $this->debug($debug_message . "\tReturning ($vat_number, $vat_number_status)\n");
         return [$vat_number, $vat_number_status];
     }
 
@@ -607,7 +555,7 @@ class zcObserverVatForEuCountries extends base
         //
         if (defined('FILENAME_CHECKOUT_ONE')) {
             if ($current_page_base === FILENAME_CHECKOUT_ONE) {
-                if (($GLOBALS['which'] ?? '') === 'bill') {
+                if (($GLOBALS['which'] ?? '') === 'bill' || ($_POST['which'] ?? '') === 'bill') {
                     $show_vat_number = true;
                 }
             } elseif ($current_page_base === FILENAME_CHECKOUT_ONE_CONFIRMATION) {
@@ -665,7 +613,7 @@ class zcObserverVatForEuCountries extends base
         if ($current_page_base === FILENAME_ADDRESS_BOOK_PROCESS) {
             $vat_number = $vat_number ?? $GLOBALS['entry']->fields['entry_vat_number'] ?? '';
         } elseif (defined('FILENAME_CHECKOUT_ONE') && $current_page_base === FILENAME_CHECKOUT_ONE) {
-            $vat_number = $GLOBALS['order']->billing['billing_vat_number'];
+            [$vat_number, $vat_number_status] = $this->getCustomersVatNumber($_SESSION['customer_id'], $_SESSION['billto']);
         }
         return (string)$vat_number;
     }
