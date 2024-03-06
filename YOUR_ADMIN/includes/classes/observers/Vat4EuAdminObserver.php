@@ -71,7 +71,6 @@ class Vat4EuAdminObserver extends base
 
                     //- From admin/edit_orders.php
                     'EDIT_ORDERS_PRE_UPDATE_ORDER',                 //- Allows us to update any VAT Number associated with the order
-                    'EDIT_ORDERS_ADDITIONAL_ADDRESS_ROWS',          //- Allows us to insert a "VAT Number" input field, for versions of EO prior to v4.6.0.
                     'EDIT_ORDERS_ADDL_BILLING_ADDRESS_ROWS',        //- As above, but for EO v4.6.0+.
 
                     //- From admin/includes/functions/functions_customers.php
@@ -274,43 +273,6 @@ class Vat4EuAdminObserver extends base
                 break;
 
             // -----
-            // Issued by "Edit Orders" during its rendering of the address blocks.  Allows us to
-            // insert the fields associated with the VAT Number's display/modification.
-            //
-            // On entry:
-            //
-            // $p1 ... (r/o) A copy of the current order-object.
-            // $p2 ... (r/w) A reference to a string value that is updated to contain the VAT Number field.
-            //
-            case 'EDIT_ORDERS_ADDITIONAL_ADDRESS_ROWS':
-                $vat_number = (string)$p1->billing['billing_vat_number'];
-                $vat_validated = (int)$p1->billing['billing_vat_validated'];
-                $valid_indicator = '';
-                if ($vat_number !== '' && $vat_validated !== VatValidation::VAT_VIES_OK && $vat_validated !== VatValidation::VAT_ADMIN_OVERRIDE) {
-                    $valid_indicator = '&nbsp;&nbsp;' . VAT4EU_UNVERIFIED;
-                }
-                $hidden_fields = zen_draw_hidden_field('current_vat_number', $vat_number) . zen_draw_hidden_field('current_vat_validated', $vat_validated);
-                $vat_info =
-                    '<tr>' . PHP_EOL .
-                    '    <td>&nbsp;</td>' . PHP_EOL .
-                    '    <td>&nbsp;</td>' . PHP_EOL .
-                    '    <td><strong>' . VAT4EU_ENTRY_VAT_NUMBER . '</strong></td>' . PHP_EOL .
-                    '    <td>' . zen_draw_input_field('vat_number', zen_db_output($vat_number), 'size="45"') . $valid_indicator . $hidden_fields . '</td>' . PHP_EOL .
-                    '    <td>&nbsp;</td>' . PHP_EOL .
-                    '    <td>&nbsp;</td>' . PHP_EOL .
-                    '</tr>' . PHP_EOL .
-                    '<tr>' . PHP_EOL .
-                    '    <td>&nbsp;</td>' . PHP_EOL .
-                    '    <td>&nbsp;</td>' . PHP_EOL .
-                    '    <td><strong>' . VAT4EU_ENTRY_OVERRIDE_VALIDATION . '</strong></td>' . PHP_EOL .
-                    '    <td>' . zen_draw_checkbox_field('vat_number_override', '', ($vat_validated === VatValidation::VAT_ADMIN_OVERRIDE)) . '</td>' . PHP_EOL .
-                    '    <td>&nbsp;</td>' . PHP_EOL .
-                    '    <td>&nbsp;</td>' . PHP_EOL .
-                    '</tr>' . PHP_EOL;
-                $p2 .= $vat_info;
-                break;
-
-            // -----
             // Issued by "Edit Orders", v4.6.0+, when rendering the billing-address block.  We'll insert the fields
             // associated with the VAT Number's display/modification.
             // On entry:
@@ -335,7 +297,7 @@ class Vat4EuAdminObserver extends base
                 $hidden_fields = zen_draw_hidden_field('current_vat_number', $vat_number) . zen_draw_hidden_field('current_vat_validated', $vat_validated);
                 $p2[] = [
                     'label' => rtrim(VAT4EU_ENTRY_VAT_NUMBER, ':'),
-                    'value' => zen_draw_input_field('vat_number', zen_db_output($vat_number), 'size="45"') . $valid_indicator . $hidden_fields
+                    'value' => zen_draw_input_field('vat_number', zen_output_string_protected($vat_number), 'size="45"') . $valid_indicator . $hidden_fields
                 ];
                 $p2[] = [
                     'label' => rtrim(VAT4EU_ENTRY_OVERRIDE_VALIDATION, ':'),
