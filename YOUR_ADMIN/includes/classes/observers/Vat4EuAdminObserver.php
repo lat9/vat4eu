@@ -3,7 +3,7 @@
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9
 // Copyright (c) 2017-2024 Vinos de Frutas Tropicales
 //
-// Last updated: v3.2.0
+// Last updated: v3.2.1
 //
 if (!defined('IS_ADMIN_FLAG') || IS_ADMIN_FLAG !== true) {
     die('Illegal Access');
@@ -173,10 +173,13 @@ class Vat4EuAdminObserver extends base
                 $heading_text = VAT4EU_CUSTOMERS_HEADING;
                 if (isset($_GET['list_order']) && strpos($_GET['list_order'], 'vatnum') === 0) {
                     $heading_text = '<span class="SortOrderHeader">' . $heading_text . '</span>';
+                    global $disp_order;
                     if ($_GET['list_order'] === 'vatnum-asc') {
                         $asc_class = 'SortOrderHeader';
+                        $disp_order = 'a.entry_vat_number, c.customers_lastname, c.customers_firstname';
                     } else {
                         $desc_class = 'SortOrderHeader';
+                        $disp_order = 'a.entry_vat_number DESC, c.customers_lastname, c.customers_firstname';
                     }
                 }
                 $current_parms = zen_get_all_get_params(['list_order', 'page']);

@@ -81,7 +81,7 @@ a[target=_blank] { text-decoration: underline; }
 
 <body>
   <h1 id="title">VAT for EU Countries (VAT4EU) for Zen Cart&reg; 1.5.8a and 2.0.0</h1>
-  <p>Version 3.2.0 by lat9 and webchills.  Copyright &copy; 2017-2024, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
+  <p>Version 3.2.1 by lat9 and webchills.  Copyright &copy; 2017-2024, <a href="https://vinosdefrutastropicales.com" target="_blank">Vinos de Frutas Tropicales</a>.</p>
   <p>Current Support Thread on the Zen Cart forums: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></p>
   
   <p><strong>Usage Notes:</strong></p>
@@ -485,6 +485,13 @@ a[target=_blank] { text-decoration: underline; }
         <noscript><h3>Version History</h3></noscript>
         <p>You can view the details of these changes on the plugin's <a href="https://github.com/lat9/vat4eu/issues" target="_blank">GitHub repository.</a></p>
         <ul>
+          <li>v3.2.1-beta1, 2024-03-06 (lat9, webchills):<ul>
+            <li>BUGFIX: Clicking on the link to sort by VAT Number in the admin customers' listing doesn't perform the sort.</li>
+            <li>The following files were changed:<ol>
+                <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
+                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+            </ol></li>
+          </ul></li>
           <li>v3.2.0, 2024-03-06 (lat9, webchills):<ul>
             <li>BUGFIX: Correct text hidden on VAT4EU help-text pop-up.</li>
             <li>BUGFIX: Correct PHP Warning (PHP 8.0) on initial installation.</li>
