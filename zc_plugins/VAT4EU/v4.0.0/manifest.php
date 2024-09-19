@@ -1,6 +1,6 @@
 <?php
 return [
-    'pluginVersion' => 'v3.0.0',
+    'pluginVersion' => 'v4.0.0',
     'pluginName' => 'VAT for EU Countries',
     'pluginDescription' => 'This plugin updates your store to gather, display and validate an EU &quot;VAT Number&quot;. See <em>VAT4EU</em>\'s <a href="https://github.com/lat9/vat4eu/wiki" target="_blank" rel="noopener noreferrer">Wiki</a> for additional information.',
     'pluginAuthor' => 'Vinos de Frutas Tropicales (lat9)',
