@@ -113,9 +113,6 @@ class ScriptedInstaller extends ScriptedInstallBase
     protected function nonEncapsulatedVersionPresent(): bool
     {
         $log_messages = [];
-        if (defined('FILENAME_EDIT_ORDERS')) {
-            $log_messages[] = "'FILENAME_EDIT_ORDERS' definition is present";
-        }
 
         $file_found_message = 'Non-encapsulated admin file (%s) must be removed before this plugin can be installed.';
         if (file_exists(DIR_FS_ADMIN . 'edit_orders.php')) {
