@@ -15,7 +15,6 @@ if (!defined('IS_ADMIN_FLAG') || IS_ADMIN_FLAG !== true) {
 
 class zcObserverVat4EuAdminObserver extends base
 {
-    private bool $isEnabled = false;
     private bool $vatValidated = false;
     private bool $vatIsRefundable = false;
     private string $vatNumber = '';
@@ -55,8 +54,6 @@ class zcObserverVat4EuAdminObserver extends base
         if (!class_exists('VatValidation')) {
             require $this->zcPluginDir . 'catalog/' . DIR_WS_CLASSES . 'VatValidation.php';
         }
-
-        $this->isEnabled = true;
 
         $this->debug = (VAT4EU_DEBUG === 'true');
         if (isset($_SESSION['admin_id'])) {
@@ -352,7 +349,7 @@ class zcObserverVat4EuAdminObserver extends base
     // -----
     // This helper function retrieves the 2-character ISO code for the specified country.
     //
-    public function getCountryIsoCode2($countries_id)
+    public function getCountryIsoCode2($countries_id): string
     {
         global $db;
 
@@ -397,7 +394,7 @@ class zcObserverVat4EuAdminObserver extends base
     }
 
     // -----
-    // This function, called during form validation where a VAT Number can be entered, e.g. Customers->Customers, returning
+    // This function, called during form validation where a VAT Number can be entered, e.g. Customers :: Customers, returning
     // a boolean value that indicates whether (true) or not (false) the VAT Number is 'valid'.
     //
     protected function validateVatNumber(): bool
@@ -551,21 +548,21 @@ class zcObserverVat4EuAdminObserver extends base
 
     // -----
     // Pull the countries_id value from the supplied country field, as formatted by the storefront orders' class.
-    // If the value supplied is not an array or doesn't have a country-id value, then the country field supplied is
+    // If the value supplied doesn't have a country-id value, then the country field supplied is
     // most likely from the delivery section of a virtual (i.e. no shipping required) order.
     //
     // Returns boolean false if the country-id cannot be determined; the integer id value otherwise.
     //
     protected function getCountryIdFromOrder($country_info)
     {
-        return (is_array($country_info) && isset($country_info['id'])) ? $country_info['id'] : false;
+        return ($country_info['id'] ?? false);
     }
 
     // ------
     // This function determines, based on the admin page currently active, whether a zen_address_format
     // function call should have the VAT Number appended and, if so, appends it!
     //
-    protected function formatAddress($address_elements, $current_address)
+    protected function formatAddress(array $address_elements, string $current_address): bool|string
     {
         global $current_page;
 
