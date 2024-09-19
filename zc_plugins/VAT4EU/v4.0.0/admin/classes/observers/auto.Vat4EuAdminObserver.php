@@ -3,27 +3,35 @@
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9
 // Copyright (c) 2017-2024 Vinos de Frutas Tropicales
 //
-// Last updated: v3.2.1
+// Last updated: v4.0.0
 //
+use App\Models\PluginControl;
+use App\Models\PluginControlVersion;
+use Zencart\PluginManager\PluginManager;
+
 if (!defined('IS_ADMIN_FLAG') || IS_ADMIN_FLAG !== true) {
     die('Illegal Access');
 }
 
-class Vat4EuAdminObserver extends base
+class zcObserverVat4EuAdminObserver extends base
 {
-    private $isEnabled = false;
-    private $vatValidated = false;
-    private $vatIsRefundable = false;
-    private $vatNumber = '';
+    private bool $isEnabled = false;
+    private bool $vatValidated = false;
+    private bool $vatIsRefundable = false;
+    private string $vatNumber = '';
     private $vatNumberStatus = 0;
     private $vatNumberMessage = '';
-    private $vatNumberError = false;
+    private bool $vatNumberError = false;
     private $addressFormatCount = 0;
     private $addressesToFormat;
-    private $vatCountries = [];
-    private $debug = false;
-    private $logfile = '';
-    private $oID = 0;
+    private array $vatCountries = [];
+
+    private bool $debug = false;
+    private string $logfile;
+
+    private int $oID;
+
+    private string $zcPluginDir;
 
     // -----
     // On construction, this auto-loaded observer checks to see that the plugin is enabled and, if so:
@@ -34,52 +42,54 @@ class Vat4EuAdminObserver extends base
     public function __construct()
     {
         // -----
+        // Determine this zc_plugin's installed directory for use by other of the
+        // plugin's modules.
+        //
+        $plugin_manager = new PluginManager(new PluginControl(), new PluginControlVersion());
+        $this->zcPluginDir = $plugin_manager->getPluginVersionDirectory('VAT4EU', $plugin_manager->getInstalledPlugins());
+
+        // -----
         // Pull in the VatValidation class, enabling its constants to be used even if the plugin
         // isn't enabled.
         //
         if (!class_exists('VatValidation')) {
-            require DIR_FS_CATALOG . DIR_WS_CLASSES . 'VatValidation.php';
+            require $this->zcPluginDir . 'catalog/' . DIR_WS_CLASSES . 'VatValidation.php';
         }
 
-        // -----
-        // If the plugin is enabled ...
-        //
-        if (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED === 'true') {
-            $this->isEnabled = true;
-            $this->debug = (defined('VAT4EU_DEBUG') && VAT4EU_DEBUG === 'true');
-            if (isset($_SESSION['admin_id'])) {
-                $this->logfile = DIR_FS_LOGS . '/vat4eu_adm_' . $_SESSION['admin_id'] . '.log';
-            } else {
-                $this->logfile = DIR_FS_LOGS . '/vat4eu_adm.log';
-            }
-            if (isset($_GET['oID'])) {
-                $this->oID = (int)$_GET['oID'];
-            }
+        $this->isEnabled = true;
 
-            $this->attach(
-                $this,
-                [
-                    //- From /includes/classes/order.php
-                    'NOTIFY_ORDER_AFTER_QUERY',                     //- Reconstructing a previously-placed order
-
-                    //- From admin/customers.php
-                    'NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE',       //- Allows us to check/validate any entered VAT Number
-                    'NOTIFY_ADMIN_CUSTOMERS_B4_ADDRESS_UPDATE',     //- Gives us the chance to insert the VAT-related fields
-                    'NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT',         //- The point at which the VAT Number fields are inserted
-                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER',        //- The point at which we add columns to the listing heading
-                    'NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT',       //- The point at which we insert a customer record in the listing
-
-                    //- From admin/edit_orders.php
-                    'EDIT_ORDERS_PRE_UPDATE_ORDER',                 //- Allows us to update any VAT Number associated with the order
-                    'EDIT_ORDERS_ADDL_BILLING_ADDRESS_ROWS',        //- As above, but for EO v4.6.0+.
-
-                    //- From admin/includes/functions/functions_customers.php
-                    'NOTIFY_END_ZEN_ADDRESS_FORMAT',                //- Issued at the end of the zen_address_format function (*)
-                ]
-            );
-
-            $this->vatCountries = explode(',', str_replace(' ', '', VAT4EU_EU_COUNTRIES));
+        $this->debug = (VAT4EU_DEBUG === 'true');
+        if (isset($_SESSION['admin_id'])) {
+            $this->logfile = DIR_FS_LOGS . '/vat4eu_adm_' . $_SESSION['admin_id'] . '.log';
+        } else {
+            $this->logfile = DIR_FS_LOGS . '/vat4eu_adm.log';
         }
+
+        $this->oID = (int)($_GET['oID'] ?? 0);
+
+        $this->attach(
+            $this,
+            [
+                //- From /includes/classes/order.php
+                'NOTIFY_ORDER_AFTER_QUERY',                     //- Reconstructing a previously-placed order
+
+                //- From admin/customers.php
+                'NOTIFY_ADMIN_CUSTOMERS_UPDATE_VALIDATE',       //- Allows us to check/validate any entered VAT Number
+                'NOTIFY_ADMIN_CUSTOMERS_B4_ADDRESS_UPDATE',     //- Gives us the chance to insert the VAT-related fields
+                'NOTIFY_ADMIN_CUSTOMERS_CUSTOMER_EDIT',         //- The point at which the VAT Number fields are inserted
+                'NOTIFY_ADMIN_CUSTOMERS_LISTING_HEADER',        //- The point at which we add columns to the listing heading
+                'NOTIFY_ADMIN_CUSTOMERS_LISTING_ELEMENT',       //- The point at which we insert a customer record in the listing
+
+                //- From admin/edit_orders.php
+                'EDIT_ORDERS_PRE_UPDATE_ORDER',                 //- Allows us to update any VAT Number associated with the order
+                'EDIT_ORDERS_ADDL_BILLING_ADDRESS_ROWS',        //- As above, but for EO v4.6.0+.
+
+                //- From admin/includes/functions/functions_customers.php
+                'NOTIFY_END_ZEN_ADDRESS_FORMAT',                //- Issued at the end of the zen_address_format function (*)
+            ]
+        );
+
+        $this->vatCountries = explode(',', str_replace(' ', '', VAT4EU_EU_COUNTRIES));
     }
 
     // -----
@@ -334,7 +344,7 @@ class Vat4EuAdminObserver extends base
     // Returns a boolean status indicating whether (true) or not (false) the currently-active
     // order-class object (if present) qualifies for a VAT refund.
     //
-    public function isVatRefundable()
+    public function isVatRefundable(): bool
     {
         return $this->checkVatIsRefundable();
     }
@@ -359,7 +369,7 @@ class Vat4EuAdminObserver extends base
     // This function returns a Font-Awesome glyph that represents the specified
     // VAT-validation status.
     //
-    protected function showVatNumberStatus($vat_validation)
+    protected function showVatNumberStatus($vat_validation): string
     {
         switch ($vat_validation) {
             case VatValidation::VAT_ADMIN_OVERRIDE:
@@ -390,7 +400,7 @@ class Vat4EuAdminObserver extends base
     // This function, called during form validation where a VAT Number can be entered, e.g. Customers->Customers, returning
     // a boolean value that indicates whether (true) or not (false) the VAT Number is 'valid'.
     //
-    protected function validateVatNumber()
+    protected function validateVatNumber(): bool
     {
         global $vat_number, $vat_number_override, $current_page;
 
@@ -460,10 +470,8 @@ class Vat4EuAdminObserver extends base
     // -----
     // This function creates (and returns) the HTML associated with a "VAT Number".
     //
-    protected function formatVatNumberDisplay($cInfo)
+    protected function formatVatNumberDisplay($cInfo): array
     {
-        global $db;
-
         if (isset($_POST['vat_number'])) {
             $vat_number = $cInfo->vat_number;
             $vat_override = isset($_POST['vat_number_override']);
@@ -511,7 +519,7 @@ class Vat4EuAdminObserver extends base
     // on a common order-class query.  Virtual orders will have an empty string for the order's delivery country, while
     // shippable orders will contain an array of country-related information.
     //
-    protected function checkVatIsRefundable()
+    protected function checkVatIsRefundable(): bool
     {
         global $order;
 
@@ -674,14 +682,14 @@ class Vat4EuAdminObserver extends base
     // This function returns a boolean indicator, identifying whether (true) or not (false) the
     // country associated with the "countries_id" input qualifies for this plugin's processing.
     //
-    protected function isVatCountry($countries_id)
+    protected function isVatCountry($countries_id): bool
     {
         return in_array($this->getCountryIsoCode2($countries_id), $this->vatCountries);
     }
 
-    private function debug($message)
+    private function debug($message): void
     {
-        if ($this->debug) {
+        if ($this->debug === true) {
             error_log(date('Y-m-d H:i:s') . ": $message\n", 3, $this->logfile);
         }
     }
