@@ -3,12 +3,9 @@
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
 // Copyright (c) 2017-2024 Vinos de Frutas Tropicales
 //
-// Last updated: v3.2.0
+// Last updated: v4.0.0
 //
 $define = [
-    'VAT4EU_TEXT_MESSAGE_INSTALLED' => 'v%s of the <em>VAT Mod</em> plugin has been successfully installed.',
-    'VAT4EU_TEXT_MESSAGE_UPDATED' => 'The <em>VAT4EU</em> plugin has been successfully updated from v%1$s to v%2$s.',
-
     'VAT4EU_GB_COUNTRY_REMOVED' => 'The country \'GB\' has been removed from the VAT4EU <em>EU Countries</em> list.',
 
     'BOX_CONFIG_VAT4EU' => 'VAT for EU Countries',
@@ -28,10 +25,11 @@ $define = [
 
     'VAT4EU_CUSTOMERS_HEADING' => 'VAT Number',
 
-    'VAT4EU_ENTRY_VAT_MIN_ERROR' => '<span class="errorText">At least %u characters.</span>',
-    'VAT4EU_ENTRY_VAT_PREFIX_INVALID' => '<span class="errorText">Must begin with <b>%1$s</b>, since the address is in <em>%2$s</em>.</span>',
-    'VAT4EU_ENTRY_VAT_INVALID_CHARS' => '<span class="errorText">Invalid characters detected.</span>',
-    'VAT4EU_ENTRY_VAT_VIES_INVALID' => '<span class="errorText">Failed VIES validation.</span>',
+    'VAT4EU_ENTRY_VAT_MIN_ERROR' => '<span class="errorText">A <em>VAT Number</em> must be at least %u characters.</span>',
+    'VAT4EU_ENTRY_VAT_PREFIX_INVALID' => '<span class="errorText">The <em>VAT Number</em> must begin with <b>%1$s</b>, since the address is in <em>%2$s</em>.</span>',
+    'VAT4EU_ENTRY_VAT_INVALID_CHARS' => '<span class="errorText">Invalid characters were detected in the <em>VAT Number</em>.</span>',
+    'VAT4EU_ENTRY_VAT_VIES_INVALID' => '<span class="errorText">The <em>VAT Number failed VIES validation.</span>',
+    'VAT4EU_ENTRY_VAT_NOT_SUPPORTED' => '<span class="errorText">The country in this address (%s) does not support VAT numbers.</span>',
     'VAT4EU_ENTRY_VAT_REQUIRED' => '<span class="errorText">This field is required</span>',
 
     // -----
