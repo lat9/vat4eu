@@ -3,8 +3,10 @@
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
 // Copyright (c) 2017-2024 Vinos de Frutas Tropicales
 //
-// Last updated: v3.2.0
+// Last updated: v4.0.0
 //
+use Zencart\Plugins\Catalog\VAT4EU\VatValidation;
+
 class zcObserverVatForEuCountries extends base 
 {
     private $isEnabled = false;
@@ -32,14 +34,6 @@ class zcObserverVatForEuCountries extends base
         //
         if (!defined('VAT4EU_ENABLED') || VAT4EU_ENABLED !== 'true') {
             return;
-        }
-
-        // -----
-        // Pull in the VatValidation class, enabling its constants to be used even if the plugin
-        // isn't enabled.
-        //
-        if (!class_exists('VatValidation')) {
-            require DIR_WS_CLASSES . 'VatValidation.php';
         }
 
         $this->isEnabled = true;
