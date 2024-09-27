@@ -3,22 +3,22 @@
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
 // Copyright (c) 2017-2024 Vinos de Frutas Tropicales
 //
-// Last updated: v3.2.0
+// Last updated: v4.0.0
 //
 if (!defined('IS_ADMIN_FLAG')) {
     die('Invalid access.');
 }
 
-class ot_vat_refund extends base
+class ot_vat_refund
 {
-    public $title;
-    public $description;
-    public $output;
-    public $code;
-    public $sort_order;
+    public string $title;
+    public string $description;
+    public array $output = [];
+    public string $code;
+    public int|null $sort_order;
 
     protected $_check;
-    protected $isEnabled = false;
+    protected bool $isEnabled = false;
 
     public function __construct()
     {
@@ -30,12 +30,10 @@ class ot_vat_refund extends base
             return false;
         }
 
-        $this->isEnabled = (defined('VAT4EU_ENABLED') && VAT4EU_ENABLED === 'true');
-
-        $this->output = [];
+        $this->isEnabled = (VAT4EU_ENABLED === 'true');
     }
 
-    public function process()
+    public function process(): void
     {
         if ($this->isEnabled === false) {
             return;
@@ -44,19 +42,20 @@ class ot_vat_refund extends base
         $is_refundable = false;
         if (IS_ADMIN_FLAG === false && is_object($GLOBALS['zcObserverVatForEuCountries'])) {
             $is_refundable = $GLOBALS['zcObserverVatForEuCountries']->isVatRefundable();
-        } elseif (IS_ADMIN_FLAG == true && is_object($GLOBALS['vat4EuAdmin'])) {
-            $is_refundable = $GLOBALS['vat4EuAdmin']->isVatRefundable();
+        } elseif (IS_ADMIN_FLAG === true && is_object($GLOBALS['zcObserverVat4euAdminObserver'])) {
+            $is_refundable = $GLOBALS['zcObserverVat4euAdminObserver']->isVatRefundable();
         }
 
         if ($is_refundable === true) {
-            $order = $GLOBALS['order'];
+            global $order, $currencies;
+
             $vat_refund = $order->info['tax'];
             if ($vat_refund != 0) {
-                $GLOBALS['order']->info['total'] -= $vat_refund;
+                $order->info['total'] -= $vat_refund;
                 $this->output[] = [
                     'title' => $this->title . ':',
                     'text' => '-' . $GLOBALS['currencies']->format($vat_refund, true, $order->info['currency'], $order->info['currency_value']),
-                    'value' => -$vat_refund
+                    'value' => -$vat_refund,
                 ];
             }
         }
@@ -76,7 +75,7 @@ class ot_vat_refund extends base
         return $this->_check;
     }
 
-    public function keys()
+    public function keys(): array
     {
         return [
             'MODULE_ORDER_TOTAL_VAT_REFUND_STATUS',
@@ -84,25 +83,25 @@ class ot_vat_refund extends base
         ];
     }
 
-    public function install()
+    public function install(): void
     {
-        $GLOBALS['db']->Execute(
+        global $db;
+
+        $db->Execute(
             "INSERT INTO " . TABLE_CONFIGURATION . "
                 (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, set_function, date_added)
              VALUES
-                ('This module is installed', 'MODULE_ORDER_TOTAL_VAT_REFUND_STATUS', 'true', '', '6', '1','zen_cfg_select_option([\'true\'], ', now())"
-        );
-        $GLOBALS['db']->Execute(
-            "INSERT INTO " . TABLE_CONFIGURATION . "
-                (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added)
-             VALUES
-                ('Sort Order', 'MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER', '900', 'Sort order of display.<br /><br /><b>Note:</b> Make sure that the value is larger than the sort-order for the <em>Tax</em> total\'s display!', '6', '2', now())"
+                ('This module is installed', 'MODULE_ORDER_TOTAL_VAT_REFUND_STATUS', 'true', '', 6, 1, 'zen_cfg_select_option([\'true\'], ', now()),
+
+                ('Sort Order', 'MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER', '900', 'Sort order of display.<br><br><b>Note:</b> Make sure that the value is larger than the sort-order for the <em>Tax</em> total\'s display!', 6, 2, NULL, now())"
         );
     }
 
-    public function remove()
+    public function remove(): void
     {
-        $GLOBALS['db']->Execute(
+        global $db;
+
+        $db->Execute(
             "DELETE FROM " . TABLE_CONFIGURATION . "
               WHERE configuration_key IN ('" . implode("', '", $this->keys()) . "')"
         );
