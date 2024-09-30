@@ -39,11 +39,13 @@ class ot_vat_refund
             return;
         }
 
+        global $zcObserverVatForEuCountries, $zcObserverVat4euAdminObserver;
+        
         $is_refundable = false;
-        if (IS_ADMIN_FLAG === false && is_object($GLOBALS['zcObserverVatForEuCountries'])) {
-            $is_refundable = $GLOBALS['zcObserverVatForEuCountries']->isVatRefundable();
-        } elseif (IS_ADMIN_FLAG === true && is_object($GLOBALS['zcObserverVat4euAdminObserver'])) {
-            $is_refundable = $GLOBALS['zcObserverVat4euAdminObserver']->isVatRefundable();
+        if (IS_ADMIN_FLAG === false && isset($zcObserverVatForEuCountries)) {
+            $is_refundable = $zcObserverVatForEuCountries->isVatRefundable();
+        } elseif (IS_ADMIN_FLAG === true && isset($zcObserverVat4euAdminObserver)) {
+            $is_refundable = $zcObserverVat4euAdminObserver->isVatRefundable();
         }
 
         if ($is_refundable === true) {
@@ -54,7 +56,7 @@ class ot_vat_refund
                 $order->info['total'] -= $vat_refund;
                 $this->output[] = [
                     'title' => $this->title . ':',
-                    'text' => '-' . $GLOBALS['currencies']->format($vat_refund, true, $order->info['currency'], $order->info['currency_value']),
+                    'text' => '-' . $currencies->format($vat_refund, true, $order->info['currency'], $order->info['currency_value']),
                     'value' => -$vat_refund,
                 ];
             }
@@ -63,8 +65,10 @@ class ot_vat_refund
 
     public function check()
     {
+        global $db;
+
         if (!isset($this->_check)) {
-            $check = $GLOBALS['db']->Execute(
+            $check = $db->Execute(
                 "SELECT configuration_value
                    FROM " . TABLE_CONFIGURATION . "
                   WHERE configuration_key = 'MODULE_ORDER_TOTAL_VAT_REFUND_STATUS'

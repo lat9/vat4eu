@@ -40,13 +40,17 @@ class ot_vat_reverse_charges
 
     public function process(): void
     {
+        if ($this->isEnabled === false) {
+            return;
+        }
+
+        global $zcObserverVatForEuCountries, $zcObserverVat4euAdminObserver;
+
         $is_refundable = false;
-        if ($this->isEnabled === true) {
-            if (IS_ADMIN_FLAG === false && is_object($GLOBALS['zcObserverVatForEuCountries'])) {
-                $is_refundable = $GLOBALS['zcObserverVatForEuCountries']->isVatRefundable();
-            } elseif (IS_ADMIN_FLAG == true && is_object($GLOBALS['zcObserverVat4euAdminObserver'])) {
-                $is_refundable = $GLOBALS['zcObserverVat4euAdminObserver']->isVatRefundable();
-            }
+        if (IS_ADMIN_FLAG === false && isset($zcObserverVatForEuCountries)) {
+            $is_refundable = $zcObserverVatForEuCountries->isVatRefundable();
+        } elseif (IS_ADMIN_FLAG == true && isset($zcObserverVat4euAdminObserver)) {
+            $is_refundable = $zcObserverVat4euAdminObserver->isVatRefundable();
         }
         if ($is_refundable === true) {
             global $order;
@@ -55,7 +59,7 @@ class ot_vat_reverse_charges
                 $this->output[] = [
                     'title' => '<span id="vat-reverse-charge">' . $this->title . '</span>',
                     'text' => '&nbsp;',
-                    'value' => 0
+                    'value' => 0,
                 ];
             }
         }
@@ -63,8 +67,10 @@ class ot_vat_reverse_charges
 
     public function check()
     {
+        global $db;
+
         if (!isset($this->_check)) {
-            $check = $GLOBALS['db']->Execute(
+            $check = $db->Execute(
                 "SELECT configuration_value
                    FROM " . TABLE_CONFIGURATION . "
                   WHERE configuration_key = 'MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_STATUS'
