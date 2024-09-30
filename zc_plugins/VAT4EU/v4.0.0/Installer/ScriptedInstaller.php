@@ -131,6 +131,7 @@ class ScriptedInstaller extends ScriptedInstallBase
             ],
             'includes/languages/english/extra_definitions/' => [
                 'lang.vat4eu_extra_definitions_admin.php',
+                'vat4eu_extra_definitions_admin.php',
             ],
         ];
         foreach ($files_to_check as $dir => $files) {
@@ -154,10 +155,13 @@ class ScriptedInstaller extends ScriptedInstallBase
             ],
             'includes/languages/english/extra_definitions/' => [
                 'lang.vat4eu_extra_definitions.php',
+                'vat4eu_extra_definitions.php',
             ],
             'includes/languages/english/modules/order_total/' => [
                 'lang.ot_vat_refund.php',
                 'lang.ot_vat_reverse_charges.php',
+                'ot_vat_refund.php',
+                'ot_vat_reverse_charges.php',
             ],
             'includes/modules/' => [
                 'order_total/ot_vat_refund.php',
