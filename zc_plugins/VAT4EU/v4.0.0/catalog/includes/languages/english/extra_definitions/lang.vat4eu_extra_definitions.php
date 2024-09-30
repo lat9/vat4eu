@@ -3,7 +3,7 @@
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
 // Copyright (c) 2017-2024 Vinos de Frutas Tropicales
 //
-// Last updated: v3.2.0
+// Last updated: v4.0.0
 //
 // -----
 // If VAT4EU hasn't been installed in the admin or removed, don't process these
@@ -28,8 +28,8 @@ $define = [
     // -----
     // These definitions are used by tpl_modules_vat4eu_display.php's link to the popup_vat4eu_formats page.
     //
-    'VAT4EU_WHATS_THIS' => 'What\'s this?',
     'VAT4EU_CHANGE_IN_ADDRESS_BOOK' => 'To change the &quot;VAT Number&quot; to be used for this order, please update the value in your <a href="%s">address book</a> and then return to checkout.',
+    'VAT4EU_MODAL_TITLE' => 'VAT Identification Number Structure',
 
     'VAT4EU_ENTRY_VAT_MIN_ERROR' => 'Your <em>VAT Number</em> must contain a minimum of ' . VAT4EU_MIN_LENGTH . ' characters.',
     'VAT4EU_ENTRY_VAT_PREFIX_INVALID' => 'Your <em>VAT Number</em> must begin with <b>%1$s</b>, since the address is in <em>%2$s</em>.',

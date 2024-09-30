@@ -6,17 +6,22 @@
 // Last updated: v4.0.0
 //
 use Zencart\Plugins\Catalog\VAT4EU\VatValidation;
+use Zencart\Traits\InteractsWithPlugins;
+use Zencart\Traits\linkCatalogStylesheet;
 
-class zcObserverVatForEuCountries extends base 
+class zcObserverVatForEuCountries extends \base
 {
+    use InteractsWithPlugins;
+
     private $newCustomerId;
     private $vatNumberStatus;
     private $addressLabelCount = 0;
     private $orderHasShippingAddress;
 
     private array $vatCountries = [];
-    
+
     private bool $nonGuestIsLoggedIn;
+    private bool $isBootstrapTemplate;
 
     private bool $debug = false;
     private string $logfile;
@@ -39,7 +44,11 @@ class zcObserverVatForEuCountries extends base
             return;
         }
 
+        $this->detectZcPluginDetails(__DIR__);
+
         $this->nonGuestIsLoggedIn = (zen_is_logged_in() && !zen_in_guest_checkout());
+        $this->isBootstrapTemplate = (function_exists('zca_bootstrap_active') && zca_bootstrap_active() === true);
+
         $this->debug = (VAT4EU_DEBUG === 'true');
         if ($this->nonGuestIsLoggedIn === true) {
             $this->logfile = DIR_FS_LOGS . '/vat4eu_' . $_SESSION['customer_id'] . '_' . date('Ymd') . '.log';
@@ -95,6 +104,9 @@ class zcObserverVatForEuCountries extends base
         global $current_page_base;
         if (in_array($current_page_base, $address_form_pages)) {
             $this->attach($this, ['NOTIFY_FOOTER_END']);
+            if ($this->isBootstrapTemplate === false) {
+                $this->attach($this, ['NOTIFY_HTML_HEAD_CSS_BEGIN']);
+            }
         }
 
         // -----
@@ -394,6 +406,16 @@ class zcObserverVatForEuCountries extends base
                 break;
 
             // -----
+            // Issued during a template's html_header.php just before the CSS is output, enabling VAT4EU
+            // (for non-bootstrap templates **only**) to bring in its styling for the VAT formats modal.
+            //
+            // $p1 ... (r/o) Contains the $current_page_base.
+            //
+            case 'NOTIFY_HTML_HEAD_CSS_BEGIN':
+                $this->linkCatalogStylesheet('vat4eu.css', $p1);
+                break;
+
+            // -----
             // Issued at the end of a template's common/tpl_main_page.php. Load the jQuery module to insert
             // the VAT Number entry-field into an associated address-book entry. Note that this event is
             // observed **only** on 'appropriate' pages.
@@ -403,9 +425,26 @@ class zcObserverVatForEuCountries extends base
                 // If currently on the 'checkout_one' page and gathering information for a non-billing address,
                 // nothing further to be done.
                 //
-                global $which;
+                global $which, $template, $current_page_base;
+
                 if ((isset($which) && $which !== 'bill') || (isset($_POST['which']) && $_POST['which'] !== 'bill')){
                     return;
+                }
+
+                // -----
+                // Locate the 'define' file that contains the VAT4EU formatting modal's
+                // content. Check first to see if there's a template-override, otherwise, use
+                // the plugin's 'english' content.
+                //
+                $vat4eu_formats_define = zen_get_file_directory(
+                    DIR_FS_CATALOG . DIR_WS_LANGUAGES . $_SESSION['language'] . '/html_includes/',
+                    'define_vat4eu_formats.php'
+                );
+                if (!is_file($vat4eu_formats_define)) {
+                    $vat4eu_formats_define = zen_get_file_directory(
+                        $this->pluginManagerInstalledVersionDirectory . 'catalog/' . DIR_WS_LANGUAGES . 'english/html_includes/',
+                        'define_vat4eu_formats.php'
+                    );
                 }
 
                 // -----
@@ -425,10 +464,9 @@ class zcObserverVatForEuCountries extends base
                 // Retrieve the HTML to be inserted after any 'company' field-entry in the
                 // current form.
                 //
-                global $template, $current_page_base;
-
                 $vat_number = $this->getVatNumberForFormEntry($current_page_base ?? 'checkout_one');
                 $vat_number = (!empty($vat_number)) ? zen_output_string_protected($vat_number) : '';
+                $vat4eu_is_bootstrap = $this->isBootstrapTemplate;
 
                 ob_start();
                 require $template->get_template_dir('tpl_modules_vat4eu_display.php', DIR_WS_TEMPLATE, $current_page_base, 'templates') . '/tpl_modules_vat4eu_display.php'; 
