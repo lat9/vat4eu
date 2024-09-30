@@ -141,8 +141,7 @@ class ScriptedInstaller extends ScriptedInstallBase
                 }
             }
         }
-//-FIXME: Unsure as to what to do with the popup_vat4eu_formats page-handling
-//  and various template/css files.
+
         $files_to_check = [
             'includes/classes/' => [
                 'VatValidation.php',
@@ -160,9 +159,15 @@ class ScriptedInstaller extends ScriptedInstallBase
                 'lang.ot_vat_refund.php',
                 'lang.ot_vat_reverse_charges.php',
             ],
-            'includes/modules/order_total/' => [
-                'ot_vat_refund.php',
-                'ot_vat_reverse_charges.php',
+            'includes/modules/' => [
+                'order_total/ot_vat_refund.php',
+                'order_total/ot_vat_reverse_charges.php',
+                'pages/popup_vat4eu_formats/header_php.php',
+                'pages/popup_vat4eu_formats/jscript_main.php',
+            ],
+            'includes/templates/template_default/' => [
+                'popup_vat4eu_formats/tpl_main_page.php',
+                'templates/tpl_modules_vat4eu_display.php',
             ],
         ];
         foreach ($files_to_check as $dir => $files) {
