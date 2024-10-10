@@ -473,8 +473,11 @@ class zcObserverVat4EuAdminObserver extends base
         }
         $country_iso_code_2 = $this->getCountryIsoCode2((int)$countries_id);
         if (!in_array($country_iso_code_2, $this->vatCountries)) {
-            $this->vatNumberMessage = sprintf(VAT4EU_ENTRY_VAT_NOT_SUPPORTED, $country_iso_code_2);
-            return false;
+            if ($vat_number_length !== 0) {
+                $this->vatNumberMessage = sprintf(VAT4EU_ENTRY_VAT_NOT_SUPPORTED, $country_iso_code_2);
+                return false;
+            }
+            return true;
         }
 
         $validation = new VatValidation($country_iso_code_2, $this->vatNumber);
@@ -557,7 +560,7 @@ class zcObserverVat4EuAdminObserver extends base
                     'vat_number',
                     zen_output_string_protected((string)$vat_number),
                     zen_set_field_length(TABLE_ADDRESS_BOOK, 'entry_vat_number', 50) . ' class="form-control" id="vat-number"'
-                ) . $hidden_fields . $this->vatNumberMessage,
+                ) . $this->vatNumberMessage,
             ],
             [
                 'label' => VAT4EU_ENTRY_OVERRIDE_VALIDATION,
