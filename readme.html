@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>VAT for EU Countries (VAT4EU)</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="vinos_favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+  <style>
+.nav-pills-custom .nav-link {
+    color: #aaa;
+    background: #fff;
+    position: relative;
+}
+.nav-pills-custom .nav-link.active {
+    color: #306eff;
+    background: #fff;
+}
+/* Add indicator arrow for the active tab */
+@media (min-width: 992px) {
+    .nav-pills-custom .nav-link::before {
+        content: '';
+        display: block;
+        border-top: 8px solid transparent;
+        border-left: 10px solid #fff;
+        border-bottom: 8px solid transparent;
+        position: absolute;
+        top: 50%;
+        right: -10px;
+        transform: translateY(-50%);
+        opacity: 0;
+    }
+}
+.nav-pills-custom .nav-link.active::before {
+    opacity: 1;
+}
+body {
+    min-height: 100vh;
+    background: radial-gradient(ellipse at center, rgba(240,249,255,1) 0%,rgba(203,235,255,1) 47%,rgba(161,219,255,1) 100%);
+}
+  </style>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+</head>
+<body>
+<section class="py-5 header">
+    <div class="container py-4">
+        <header class="pb-2">
+            <h1 class="display-4 text-center">VAT for EU Countries (VAT4EU) v4.0.0</h1>
+            <ul>
+                <li>Zen Cart download link: <a href="https://www.zen-cart.com/downloads.php?do=file&id=2164" target="_blank">https://www.zen-cart.com/downloads.php?do=file&id=2164</a></li>
+                <li>Zen Cart support thread: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></li>
+                <li>GitHub repository: <a href="https://github.com/lat9/vat4eu" target="_blank">https://github.com/lat9/vat4eu</a></li>
+            </ul>
+
+            <h3>Prerequisites</h3>
+            <p>This version of <b><em>VAT4EU</em></b> requires:<ol>
+                <li>A working copy of Zen Cart 2.1.0 or later. If you're using an older version of Zen Cart, please use the version of <em>VAT4EU</em> that is associated with your Zen Cart's version.</li>
+                <li>The site must use a PHP version greater than or equal to PHP 8.0.</li>
+                <li>For integration with <b><em>Edit Orders</em></b>, use v5.0.0 or later of that plugin.</li>
+                <li>If you require the automatic VAT validation service (via <a href="https://ec.europa.eu/taxation_customs/vies/technicalInformation.html" target="_blank">VIES</a>) to operate properly, you'll need to ensure that the <code>SOAP</code> service is enabled in your site's PHP.  To check, navigate to your Zen Cart admin's <em>Tools :: Server/Version Info</em> and search that page for <code>Soap Client</code>.  If that setting is not found or is not set to <em>enabled</em>, then the <em>VIES</em> service cannot be used.</li>
+            </ol>
+        </header>
+
+        <div class="row">
+            <div class="col-md-3">
+                <!-- Tabs nav -->
+                <div class="nav flex-column nav-pills nav-pills-custom" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                    <a class="nav-link mb-3 p-3 shadow active" id="v-pills-1-tab" data-toggle="pill" href="#v-pills-1" role="tab" aria-controls="v-pills-1" aria-selected="true">
+                        <span class="font-weight-bold small text-uppercase">Overview</span></a>
+                    <a class="nav-link mb-3 p-3 shadow" id="v-pills-2-tab" data-toggle="pill" href="#v-pills-2" role="tab" aria-controls="v-pills-2" aria-selected="false">
+                        <span class="font-weight-bold small text-uppercase">Installation</span></a>
+                    <a class="nav-link mb-3 p-3 shadow" id="v-pills-3-tab" data-toggle="pill" href="#v-pills-3" role="tab" aria-controls="v-pills-3" aria-selected="false">
+                        <span class="font-weight-bold small text-uppercase">How to Use</span></a>
+                    <a class="nav-link mb-3 p-3 shadow" id="v-pills-3a-tab" data-toggle="pill" href="#v-pills-3a" role="tab" aria-controls="v-pills-3a" aria-selected="false">
+                        <span class="font-weight-bold small text-uppercase">Integration With Other Modules</span></a>
+                    <a class="nav-link mb-3 p-3 shadow" id="v-pills-4-tab" data-toggle="pill" href="#v-pills-4" role="tab" aria-controls="v-pills-4" aria-selected="false">
+                        <span class="font-weight-bold small text-uppercase">Credits and History</span></a>
+                    <a class="nav-link mb-3 p-3 shadow" id="v-pills-5-tab" data-toggle="pill" href="#v-pills-5" role="tab" aria-controls="v-pills-5" aria-selected="false">
+                        <span class="font-weight-bold small text-uppercase">Files</span></a>
+                    <a class="nav-link mb-3 p-3 shadow" id="v-pills-6-tab" data-toggle="pill" href="#v-pills-6" role="tab" aria-controls="v-pills-6" aria-selected="false">
+                        <span class="font-weight-bold small text-uppercase">License</span></a>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <!-- Tabs content -->
+                <div class="tab-content" id="v-pills-tabContent">
+                    <div class="tab-pane fade shadow rounded bg-white show active p-4" id="v-pills-1" role="tabpanel" aria-labelledby="v-pills-1-tab">
+                        <h4 class="font-italic mb-4">Overview</h4>
+                        <p><em>VAT for EU Countries (VAT4EU)</em> updates your store to gather, display and validate an EU &quot;VAT Number&quot;. Once the plugin is installed, configured and enabled on your store:</p>
+                        <ol>
+                          <li>The address-gathering forms on the <em>storefront</em> and the admin's <em>Customers :: Customers</em> tool include an input field for a <em>VAT Number</em>.</li>
+                          <li><em>Billing-address</em> blocks within the various checkout- and account-related pages and order-confirmation emails have the associated &quot;VAT Number&quot; appended.</li>
+                          <li>Your admin's invoices' and packingslips' billing-address displays with any &quot;VAT Number&quot; associated with the associated order.</li>
+                          <li>If an order <em>qualifies</em> for a <b>VAT Refund</b>, order-total modules display the refunded VAT value, deducting that value from the order's total, and include a &quot;VAT reverse-charge&quot; statement for the order.<ul>
+                            <li>A <em>qualified</em> order:<ol>
+                              <li>Includes a validated (either via VIES, see below, or via admin-override) <em>VAT Number</em> for the billing address.</li>
+                              <li>Is to be shipped to an EU country <em>other than</em> the country in which the store resides <span class="smaller">(unless otherwise configured)</span>.</li>
+                            </ol></li>
+                            <li>Unlike the previous (see below) version of this processing, <em>no alteration is made to product prices</em>; your store will continue to display prices inclusive of VAT (if so configured).  The <em>VAT Refund</em> processing simply inserts an order-total element that backs-out any tax charged for <em>qualified</em> orders.</li>
+                          </ul></li>
+                          <li>The plugin's processing makes use of the <a href="https://ec.europa.eu/taxation_customs/vies/faq.html" target="_blank">VIES (VAT Information Exchange System)</a> on-line validation service to automatically validate any <em>VAT Number</em> entered &mdash; either by the customer or an admin.  Admin processing includes a validation-override.</li>
+                        </ol>
+
+                        <p><strong>Note:</strong> This plugin is derived from the similarly-named plugin <a href="https://www.zen-cart.com/showthread.php?35744-VAT-mod-for-European-companies&p=201772#post201772" target="_blank">VAT-mod for European companies</a>, but its processing is quite different!</p>
+                    </div>
+
+                    <div class="tab-pane fade shadow rounded bg-white p-4" id="v-pills-2" role="tabpanel" aria-labelledby="v-pills-2-tab">
+                        <h4 class="font-italic mb-4">Installation</h4>
+                        <p>The installation steps for v4.0.0 and later of <em>VAT4EU</em> are much simpler than those for prior versions of the plugin, since the plugin is now <code>encapsulated</code>.  There are no longer any <span style="color: red;">core-file</span> or template-override edits required!</p>
+                        <p>With this simplification, the upgrade from prior versions is a bit more complex, as the <span style="color: red;">core-file</span> and template changes must be backed-out and now-redundant files individually removed.  See <a href="https://github.com/lat9/vat4eu/wiki/Upgrading-to-v4.0.0---From-a-Version-Prior-to-v4.0.0" target="_blank">this</a> GitHub Wiki article for additional information.</p>
+                        <ol>
+                            <li>Unzip the plugin's zip-file distribution.</li>
+                            <li>Copy the contents for the distribution's <code>zc_plugins</code> directory to your site's <code>/zc_plugins</code> directory.</b> 
+                            <li>Log into your Zen Cart admin and navigate to <b>Modules :: Plugin Manager</b>.</li>
+                            <li>You'll see a plugin named <b>VAT for EU Countries</b>. Click on the associated <code>Install</code> button, confirm the installation and you're finished!</li>
+                            <li>Now that the plugin's installed, refer to this readme's <b><em>How to Use</em></b> tab to configure the plugin for your use.</li>
+                        </ol>
+                        <div class="card mt-3">
+                            <div class="card-header text-center bg-secondary text-white">Database Modifications</div>
+                            <div class="card-body">
+                                <p>The plugin's admin installation script makes modifications to your site's database:</p>
+                                <ol>
+                                    <li>A new <code>configuration_group</code> entry is created for the plugin's configuration settings.</li>
+                                    <li>Additional <code>configuration</code> table entries are created for the plugin's configuration settings.</li>
+                                    <li>Two new fields are added to the <code>address_book</code> table:<ol type="a">
+                                        <li><code>entry_vat_number</code></li>
+                                        <li><code>entry_vat_validated</code></li>
+                                    </ol></li>
+                                    <li>Two new fields are added to the <code>orders</code> table:<ol type="a">
+                                        <li><code>billing_vat_number</code></li>
+                                        <li><code>billing_vat_validated</code></li>
+                                    </ol></li>
+                                </ol>
+                            </div>
+                        </div>
+                         <div class="card mt-3">
+                            <div class="card-header text-center bg-secondary text-white">Uninstalling the Plugin</div>
+                            <div class="card-body">
+                                <p>To uninstall the plugin:</p>
+                                <ol>
+                                    <li>Log into your Zen Cart admin  and navigate to <b>Modules :: Plugin Manager</b>.</li>
+                                    <li>Locate the entry for <b>VAT for EU Countries</b>, click the associated <code>Un-Install</code> button, confirm the removal and you've removed the plugin.</li>
+                                </ol>
+                                <p><b>Note:</b> The fields added to the <code>address_book</code> and <code>orders</code> tables on installation <em>are not removed</em> when the plugin is uninstalled.</li>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade shadow rounded bg-white p-4" id="v-pills-3" role="tabpanel" aria-labelledby="v-pills-3-tab">
+                        <h4 class="font-italic mb-4">How to Use</h4>
+                        <p>Refer to the plugin's <a href="https://github.com/lat9/vat4eu/wiki" target="_blank">Wiki articles</a> for this information.</p>
+                    </div>
+
+                    <div class="tab-pane fade shadow rounded bg-white p-4" id="v-pills-3a" role="tabpanel" aria-labelledby="v-pills-3a-tab">
+                        <h4 class="font-italic mb-4">Integration With Other Modules</h4>
+                        <div class="card">
+                            <div class="card-header text-center bg-secondary text-white">Edit Orders</div>
+                            <div class="card-body">
+                                <p><em>VAT4EU</em> integrates with <a href="https://www.zen-cart.com/downloads.php?do=file&id=1513" target="_blank">Edit Orders</a>, version 5.0.0 or later.  That version of <em>EO</em> provides additional notifiers that allow <em>VAT4EU</em>'s operations and supports zc210+ installations.  You'll need to install <em>EO</em> separately.</p>
+                            </div>
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-header text-center bg-secondary text-white">Other Plugins</div>
+                            <div class="card-body">
+                                <p>If you have additional plugins installed that also &quot;want to&quot; include the <em>VAT Number</em> display in an address block, <em>VAT4EU</em> has you covered!  Both the storefront and admin processing issue a notification when a <code>zen_address_format</code> function call is made on a page that isn't in the <em>VAT4EU</em> built-in processing.  An observer-class module can &quot;attach&quot; to that notifier and indicate (by setting the 3rd parameter to <em>(boolean)true</em> to indicate that the VAT Number should be included in that address block.</p>
+                                <pre>
+    $this->notify('NOTIFY_VAT4EU_ADDRESS_DEFAULT', $address_elements, $current_address, $show_vat_number);
+                                </pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade shadow rounded bg-white p-4" id="v-pills-4" role="tabpanel" aria-labelledby="v-pills-4-tab">
+                        <h4 class="font-italic mb-4">Credits and History</h4>
+                        <ul>
+                          <li>v4.0.0, 2025-03-12 (lat9):<ul>
+                            <li>CHANGE: Now released as a Zen Cart encapsulated plugin for zc210+ and EO<sup>5</sup> and later.</li>
+                          </ul></li>
+                          <li>v3.2.1, 2024-09-19 (lat9, webchills):<ul>
+                            <li>BUGFIX: Clicking on the link to sort by VAT Number in the admin customers' listing doesn't perform the sort.</li>
+                            <li>The following files were changed:<ol>
+                                <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v3.2.0, 2024-03-06 (lat9, webchills):<ul>
+                            <li>BUGFIX: Correct text hidden on VAT4EU help-text pop-up.</li>
+                            <li>BUGFIX: Correct PHP Warning (PHP 8.0) on initial installation.</li>
+                            <li>BUGFIX: Correct unwanted customer message regarding VAT number validation.</li>
+                            <li>BUGFIX: Remove deprecated (and unneeded) notification from admin observer's watch-list.</li>
+                            <li>CHANGE: Drop support for Zen Cart versions prior to 1.5.8<b>a</b>.</li>
+                            <li>INTROP: Account for zc158a+ changes in address-handling in the <b>Customers :: Customers</b> tool.</li>
+                            <li>BUGFIX: Correct missing PHP Warning when editing a customer in the admin.</li>
+                            <li>BUGFIX: Pre-define all class properties; PHP 8.2+ requirement.</li>
+                            <li>INTROP: Account for zc158a+ changes in storefront notifications.</li>
+                            <li>INTROP: Major storefront restructuring, based on a couple of zc200 changes.</li>
+                            <li>INTROP: Add full support for <em>One-Page Checkout</em>, v2.4.6 and later.</li>
+                            <li>CHANGE: Modify the uninstall-SQL script so that it works when run under the admin's <em>Install SQL Patches</em> tool.</li>
+                            <li>BUGFIX: Include any 'VAT Number' entered in the address on the <code>create_account_success</code> page.</li>
+                            <li>CHANGE: Limit pages on which the message about an unvalidated VAT Number is displayed.</li>
+                            <li>BUGFIX: Invalid characters in a submitted VAT Number aren't flagged as an error.</li>
+                            <li>CHANGE: Provide integration with the <em>Bootstrap</em> template, v3.6.3 or later.</li>
+                            <li>CHANGE: Drop support for Edit Orders versions prior to 4.7.0.</li>
+                            <li>The following files were changed, <span class="added">added</span>, or <span class="removed">removed</span>:<ol>
+                                <li>/docs/vat4eu/uninstall/uninstall_vat4eu.sql</li>
+                                <li>/includes/classes/VatValidation.php</li>
+                                <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                                <li><span class="added">/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions.php</span></li>
+                                <li><span class="removed">/includes/languages/english/extra_definitions/vat4eu_extra_definitions.php</span></li>
+                                <li>/includes/languages/english/html_includes/define_popup_var4eu_formats.php</li>
+                                <li><span class="added">/includes/languages/english/modules/order_total/lang.ot_vat_refund.php</span></li>
+                                <li><span class="added">/includes/languages/english/modules/order_total/lang.ot_vat_reverse_charges.php</span></li>
+                                <li><span class="removed">/includes/languages/english/modules/order_total/ot_vat_refund.php</span></li>
+                                <li><span class="removed">/includes/languages/english/modules/order_total/ot_vat_reverse_charges.php</span></li>
+                                <li>/includes/modules/order_total/ot_vat_refund.php</li>
+                                <li>/includes/modules/order_total/ot_vat_reverse_charges.php</li>
+                                <li><span class="added">/includes/templates/bootstrap/css/popup_vat4eu_formats.css</span></li>
+                                <li><span class="added">/includes/templates/bootstrap/templates/tpl_modules_common_address_format.php</span></li>
+                                <li><span class="added">/includes/templates/bootstrap/templates/tpl_modules_create_account.php</span></li>
+                                <li><span class="added">/includes/templates/bootstrap/templates/tpl_modules_opc_address_block.php</span></li>
+                                <li>/includes/templates/template_default/css/popup_vat4eu_formats.css</li>
+                                <li>/includes/templates/template_default/templates/tpl_modules_vat4eu_display.php</li>
+                                <li><span class="template">/includes/templates/YOUR_TEMPLATE/css/popup_vat4eu_formats.css</span></li>
+                                <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                                <li><span class="added">/YOUR_ADMIN/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions_admin.php</span></li>
+                                <li><span class="removed">/YOUR_ADMIN/includes/languages/english/extra_definitions/vat4eu_extra_definitions_admin.php</span></li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v3.1.1, 2022-04-28:<ul>
+                            <li>BUGFIX: Correct integration with &quot;Edit Orders&quot;, v4.6.0+ &mdash; notifications changed.</li>
+                            <li>BUGFIX: Use <code>zen_cfg_read_only</code> so that the plugin's version/release date don't get updated on a configuration update.</li>
+                            <li>BUGFIX: Correct incorrect message to customer that indicates that their VAT number requires validation.</li>
+                            <li>The following files were changed:<ol>
+                                <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                                <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
+                                <li>/YOUR_ADMIN/includes/functions/extra_functions/zen_cfg_read_only.php <span class="smaller">(Added)</span></li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v3.1.0, 2021-11-19:<ul>
+                            <li>CHANGE: Various refactors; the minimum PHP version supported is now PHP 5.6.0.</li>
+                            <li>CHANGE: Since Brexit, 'GB' is no longer a VAT4EU country; it's now auto-removed from configuration.</li>
+                            <li>CHANGE: Use zen_is_logged_in() and zen_is_guest_checkout() to determine logged-in status; only logged-in customers can have validated VAT numbers.</li>
+                            <li>The following files were changed:<ol>
+                                <li>/includes/classes/VatValidation.php</li>
+                                <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                                <li>/includes/languages/english/html_includes/define_popup_vat4eu_formats.php</li>
+                                <li>/YOUR_ADMIN/includes/languages/extra_definitions/vat4eu_extra_definitions_admin.php</li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v3.0.1, 2020-07-24:<ul>
+                            <li>BUGFIX: Access VIES WSDL via https protocol.</li>
+                            <li>The following files were changed:<ol>
+                                <li>/includes/classes/VatValidation.php</li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v3.0.0, 2020-07-14:<ul>
+                            <li>BUGFIX: Correct PHP notice during account-creation.</li>
+                            <li>BUGFIX: Apply numeric defaults to added numeric fields (strict MySQL).</li>
+                            <li>CHANGE: The minimum Zen Cart version for an initial install is now <code>zc156b</code> as the non-template overwrites are now 'baked into' that release.</li>
+                            <li>The following files were changed:<ol>
+                                <li>/includes/templates/template_default/templates/tpl_modules_vat4eu_display.php</li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                            <li>The following files were removed from this plugin's distribution, but shouldn't be removed from your store if you are upgrading from a previous version of <em>VAT4EU</em>:<ol>
+                                <li><span class="corefile">/includes/functions/functions_customers.php</span></li>
+                                <li><span class="corefile">/includes/modules/pages/address_book_process/header_php.php</span></li>
+                                <li><span class="template">/includes/modules/YOUR_TEMPLATE/checkout_address_book.php</span></li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v2.0.4, 2020-03-14:<ul>
+                            <li>BUGFIX: Correct checks for Greek VAT numbers.</li>
+                            <li>BUGFIX: Correct PHP notice when VAT number shouldn't be added to an address.</li>
+                            <li>The following files were changed:<ol>
+                                <li>/includes/classes/VatValidation.php</li>
+                                <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v2.0.3, 2020-03-02:<ul>
+                            <li>BUGFIX: Correct use of undefined function <code>zen_html_quotes</code>.</li>
+                            <li>The following files were changed:<ol>
+                                <li>/YOUR_ADMIN/includes/classes/observers/Vat4EuAdminObserver.php</li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v2.0.2, 2020-02-12:<ul>
+                            <li>BUGFIX: Correct PHP Warning when the <em>VAT4EU</em> order-totals are present, but not installed.</li>
+                            <li>The following files were changed:<ol>
+                                <li>/includes/modules/order_total/ot_vat_refund.php</li>
+                                <li>/includes/modules/order_total/ot_vat_reverse_charges.php</li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v2.0.1, 2020-01-09:<ul>
+                            <li>BUGFIX: Correct PHP Warning when <em>One-Page Checkout</em> is not also installed.</li>
+                            <li>The following files were changed:<ol>
+                                <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v2.0.0, 2019-01-06: This version contains changes for the following issues:<ul>
+                            <li>CHANGE: Use zc156a as the basis for all changes.</li>
+                            <li>The following files were changed or <span class="removed">removed</span>:<ol>
+                              <li><span class="corefile">/includes/functions/functions_customers.php</span></li>
+                              <li><span class="corefile">/includes/modules/pages/address_book_process/header_php.php</span></li>
+                              <li><span class="template">/includes/modules/YOUR_TEMPLATE/checkout_new_address.php</span></li>
+                              <li><span class="template">/includes/templates/YOUR_TEMPLATE/templates/tpl_modules_create_account.php</span></li>
+                              <li><span class="corefile removed">/YOUR_ADMIN/customers.php</span> <span class="smaller">(Removed from this distribution; use the as-shipped zc156 version)</span></li>
+                              <li><span class="corefile removed">/YOUR_ADMIN/includes/functions/functions_customers.php</span> <span class="smaller">(Removed from this distribution; use the as-shipped zc156 version)</span></li>
+                              <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v1.0.1, 2018-06-10: This version contains changes for the following issues:<ul>
+                            <li>BUGFIX: Correct PHP Fatal error thrown when a VAT Number is rejected by the online service.</li>
+                            <li>BUGFIX: Correct shipping/billing address additions &quot;don't stick&quot;.</li>
+                            <li>The following files were changed:<ol>
+                                <li>/includes/classes/VatValidation.php</li>
+                                <li>/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                                <li>/includes/modules/YOUR_TEMPLATE/checkout_new_address.php</li>
+                                <li>/YOUR_ADMIN/includes/init_includes/init_vat4eu_admin.php</li>
+                            </ol></li>
+                          </ul></li>
+                          <li>v1.0.0, 2017-10-23: Initial release.</li>
+                        </ul>
+                    </div>
+
+                    <div class="tab-pane fade shadow rounded bg-white p-4" id="v-pills-5" role="tabpanel" aria-labelledby="v-pills-5-tab">
+                        <h4 class="font-italic mb-4">Files</h4>
+                        <p>The following files are provided in the <em>VAT4EU</em> distribution, <code>/zc_plugins/VAT4EU/xxx/</code>, where <code>xxx</code> is the released version:</p>
+                        <ol>
+                            <li>admin/includes/classes/observers/auto.vat4eu_admin_observer.php</li>
+                            <li>admin/includes/javascript/edit_orders_vat4eu.php</li>
+                            <li>admin/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions_admin.php</li>
+                            <li>catalog/includes/classes/VatValidation.php</li>
+                            <li>catalog/includes/classes/observers/auto.vat_for_eu_countries.php</li>
+                            <li>catalog/includes/languages/english/extra_definitions/lang.vat4eu_extra_definitions.php</li>
+                            <li>catalog/includes/languages/english/html_includes/define_vat4eu_formats.php</li>
+                            <li>catalog/includes/languages/english/modules/order_total/lang.ot_vat_refund.php</li>
+                            <li>catalog/includes/languages/english/modules/order_total/lang.ot_vat_reverse_charges.php</li>
+                            <li>catalog/includes/modules/order_total/ot_vat_refund.php</li>
+                            <li>catalog/includes/modules/order_total/ot_vat_reverse_charges.php</li>
+                            <li>catalog/includes/templates/default/css/vat4eu.css</li>
+                            <li>catalog/includes/templates/default/templates/tpl_modules_vat4eu_display.php</li>
+                            <li>Installer/languages/english/main.php</li>
+                            <li>Installer/ScriptedInstaller.php</li>
+                            <li>manifest.php</li>
+                        </ol>
+                    </div>
+
+                    <div class="tab-pane fade shadow rounded bg-white p-4" id="v-pills-6" role="tabpanel" aria-labelledby="v-pills-6-tab">
+                        <h4 class="font-italic mb-4">License</h4>
+                        <p><strong>VAT for EU Countries</strong> is released under the General Public License (see LICENSE.txt). This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</p>
+                        <p>Always backup your shop and database before making changes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
