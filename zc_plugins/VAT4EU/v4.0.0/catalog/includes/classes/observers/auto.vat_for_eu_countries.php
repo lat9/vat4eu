@@ -513,7 +513,7 @@ class zcObserverVatForEuCountries extends \base
         global $messageStack;
 
         $vat_ok = false;
-        $vat_number = strtoupper(zen_db_prepare_input($_POST['vat_number']));
+        $vat_number = strtoupper(zen_db_prepare_input($_POST['vat_number'] ?? ''));
 
         $countries_id = $_POST['zone_country_id'];
         $country_iso_code_2 = $this->getCountryIsoCode2($countries_id);
