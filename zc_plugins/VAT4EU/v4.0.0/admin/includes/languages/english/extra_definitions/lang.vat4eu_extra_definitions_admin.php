@@ -1,7 +1,7 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2024 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2025 Vinos de Frutas Tropicales
 //
 // Last updated: v4.0.0
 //
@@ -28,7 +28,7 @@ $define = [
     'VAT4EU_ENTRY_VAT_MIN_ERROR' => '<span class="errorText">A <em>VAT Number</em> must be at least %u characters.</span>',
     'VAT4EU_ENTRY_VAT_PREFIX_INVALID' => '<span class="errorText">The <em>VAT Number</em> must begin with <b>%1$s</b>, since the address is in <em>%2$s</em>.</span>',
     'VAT4EU_ENTRY_VAT_INVALID_CHARS' => '<span class="errorText">Invalid characters were detected in the <em>VAT Number</em>.</span>',
-    'VAT4EU_ENTRY_VAT_VIES_INVALID' => '<span class="errorText">The <em>VAT Number failed VIES validation.</span>',
+    'VAT4EU_ENTRY_VAT_VIES_INVALID' => '<span class="errorText">The <em>VAT Number</em> failed VIES validation.</span>',
     'VAT4EU_ENTRY_VAT_NOT_SUPPORTED' => '<span class="errorText">The country in this address (%s) does not support VAT numbers.</span>',
     'VAT4EU_ENTRY_VAT_REQUIRED' => '<span class="errorText">This field is required</span>',
 
