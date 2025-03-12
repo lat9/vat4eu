@@ -1,7 +1,7 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2024 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2025 Vinos de Frutas Tropicales
 //
 // Last updated: v4.0.0
 //
@@ -517,6 +517,11 @@ class zcObserverVatForEuCountries extends \base
 
         $countries_id = $_POST['zone_country_id'];
         $country_iso_code_2 = $this->getCountryIsoCode2($countries_id);
+
+        if (!in_array($country_iso_code_2, $this->vatCountries)) {
+            $this->vatNumberStatus = VatValidation::VAT_OK;
+            return true;
+        }
 
         $this->vatNumberStatus = VatValidation::VAT_NOT_VALIDATED;
 
