@@ -3,7 +3,7 @@
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
 // Copyright (c) 2017-2025 Vinos de Frutas Tropicales
 //
-// Last updated: v4.0.0
+// Last updated: v4.0.1
 //
 use Zencart\Plugins\Catalog\VAT4EU\VatValidation;
 use Zencart\Traits\InteractsWithPlugins;
@@ -13,10 +13,10 @@ class zcObserverVatForEuCountries extends \base
 {
     use InteractsWithPlugins;
 
-    private $newCustomerId;
-    private $vatNumberStatus;
-    private $addressLabelCount = 0;
-    private $orderHasShippingAddress;
+    private int $newCustomerId;
+    private int $vatNumberStatus;
+    private int $addressLabelCount = 0;
+    private bool $orderHasShippingAddress;
 
     private array $vatCountries = [];
 
@@ -305,7 +305,7 @@ class zcObserverVatForEuCountries extends \base
             //  $p1 ... An associative array that contains the 'customer_id'.
             //
             case 'NOTIFY_MODULE_CREATE_ACCOUNT_ADDED_CUSTOMER_RECORD':
-                $this->newCustomerId = $p1['customer_id'];
+                $this->newCustomerId = (int)$p1['customer_id'];
                 break;
 
             // -----
@@ -320,9 +320,9 @@ class zcObserverVatForEuCountries extends \base
             case 'NOTIFY_MODULE_CHECKOUT_ADDED_ADDRESS_BOOK_RECORD':        //- Fall through ...
             case 'NOTIFY_MODULE_ADDRESS_BOOK_UPDATED_ADDRESS_BOOK_RECORD':  //- Fall through ...
             case 'NOTIFY_MODULE_ADDRESS_BOOK_ADDED_ADDRESS_BOOK_RECORD':    //- Fall through ...
-                $customer_id = $customer_id ?? $_SESSION['customer_id'];
+                $customer_id = $customer_id ?? (int)$_SESSION['customer_id'];
                 $address_book_id = ($eventID === 'NOTIFY_MODULE_ADDRESS_BOOK_UPDATED_ADDRESS_BOOK_RECORD') ? $p1['address_book_id'] : $p1['address_id'];
-                $vat_number = zen_db_prepare_input($_POST['vat_number']);
+                $vat_number = zen_db_prepare_input($_POST['vat_number'] ?? '');
                 $db->Execute(
                     "UPDATE " . TABLE_ADDRESS_BOOK . "
                         SET entry_vat_number = '$vat_number',
