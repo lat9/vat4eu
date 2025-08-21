@@ -1,7 +1,7 @@
 <?php
 // -----
 // Admin-level installation script for the "encapsulated" VAT4EU plugin for Zen Cart, by lat9.
-// Copyright (C) 2018-2024, Vinos de Frutas Tropicales.
+// Copyright (C) 2018-2025, Vinos de Frutas Tropicales.
 //
 use Zencart\PluginSupport\ScriptedInstaller as ScriptedInstallBase;
 
@@ -89,6 +89,8 @@ class ScriptedInstaller extends ScriptedInstallBase
               LIMIT 1"
         );
 
+        parent::executeInstall();
+
         return true;
     }
 
@@ -101,6 +103,7 @@ class ScriptedInstaller extends ScriptedInstallBase
     //
     protected function executeUpgrade($oldVersion)
     {
+        parent::executeUpgrade($oldVersion)
     }
 
     protected function executeUninstall()
@@ -108,6 +111,8 @@ class ScriptedInstaller extends ScriptedInstallBase
         zen_deregister_admin_pages(['configVat4Eu']);
 
         $this->deleteConfigGroupId($this->configGroupTitle, true);
+
+        parent::executeUninstall();
     }
 
     protected function nonEncapsulatedVersionPresent(): bool
