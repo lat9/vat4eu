@@ -110,7 +110,7 @@ class ScriptedInstaller extends ScriptedInstallBase
     {
         zen_deregister_admin_pages(['configVat4Eu']);
 
-        $this->deleteConfigGroupId($this->configGroupTitle, true);
+        $this->deleteConfigurationGroup($this->configGroupTitle, true);
 
         parent::executeUninstall();
     }
