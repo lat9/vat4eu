@@ -3,6 +3,8 @@
 // Admin-level installation script for the "encapsulated" VAT4EU plugin for Zen Cart, by lat9.
 // Copyright (C) 2018-2025, Vinos de Frutas Tropicales.
 //
+// Last updated: v4.0.3
+//
 use Zencart\PluginSupport\ScriptedInstaller as ScriptedInstallBase;
 
 class ScriptedInstaller extends ScriptedInstallBase
@@ -103,7 +105,7 @@ class ScriptedInstaller extends ScriptedInstallBase
     //
     protected function executeUpgrade($oldVersion)
     {
-        parent::executeUpgrade($oldVersion)
+        parent::executeUpgrade($oldVersion);
     }
 
     protected function executeUninstall()

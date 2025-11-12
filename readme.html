@@ -47,7 +47,7 @@ body {
 <section class="py-5 header">
     <div class="container py-4">
         <header class="pb-2">
-            <h1 class="display-4 text-center">VAT for EU Countries (VAT4EU) v4.0.2</h1>
+            <h1 class="display-4 text-center">VAT for EU Countries (VAT4EU) v4.0.3</h1>
             <ul>
                 <li>Zen Cart download link: <a href="https://www.zen-cart.com/downloads.php?do=file&id=2164" target="_blank">https://www.zen-cart.com/downloads.php?do=file&id=2164</a></li>
                 <li>Zen Cart support thread: <a href="https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread" target="_blank">https://www.zen-cart.com/showthread.php?223003-VAT4EU-Support-Thread</a></li>
@@ -177,6 +177,9 @@ body {
                     <div class="tab-pane fade shadow rounded bg-white p-4" id="v-pills-4" role="tabpanel" aria-labelledby="v-pills-4-tab">
                         <h4 class="font-italic mb-4">Credits and History</h4>
                         <ul>
+                          <li>v4.0.3, 2025-11-12 (lat9):<ul>
+                                <li>BUGFIX: Missing semi-colon results in PHP Parse error; introduced in v4.0.2.</li>
+                          </ul></li>
                           <li>v4.0.2, 2025-11-07 (lat9, piloujp):<ul>
                                 <li>BUGFIX: Callback to parent class on install/upgrade/uninstall to prevent potential PHP logs.<ul>
                                     <li><b>Note:</b> Also requires core-file changes as described in <a href="https://gist.github.com/lat9/9deb64d3325081d18bb0db5534bcf142#ensure-core-updates-are-applied" target="_blank">this</a> GitHub gist.</li>
