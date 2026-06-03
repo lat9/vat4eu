@@ -47,7 +47,12 @@ class zcObserverVatForEuCountries extends \base
         $this->detectZcPluginDetails(__DIR__);
 
         $this->nonGuestIsLoggedIn = (zen_is_logged_in() && !zen_in_guest_checkout());
-        $this->isBootstrapTemplate = (function_exists('zca_bootstrap_active') && zca_bootstrap_active() === true);
+
+        // -----
+        // Non-encapsulated versions of the template use 'zca_bootstrap_active', while
+        // encapsulated versions use 'is_bootstrap_template'.
+        //
+        $this->isBootstrapTemplate = (function_exists('zca_bootstrap_active') && zca_bootstrap_active() === true) || (function_exists('is_bootstrap_template') && is_bootstrap_template() === true);
 
         $this->debug = (zen_config('VAT4EU_DEBUG') === 'true');
         if ($this->nonGuestIsLoggedIn === true) {
