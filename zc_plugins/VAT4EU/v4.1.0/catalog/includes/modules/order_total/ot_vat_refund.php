@@ -1,9 +1,9 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2024 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2026 Vinos de Frutas Tropicales
 //
-// Last updated: v4.0.0
+// Last updated: v4.1.0
 //
 if (!defined('IS_ADMIN_FLAG')) {
     die('Invalid access.');
@@ -15,7 +15,7 @@ class ot_vat_refund
     public string $description;
     public array $output = [];
     public string $code;
-    public int|null $sort_order;
+    public string|int|null $sort_order;
 
     protected $_check;
     protected bool $isEnabled = false;
@@ -25,12 +25,13 @@ class ot_vat_refund
         $this->code = 'ot_vat_refund';
         $this->title = MODULE_ORDER_TOTAL_VAT_REFUND_TITLE;
         $this->description = MODULE_ORDER_TOTAL_VAT_REFUND_DESCRIPTION;
-        $this->sort_order = defined('MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER') ? (int)MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER : null;
+        $this->sort_order = zen_config('MODULE_ORDER_TOTAL_VAT_REFUND_SORT_ORDER');
         if ($this->sort_order === null) {
-            return false;
+            return;
         }
 
-        $this->isEnabled = (VAT4EU_ENABLED === 'true');
+        $this->sort_order = (int)$this->sort_order;
+        $this->isEnabled = (zen_config('VAT4EU_ENABLED') === 'true');
     }
 
     public function process(): void

@@ -1,9 +1,9 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2024 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2026 Vinos de Frutas Tropicales
 //
-// Last updated: v4.0.0
+// Last updated: v4.1.0
 //
 if (!defined('IS_ADMIN_FLAG')) {
     die('Invalid access.');
@@ -15,7 +15,7 @@ class ot_vat_reverse_charges
     public string $description;
     public string $code;
     public array $output = [];
-    public int|null $sort_order;
+    public string|int|null $sort_order;
 
     protected $_check;
     protected bool $isEnabled = false;
@@ -28,14 +28,13 @@ class ot_vat_reverse_charges
         $this->title = (IS_ADMIN_FLAG === true && $current_page !== 'edit_orders.php') ? MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_TITLE_ADMIN : MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_TITLE;
         
         $this->description = MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_DESCRIPTION;
-        $this->sort_order = defined('MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_SORT_ORDER') ? (int)MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_SORT_ORDER : null;
+        $this->sort_order = zen_config('MODULE_ORDER_TOTAL_VAT_REVERSE_CHARGES_SORT_ORDER');
         if ($this->sort_order === null) {
-            return false;
+            return;
         }
-        
-        $this->isEnabled = (VAT4EU_ENABLED === 'true');
 
-        $this->output = [];
+        $this->sort_order = (int)$this->sort_order;
+        $this->isEnabled = (zen_config('VAT4EU_ENABLED') === 'true');
     }
 
     public function process(): void

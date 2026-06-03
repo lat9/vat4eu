@@ -1,9 +1,9 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9
-// Copyright (c) 2017-2024 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2026 Vinos de Frutas Tropicales
 //
-// Last updated: v4.0.0
+// Last updated: v4.1.0
 //
 use Zencart\Plugins\Catalog\VAT4EU\VatValidation;
 
@@ -38,7 +38,7 @@ class zcObserverVat4EuAdminObserver extends base
     //
     public function __construct()
     {
-        $this->debug = (VAT4EU_DEBUG === 'true');
+        $this->debug = (zen_config('VAT4EU_DEBUG') === 'true');
         if (isset($_SESSION['admin_id'])) {
             $this->logfile = DIR_FS_LOGS . '/vat4eu_adm_' . $_SESSION['admin_id'] . '.log';
         } else {
@@ -46,7 +46,7 @@ class zcObserverVat4EuAdminObserver extends base
         }
 
         $this->oID = (int)($_GET['oID'] ?? 0);
-        $this->vatCountries = explode(',', str_replace(' ', '', VAT4EU_EU_COUNTRIES));
+        $this->vatCountries = explode(',', str_replace(' ', '', zen_config('VAT4EU_EU_COUNTRIES')));
 
         // -----
         // Determine which notifications to 'watch for', based on the active page.
@@ -208,7 +208,7 @@ class zcObserverVat4EuAdminObserver extends base
                             '</span>
                          </a>&nbsp;' .
                         '<a href="' . zen_href_link(FILENAME_CUSTOMERS, $current_parms . 'list_order=vatnum-desc') . '">
-                            <span class="' . $desc_class . '" title="'. VAT4EU_SORT_DESC . '">' .
+                            <span class="' . $desc_class . '" title="' . VAT4EU_SORT_DESC . '">' .
                                 TEXT_DESC .
                             '</span>
                          </a>',
@@ -492,7 +492,7 @@ class zcObserverVat4EuAdminObserver extends base
                 break;
 
             case VatValidation::VAT_MIN_LENGTH:
-                $this->vatNumberMessage = sprintf(VAT4EU_ENTRY_VAT_MIN_ERROR, (int)VAT4EU_MIN_LENGTH);;
+                $this->vatNumberMessage = sprintf(VAT4EU_ENTRY_VAT_MIN_ERROR, (int)zen_config('VAT4EU_MIN_LENGTH'));;
                 break;
 
             case VatValidation::VAT_BAD_PREFIX:
@@ -644,7 +644,7 @@ class zcObserverVat4EuAdminObserver extends base
                     $this->vatNumber = (string)$order->billing['billing_vat_number'];
                     $this->vatNumberStatus = (int)$order->billing['billing_vat_validated'];
                     if ($this->vatNumberStatus === VatValidation::VAT_VIES_OK || $this->vatNumberStatus === vatValidation::VAT_ADMIN_OVERRIDE) {
-                        if (VAT4EU_IN_COUNTRY_REFUND === 'true' || STORE_COUNTRY != $delivery_country_id) {
+                        if (zen_config('VAT4EU_IN_COUNTRY_REFUND') === 'true' || zen_config('STORE_COUNTRY') != $delivery_country_id) {
                             $this->vatIsRefundable = true;
                         }
                     }

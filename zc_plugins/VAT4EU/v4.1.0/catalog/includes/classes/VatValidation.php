@@ -1,9 +1,9 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2024 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2026 Vinos de Frutas Tropicales
 //
-// Last updated: v4.0.0
+// Last updated: v4.1.0
 //
 // This class derived from a similarly-named class provided here: https://github.com/herdani/vat-validation
 //
@@ -39,15 +39,15 @@ class VatValidation
     //
     // Valid characters are alphanumerics, space (' '), plus-sign ('+') and asterisk ('*').
     //
-    const VAT_VALIDATION     = '/[A-Z0-9 \+*]{%u}/';
+    const VAT_VALIDATION = '/[A-Z0-9 \+*]{%u}/';
 
-    private $client = null;
+    private \SoapClient|null $client = null;
 
-    private $vatNumber = '';
-    private $countryCode = '';
+    private string $vatNumber = '';
+    private string $countryCode = '';
 
-    private $debug = false;
-    private $soapInstalled = false;
+    private bool $debug = false;
+    private bool $soapInstalled = false;
 
     // -----
     // The class constructor gathers the to-be-verified country-code (2-character ISO) and
@@ -59,8 +59,8 @@ class VatValidation
     //
     public function __construct(string $countryCode, string $vatNumber)
     {
-        if (IS_ADMIN_FLAG === true || VAT4EU_ENABLED === 'true') {
-            $this->debug = (VAT4EU_DEBUG === 'true');
+        if (IS_ADMIN_FLAG === true || zen_config('VAT4EU_ENABLED') === 'true') {
+            $this->debug = (zen_config('VAT4EU_DEBUG') === 'true');
 
             // -----
             // Greek VAT numbers start with 'EL' instead of their country-code ('GR').
@@ -97,7 +97,7 @@ class VatValidation
         // know.
         //
         if ($this->vatNumber === '') {
-            if (VAT4EU_REQUIRED === 'true') {
+            if (zen_config('VAT4EU_REQUIRED') === 'true') {
                 $rc = self::VAT_REQUIRED;
             } else {
                 $rc = self::VAT_NOT_SUPPLIED;
@@ -114,7 +114,7 @@ class VatValidation
             $vat_number_length = strlen($this->vatNumber);
             if (strpos($this->vatNumber, $this->countryCode) !== 0) {
                 $rc = self::VAT_BAD_PREFIX;
-            } elseif (VAT4EU_MIN_LENGTH !== '0' && $vat_number_length < VAT4EU_MIN_LENGTH) {
+            } elseif (zen_config('VAT4EU_MIN_LENGTH') !== '0' && $vat_number_length < zen_config('VAT4EU_MIN_LENGTH')) {
                 $rc = self::VAT_MIN_LENGTH;
             } elseif (!preg_match(sprintf(self::VAT_VALIDATION, $vat_number_length), $this->vatNumber)) {
                 $rc = self::VAT_INVALID_CHARS;

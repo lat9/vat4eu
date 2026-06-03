@@ -40,7 +40,7 @@ class zcObserverVatForEuCountries extends \base
         // -----
         // If the plugin is not enabled ... nothing further to be done!
         //
-        if (VAT4EU_ENABLED !== 'true') {
+        if (zen_config('VAT4EU_ENABLED') !== 'true') {
             return;
         }
 
@@ -49,14 +49,14 @@ class zcObserverVatForEuCountries extends \base
         $this->nonGuestIsLoggedIn = (zen_is_logged_in() && !zen_in_guest_checkout());
         $this->isBootstrapTemplate = (function_exists('zca_bootstrap_active') && zca_bootstrap_active() === true);
 
-        $this->debug = (VAT4EU_DEBUG === 'true');
+        $this->debug = (zen_config('VAT4EU_DEBUG') === 'true');
         if ($this->nonGuestIsLoggedIn === true) {
             $this->logfile = DIR_FS_LOGS . '/vat4eu_' . $_SESSION['customer_id'] . '_' . date('Ymd') . '.log';
         } else {
             $this->logfile = DIR_FS_LOGS . '/vat4eu' . '_' . date('Ymd') . '.log';
         }
 
-        $this->vatCountries = explode(',', str_replace(' ', '', VAT4EU_EU_COUNTRIES));
+        $this->vatCountries = explode(',', str_replace(' ', '', zen_config('VAT4EU_EU_COUNTRIES')));
 
         // -----
         // Attach to the various notifications associated with this plugin's processing.  Create-account notifications
@@ -208,7 +208,7 @@ class zcObserverVatForEuCountries extends \base
                 if (empty($_SESSION['billto'])) {
                     return;
                 }
-                
+
                 // -----
                 // Note whether/not the order has a shipping address: it doesn't if the
                 // order's all virtual products or is a 'storepickup'.  This is needed
@@ -227,7 +227,7 @@ class zcObserverVatForEuCountries extends \base
                 // If running under OPC with a temporary address for the billing, the VAT
                 // Number "doesn't count", so a quick return.
                 //
-                if (defined('CHECKOUT_ONE_GUEST_BILLTO_ADDRESS_BOOK_ID') && ((int)CHECKOUT_ONE_GUEST_BILLTO_ADDRESS_BOOK_ID) === $_SESSION['billto']) {
+                if ((int)zen_config('CHECKOUT_ONE_GUEST_BILLTO_ADDRESS_BOOK_ID') === (int)$_SESSION['billto']) {
                     $class->billing['billing_vat_number'] = '';
                     $class->billing['billing_vat_validated'] = VatValidation::VAT_NOT_VALIDATED;
                     return;
@@ -520,7 +520,7 @@ class zcObserverVatForEuCountries extends \base
     // This function, called for pages that make modifications to an account's
     // VAT Number, provides basic validation for that number.
     //
-    protected function validateVatNumber($message_location): bool
+    protected function validateVatNumber(string $message_location): bool
     {
         global $messageStack;
 
@@ -549,7 +549,7 @@ class zcObserverVatForEuCountries extends \base
                 break;
 
             case VatValidation::VAT_MIN_LENGTH:
-                $messageStack->add($message_location, VAT4EU_ENTRY_VAT_MIN_ERROR, 'error');
+                $messageStack->add($message_location, sprintf(VAT4EU_ENTRY_VAT_MIN_ERROR, (int)zen_config('VAT4EU_MIN_LENGTH')), 'error');
                 break;
 
             case VatValidation::VAT_BAD_PREFIX:
@@ -565,7 +565,7 @@ class zcObserverVatForEuCountries extends \base
                 if ($message_location === 'create_account') {
                     $message_location = 'header';
                 }
-                if (VAT4EU_VALIDATION === 'Admin') {
+                if (zen_config('VAT4EU_VALIDATION') === 'Admin') {
                     $messageStack->add_session($message_location, sprintf(VAT4EU_APPROVAL_PENDING, zen_output_string_protected($vat_number)), 'warning');
                 } elseif ($validation->validateVatNumber() === true) {
                     $this->vatNumberStatus = VatValidation::VAT_VIES_OK;
@@ -639,7 +639,7 @@ class zcObserverVatForEuCountries extends \base
                     if (!$ship_check->EOF && $this->isVatCountry($ship_check->fields['entry_country_id']) === true) {
                         $debug_message .= "\tShip-to country is in the EU (" . $ship_check->fields['entry_country_id'] . ")\n";
                         if ($vat_number_status === VatValidation::VAT_VIES_OK || $vat_number_status === VatValidation::VAT_ADMIN_OVERRIDE) {
-                            if (VAT4EU_IN_COUNTRY_REFUND === 'true' || STORE_COUNTRY != $ship_check->fields['entry_country_id']) {
+                            if (zen_config('VAT4EU_IN_COUNTRY_REFUND') === 'true' || zen_config('STORE_COUNTRY') != $ship_check->fields['entry_country_id']) {
                                 $vat_is_refundable = true;
                             }
                         }
