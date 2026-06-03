@@ -1,9 +1,9 @@
 <?php
 // -----
 // Part of the VAT4EU plugin by Cindy Merkin a.k.a. lat9 (cindy@vinosdefrutastropicales.com)
-// Copyright (c) 2017-2025 Vinos de Frutas Tropicales
+// Copyright (c) 2017-2026 Vinos de Frutas Tropicales
 //
-// Last updated: v4.0.1
+// Last updated: v4.1.0
 //
 use Zencart\Plugins\Catalog\VAT4EU\VatValidation;
 use Zencart\Traits\InteractsWithPlugins;
@@ -287,6 +287,16 @@ class zcObserverVatForEuCountries extends \base
             //  $p2 ... A reference to the module's $error variable.
             //
             case 'NOTIFY_CREATE_ACCOUNT_VALIDATION_CHECK':
+                // -----
+                // Make sure that this validation check is for the 'normal' create-
+                // account processing, bypassing this check if not (like for OPC's
+                // account-registration which doesn't include address-related
+                // information.
+                //
+                if (($_POST['action'] ?? 'not-set') !== 'process') {
+                    $this->vatNumberStatus = VatValidation::VAT_NOT_SUPPLIED;
+                    break;
+                }
                 $message_location = 'create_account';
             case 'NOTIFY_MODULE_CHECKOUT_NEW_ADDRESS_VALIDATION':   //- Fall through ...
                 $message_location = $message_location ?? 'checkout_address';
@@ -475,7 +485,9 @@ class zcObserverVatForEuCountries extends \base
 ?>
 <script>
     jQuery(function() {
-        jQuery('input[name="company"').prev('label').before(<?= json_encode($vat_field_entry) ?>);
+        if (jQuery('select[name="zone_country_id"]').length > 0) {
+            jQuery('input[name="company"').prev('label').before(<?= json_encode($vat_field_entry) ?>);
+        }
     });
 </script>
 <?php
