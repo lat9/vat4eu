@@ -1,9 +1,9 @@
 <?php
 // -----
 // Admin-level installation script for the "encapsulated" VAT4EU plugin for Zen Cart, by lat9.
-// Copyright (C) 2018-2025, Vinos de Frutas Tropicales.
+// Copyright (C) 2018-2026, Vinos de Frutas Tropicales.
 //
-// Last updated: v4.0.3
+// Last updated: v4.1.0
 //
 use Zencart\PluginSupport\ScriptedInstaller as ScriptedInstallBase;
 
@@ -30,7 +30,7 @@ class ScriptedInstaller extends ScriptedInstallBase
             "INSERT IGNORE INTO " . TABLE_CONFIGURATION . " 
                 (configuration_title, configuration_key, configuration_value, configuration_description, configuration_group_id, sort_order, date_added, use_function, set_function)
              VALUES
-                ('European Union Countries List', 'VAT4EU_EU_COUNTRIES', 'AT, BE, BG, CY, CZ, DE, DK, EE, GR, ES, FI, FR, HR, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK', 'This comma-separated list identifies the countries that are in the EU by their 2-character ISO codes; intervening blanks are allowed. You normally will not need to change this list; it is provided as member countries move in and out of the EU.<br><br><b>Default</b>: AT, BE, BG, CY, CZ, DE, DK, EE, GR, ES, FI, FR, HR, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK', $cgi, 15, now(), NULL, NULL),
+                ('European Union Countries List', 'VAT4EU_EU_COUNTRIES', 'AT, BE, BG, CY, CZ, DE, DK, EE, GR, ES, FI, FR, GB, HR, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK', 'This comma-separated list identifies the countries that are in the EU by their 2-character ISO codes; intervening blanks are allowed. You normally will not need to change this list; it is provided as member countries move in and out of the EU.<br><br><b>Default</b>: AT, BE, BG, CY, CZ, DE, DK, EE, GR, ES, FI, FR, GB, HR, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK', $cgi, 15, now(), NULL, NULL),
 
                 ('Enable storefront processing?', 'VAT4EU_ENABLED', 'false', 'The <em>VAT4EU</em> processing is enabled when this setting is &quot;true&quot; and you have also set <em>Configuration :: Customer Details :: Company</em> to <b>true</b>.', $cgi, 20, now(), NULL, 'zen_cfg_select_option([\'true\', \'false\'],'),
 
@@ -83,7 +83,7 @@ class ScriptedInstaller extends ScriptedInstallBase
 
         // -----
         // If a previous (non-encapsulated) version of the plugin is currently installed,
-        // remove the now-unused configuration settings.
+        // remove the now-unused configuration setting.
         //
         $this->executeInstallerSql(
             "DELETE FROM " . TABLE_CONFIGURATION . "
@@ -105,6 +105,24 @@ class ScriptedInstaller extends ScriptedInstallBase
     //
     protected function executeUpgrade($oldVersion)
     {
+        // -----
+        // v4.1.0: Add the UK (country-code 'GB') to the EU countries' list; Northern Ireland
+        // is part of the UK and taxed as part of the EU.
+        //
+        $eu_countries = explode(',', str_replace(' ', '', zen_config('VAT4EU_EU_COUNTRIES')));
+        $eu_countries[] = 'GB';
+        $eu_countries = array_unique($eu_countries);
+        sort($eu_countries);
+        $eu_countries = implode(', ', $eu_countries);
+        $this->executeInstallerSql(
+            "UPDATE " . TABLE_CONFIGURATION . "
+                SET configuration_value = '$eu_countries',
+                    configuration_description = 'This comma-separated list identifies the countries that are in the EU by their 2-character ISO codes; intervening blanks are allowed. You normally will not need to change this list; it is provided as member countries move in and out of the EU.<br><br><b>Default</b>: AT, BE, BG, CY, CZ, DE, DK, EE, GR, ES, FI, FR, GB, HR, HU, IE, IT, LT, LU, LV, MT, NL, PL, PT, RO, SE, SI, SK',
+                    last_modified = NOW()
+              WHERE configuration_key = 'VAT4EU_EU_COUNTRIES'
+              LIMIT 1"
+        );
+
         parent::executeUpgrade($oldVersion);
     }
 

@@ -319,7 +319,7 @@ class zcObserverVat4EuAdminObserver extends base
                 }
                 $vat_number = $p1['billing_vat_number'];
                 $non_builtin_errors = [];
-                if (!$this->isVatCountry((int)$p1['country'])) {
+                if (!$this->isVatCountry((int)$p1['country'], $p1['postcode'])) {
                     if ($vat_number !== '') {
                         $country_iso_code_2 = $this->getCountryIsoCode2((int)$p1['country']);
                         $non_builtin_errors['vat-number'] = sprintf(VAT4EU_ENTRY_VAT_NOT_SUPPORTED, $country_iso_code_2);
@@ -639,8 +639,8 @@ class zcObserverVat4EuAdminObserver extends base
         if (isset($order)) {
             $billing_country_id = $this->getCountryIdFromOrder($order->billing['country']);
             $delivery_country_id = $this->getCountryIdFromOrder($order->delivery['country']);
-            if ($billing_country_id !== false && $this->isVatCountry((int)$billing_country_id)) {
-                if ($delivery_country_id !== false && $this->isVatCountry((int)$delivery_country_id)) {
+            if ($billing_country_id !== false && $this->isVatCountry((int)$billing_country_id, $order->billing['postcode'])) {
+                if ($delivery_country_id !== false && $this->isVatCountry((int)$delivery_country_id, $order->delivery['postcode'])) {
                     $this->vatNumber = (string)$order->billing['billing_vat_number'];
                     $this->vatNumberStatus = (int)$order->billing['billing_vat_validated'];
                     if ($this->vatNumberStatus === VatValidation::VAT_VIES_OK || $this->vatNumberStatus === vatValidation::VAT_ADMIN_OVERRIDE) {
@@ -777,11 +777,19 @@ class zcObserverVat4EuAdminObserver extends base
 
     // -----
     // This function returns a boolean indicator, identifying whether (true) or not (false) the
-    // country associated with the "countries_id" input qualifies for this plugin's processing.
+    // specified country/postcode qualifies as a "VAT" country.
     //
-    protected function isVatCountry(int $countries_id): bool
+    // Most of the countries listed in the `vatCountries` array qualify simply
+    // via their presence. The one outlier is "Northern Ireland", which is part of the
+    // UK (country-code 'GB') with a postcode that starts with 'BT' (Belfast).
+    //
+    protected function isVatCountry(int $countries_id, string $postcode): bool
     {
-        return in_array($this->getCountryIsoCode2($countries_id), $this->vatCountries);
+        $country_iso_code2 = $this->getCountryIsoCode2($countries_id);
+        if (!in_array($country_iso_code2, $this->vatCountries)) {
+            return false;
+        }
+        return ($country_iso_code2 !== 'GB' || str_starts_with(strtoupper($postcode), 'BT'));
     }
 
     private function debug($message): void

@@ -64,8 +64,9 @@ class VatValidation
 
             // -----
             // Greek VAT numbers start with 'EL' instead of their country-code ('GR').
+            // VAT numbers for Northern Ireland (part of the UK) start with 'XI'.
             //
-            $this->countryCode = ($countryCode === 'GR') ? 'EL' : $countryCode;
+            $this->countryCode = ($countryCode === 'GR') ? 'EL' : ($countryCode === 'GB' ? 'XI' : $countryCode);
             $this->vatNumber = strtoupper((string)$vatNumber);
 
             if (!class_exists('SoapClient')) {
@@ -112,7 +113,7 @@ class VatValidation
         //    characters allowed for some countries.
         } else {
             $vat_number_length = strlen($this->vatNumber);
-            if (strpos($this->vatNumber, $this->countryCode) !== 0) {
+            if (!str_starts_with($this->vatNumber, $this->countryCode)) {
                 $rc = self::VAT_BAD_PREFIX;
             } elseif (zen_config('VAT4EU_MIN_LENGTH') !== '0' && $vat_number_length < zen_config('VAT4EU_MIN_LENGTH')) {
                 $rc = self::VAT_MIN_LENGTH;
