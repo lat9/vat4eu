@@ -226,7 +226,7 @@ class zcObserverVatForEuCountries extends \base
                 // (of the 4 issued) calls to the function on the checkout_process page should
                 // actually include the associated VAT Number.
                 //
-                $this->orderHasShippingAddress = ($class->content_type !== 'virtual' && strpos($class->info['shipping_module_code'], 'storepickup') === false);
+                $this->orderHasShippingAddress = ($class->content_type !== 'virtual' && !str_contains($class->info['shipping_module_code'], 'storepickup'));
 
                 // -----
                 // If running under OPC with a temporary address for the billing, the VAT
@@ -509,7 +509,7 @@ class zcObserverVatForEuCountries extends \base
         return $this->checkVatIsRefundable();
     }
 
-    public function getCountryIsoCode2($countries_id): string
+    public function getCountryIsoCode2(int $countries_id): string
     {
         global $db;
         $check = $db->Execute(
@@ -527,19 +527,17 @@ class zcObserverVatForEuCountries extends \base
     //
     protected function validateVatNumber(string $message_location): bool
     {
-        global $messageStack;
-
-        $vat_ok = false;
-        $vat_number = strtoupper(zen_db_prepare_input($_POST['vat_number'] ?? ''));
-
-        $countries_id = $_POST['zone_country_id'];
-        $country_iso_code_2 = $this->getCountryIsoCode2($countries_id);
-
-        if (!in_array($country_iso_code_2, $this->vatCountries)) {
+        $countries_id = (int)$_POST['zone_country_id'];
+        if (!$this->isVatCountry($countries_id, $_POST['postcode'] ?? '')) {
             $this->vatNumberStatus = VatValidation::VAT_OK;
             return true;
         }
 
+        global $messageStack;
+
+        $vat_ok = false;
+        $country_iso_code_2 = $this->getCountryIsoCode2($countries_id);
+        $vat_number = strtoupper(zen_db_prepare_input($_POST['vat_number'] ?? ''));
         $this->vatNumberStatus = VatValidation::VAT_NOT_VALIDATED;
 
         $validation = new VatValidation($country_iso_code_2, $vat_number);
@@ -595,7 +593,7 @@ class zcObserverVatForEuCountries extends \base
         $vat_number = '';
         $vat_number_status = VatValidation::VAT_NOT_VALIDATED;
         $check = $db->Execute(
-            "SELECT entry_country_id, entry_vat_number, entry_vat_validated
+            "SELECT entry_country_id, entry_postcode, entry_vat_number, entry_vat_validated
                FROM " . TABLE_ADDRESS_BOOK . "
               WHERE address_book_id = $address_id
                 AND customers_id = $customers_id
@@ -603,7 +601,7 @@ class zcObserverVatForEuCountries extends \base
         );
         if (!$check->EOF) {
             $debug_message .= "\tAddress located, country #" . $check->fields['entry_country_id'] . "\n";
-            if ($this->isVatCountry($check->fields['entry_country_id'])) {
+            if ($this->isVatCountry((int)$check->fields['entry_country_id'], $check->fields['entry_postcode'])) {
                 $vat_number = (string)$check->fields['entry_vat_number'];
                 $vat_number_status = (int)$check->fields['entry_vat_validated'];
                 $debug_message .= "\tBilling country is part of the EU, VAT Number ($vat_number), validation status: $vat_number_status.\n";
@@ -635,13 +633,13 @@ class zcObserverVatForEuCountries extends \base
                 if ($sendto_address_id !== false) {
                     $debug_message .= "\tSend-to address set ...\n";
                     $ship_check = $db->Execute(
-                        "SELECT entry_country_id
+                        "SELECT entry_country_id, entry_postcode
                            FROM " . TABLE_ADDRESS_BOOK . "
                           WHERE address_book_id = " . (int)$sendto_address_id . "
                             AND customers_id = " . (int)$customers_id . "
                           LIMIT 1"
                     );
-                    if (!$ship_check->EOF && $this->isVatCountry($ship_check->fields['entry_country_id']) === true) {
+                    if (!$ship_check->EOF && $this->isVatCountry((int)$ship_check->fields['entry_country_id'], $ship_check->fields['entry_postcode']) === true) {
                         $debug_message .= "\tShip-to country is in the EU (" . $ship_check->fields['entry_country_id'] . ")\n";
                         if ($vat_number_status === VatValidation::VAT_VIES_OK || $vat_number_status === VatValidation::VAT_ADMIN_OVERRIDE) {
                             if (zen_config('VAT4EU_IN_COUNTRY_REFUND') === 'true' || zen_config('STORE_COUNTRY') != $ship_check->fields['entry_country_id']) {
@@ -757,11 +755,19 @@ class zcObserverVatForEuCountries extends \base
 
     // -----
     // This function returns a boolean indicator, identifying whether (true) or not (false) the
-    // country associated with the "countries_id" input qualifies for this plugin's processing.
+    // specified country/postcode qualifies as a "VAT" country.
     //
-    protected function isVatCountry($countries_id): bool
+    // Most of the countries listed in the `vatCountries` array qualify simply
+    // via their presence. The one outlier is "Northern Ireland", which is part of the
+    // UK (country-code 'GB') with a postcode that starts with 'BT' (Belfast).
+    //
+    protected function isVatCountry(int $countries_id, string $postcode): bool
     {
-        return in_array($this->getCountryIsoCode2($countries_id), $this->vatCountries);
+        $country_iso_code2 = $this->getCountryIsoCode2($countries_id);
+        if (!in_array($country_iso_code2, $this->vatCountries)) {
+            return false;
+        }
+        return ($country_iso_code2 !== 'GB' || str_starts_with(strtoupper($postcode), 'BT'));
     }
 
     private function debug($message)
